@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AITactic.cs" />
+    <Compile Include="Artifact.cs" />
     <Compile Include="BuildingLevel3.cs" />
     <Compile Include="CountingStream.cs" />
     <Compile Include="CustomObject.cs" />
@@ -86,7 +87,6 @@
     <Compile Include="UnitLevel.cs" />
     <Compile Include="LossCondition.cs" />
     <Compile Include="LossConditionType.cs" />
-    <Compile Include="MapArtifacts.cs" />
     <Compile Include="MapDeserializer.cs" />
     <Compile Include="MapFormat.cs" />
     <Compile Include="MapHeader.cs" />

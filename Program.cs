@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
@@ -22,6 +23,9 @@ namespace H3Mapper
                 using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
                 {
                     var reader = new MapReader();
+                    reader.HeroIdMapping = ReadIdMap("heroes.txt");
+                    reader.SpellIdMapping = ReadIdMap("spells.txt");
+                    reader.ArtifactIdMapping = ReadIdMap("artifacts.txt");
                     var mapHeader = reader.Read(new CountingStream(mapFile));
 
                     var output = Path.ChangeExtension(mapFilePath, ".json");
@@ -42,6 +46,37 @@ namespace H3Mapper
             Console.Write("Press any key to close");
             Console.ReadKey(true);
             return 0;
+        }
+
+        private static IDictionary<int,string> ReadIdMap(string mapFile)
+        {
+            var map = new Dictionary<int, string>();
+            if (!File.Exists(mapFile))
+            {
+                Console.WriteLine("ID mapping file " + mapFile + " doesn't exist. Skipping.");
+                
+                return map;
+            }
+            var lines = File.ReadAllLines(mapFile);
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//")) continue;
+                var splitLine = line.Split(':');
+                if (splitLine.Length != 2)
+                {
+                    throw new Exception("Invalid line '" + line + "' in " + mapFile);
+                }
+                var idRaw = splitLine[0];
+                var name = splitLine[1];
+                int id;
+                if (int.TryParse(idRaw.Trim(), out id) == false)
+                {
+                    throw new Exception("Invalid line '" + line + "' in " + mapFile + ". " + idRaw +
+                                        " is not a recognizable number.");
+                }
+                map[id] = name.Trim();
+            }
+            return map;
         }
 
         private static void ShowHelp()

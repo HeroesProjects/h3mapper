@@ -25,9 +25,13 @@ namespace H3Mapper
             deserializers2.Add(typeof (BitArray), b => new BitArray(b));
         }
 
-        public string Location
+        public string LocationHex
         {
             get { return map.Position.ToString("X8"); }
+        }
+        public long Location
+        {
+            get { return map.Position; }
         }
 
         public T Read<T>(int byteCount)
@@ -52,7 +56,8 @@ namespace H3Mapper
             if (type.IsEnum)
             {
                 var value = Convert(raw, type.GetEnumUnderlyingType());
-                if (Enum.IsDefined(type, value) == false)
+                var enumValue = Enum.ToObject(type, value);
+                if (enumValue.ToString() == value.ToString())
                 {
                     log("Unrecognised value for " + type.Name + ": " + value);
                 }
@@ -196,7 +201,7 @@ namespace H3Mapper
 
         public void Log(string message)
         {
-            log("Log at " + Location + ": " + message);
+            log("Log at " + LocationHex + ": " + message);
         }
     }
 }

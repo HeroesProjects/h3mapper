@@ -8,6 +8,10 @@ namespace H3Mapper
 {
     public class MapReader
     {
+        public IDictionary<int, string> HeroIdMapping { get; set; }
+        public IDictionary<int, string> SpellIdMapping { get; set; }
+        public IDictionary<int, string> ArtifactIdMapping { get; set; }
+
         public MapHeader Read(Stream mapFile)
         {
             var s = new MapDeserializer(mapFile, Console.WriteLine);
@@ -43,7 +47,7 @@ namespace H3Mapper
             }
             header.AllowedHeroes = ReadAllowedHeroes(s, header.Format);
             header.DisposedHeroes = ReadDisposedHeroes(s, header.Format);
-            header.AllowedArtifacts = ReadAllowedArtifacts(s, header.Format);
+            header.BannedArtifacts = ReadAllowedArtifacts(s, header.Format);
             header.AllowedSpellsAndAbilities = ReadAllowedSpellsAndAbilities(s, header.Format);
             if (IsHota(header.Format))
             {
@@ -71,7 +75,7 @@ namespace H3Mapper
             {
                 var mo = default(MapObject);
                 var position = ReadPosition(s);
-                if (position.IsZero())
+                if (position.IsInvalid())
                 {
                     s.Log("Map object " + i + " at zero position.");
                 }
@@ -362,6 +366,7 @@ namespace H3Mapper
             if (id == ObjectId.SpellScroll)
             {
                 a.SpellId = s.Read<uint>();
+                a.SpellName = TryGetValueForId((int) a.SpellId, SpellIdMapping);
             }
             return a;
         }
@@ -466,7 +471,9 @@ namespace H3Mapper
                     r.Value = s.Read<byte>();
                     break;
                 case RewardType.Artifact:
-                    r.ItemId = ReadVersionDependantId(s, format).Value;
+                    var itemId = ReadVersionDependantId(s, format).Value;
+                    r.ItemId = itemId;
+                    r.ItemName = TryGetValueForId(itemId, ArtifactIdMapping);
                     break;
                 case RewardType.Spell:
                     r.ItemId = s.Read<byte>();
@@ -491,7 +498,14 @@ namespace H3Mapper
                 if (artifactId.HasValue)
                 {
                     q.Type = QuestType.ReturnWithArtifacts;
-                    q.Artifacts = new[] {artifactId.Value};
+                    q.Artifacts = new[]
+                    {
+                        new Artifact
+                        {
+                            ArtifactId = artifactId.Value,
+                            ArtifactName = TryGetValueForId(artifactId.Value, ArtifactIdMapping)
+                        }
+                    };
                 }
                 return q;
             }
@@ -500,7 +514,7 @@ namespace H3Mapper
             switch (q.Type)
             {
                 case QuestType.None:
-                    break;
+                    return q;
                 case QuestType.AchievePrimarySkillLevel:
                     q.Skills = ReadPrimarySkills(s);
                     break;
@@ -514,10 +528,15 @@ namespace H3Mapper
                     break;
                 case QuestType.ReturnWithArtifacts:
                     var count = s.Read<byte>();
-                    var artifactIds = new int[count];
+                    var artifactIds = new Artifact[count];
                     for (var i = 0; i < artifactIds.Length; i++)
                     {
-                        artifactIds[i] = s.Read<ushort>();
+                        var id = s.Read<ushort>();
+                        artifactIds[i] = new Artifact
+                        {
+                            ArtifactId = id,
+                            ArtifactName = TryGetValueForId(id, ArtifactIdMapping)
+                        };
                     }
                     q.Artifacts = artifactIds;
                     break;
@@ -569,7 +588,15 @@ namespace H3Mapper
 
                 //TODO: should it be inside of that 
                 m.Resources = ReadResources(s);
-                m.ArtifactId = ReadVersionDependantId(s, format);
+                var artifactId = ReadVersionDependantId(s, format);
+                if (artifactId != null)
+                {
+                    m.Artifact = new Artifact
+                    {
+                        ArtifactId = artifactId.Value,
+                        ArtifactName = TryGetValueForId(artifactId.Value, ArtifactIdMapping)
+                    };
+                }
             }
             m.AlwaysAttacts = s.Read<bool>();
             m.KeepsSize = s.Read<bool>();
@@ -620,7 +647,7 @@ namespace H3Mapper
                 h.Army = ReadCreatures(s, format, 7);
             }
             h.ArmyFormationType = s.Read<Formation>();
-            
+
             var hasArtifacts = s.Read<bool>();
             if (hasArtifacts)
             {
@@ -688,12 +715,17 @@ namespace H3Mapper
             return e;
         }
 
-        private int[] ReadArtifacts(MapDeserializer s, MapFormat format, byte artifactCount)
+        private Artifact[] ReadArtifacts(MapDeserializer s, MapFormat format, byte artifactCount)
         {
-            var artifacts = new int[artifactCount];
+            var artifacts = new Artifact[artifactCount];
             for (var i = 0; i < artifactCount; i++)
             {
-                artifacts[i] = ReadVersionDependantId(s, format).Value;
+                var id = ReadVersionDependantId(s, format).Value;
+                artifacts[i] = new Artifact
+                {
+                    ArtifactId = id,
+                    ArtifactName = TryGetValueForId(id, ArtifactIdMapping)
+                };
             }
             return artifacts;
         }
@@ -720,6 +752,7 @@ namespace H3Mapper
                 {
                     o.Guards = ReadCreatures(s, format, 7);
                 }
+                s.Skip(4);
             }
         }
 
@@ -946,9 +979,17 @@ namespace H3Mapper
                 artifacts.Add(new HeroArtifact
                 {
                     ArtifactId = artifactId.Value,
+                    ArtifactName = TryGetValueForId(artifactId.Value, ArtifactIdMapping),
                     Slot = i
                 });
             }
+        }
+
+        private string TryGetValueForId(int id, IDictionary<int, string> mapping)
+        {
+            string value;
+            mapping.TryGetValue(id, out value);
+            return value;
         }
 
         private int? ReadVersionDependantId(MapDeserializer s, MapFormat format)
@@ -988,15 +1029,24 @@ namespace H3Mapper
             return sa;
         }
 
-        private MapArtifacts ReadAllowedArtifacts(MapDeserializer s, MapFormat format)
+        private Artifact[] ReadAllowedArtifacts(MapDeserializer s, MapFormat format)
         {
             if (format == MapFormat.RoE) return null;
             var byteCount = format == MapFormat.AB ? 17 : 18;
             var bits = s.Read<BitArray>(byteCount);
-            return new MapArtifacts
+            var artifacts = new List<Artifact>(bits.Length);
+            for (var i = 0; i < bits.Length; i++)
             {
-                BitMask = bits.OfType<bool>().ToArray()
-            };
+                if (bits.Get(i))
+                {
+                    artifacts.Add(new Artifact
+                    {
+                        ArtifactId = i,
+                        ArtifactName = TryGetValueForId(i, ArtifactIdMapping)
+                    });
+                }
+            }
+            return artifacts.ToArray();
         }
 
         private DisposedHero[] ReadDisposedHeroes(MapDeserializer s, MapFormat format)

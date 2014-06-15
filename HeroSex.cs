@@ -3,6 +3,7 @@ namespace H3Mapper
     public enum HeroSex : byte
     {
         Male,
-        Female
+        Female,
+        Default = byte.MaxValue
     }
 }

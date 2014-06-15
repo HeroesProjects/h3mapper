@@ -18,7 +18,7 @@ namespace H3Mapper
         public int TeamCount { get; set; }
         public MapAllowedHeroes AllowedHeroes { get; set; }
         public DisposedHero[] DisposedHeroes { get; set; }
-        public MapArtifacts AllowedArtifacts { get; set; }
+        public Artifact[] BannedArtifacts { get; set; }
         public MapSpellsAndAbilities AllowedSpellsAndAbilities { get; set; }
         public MapRumor[] Rumors { get; set; }
         public MapHeroDefinition[] PrefedinedHeroes { get; set; }

@@ -8,7 +8,7 @@ namespace H3Mapper
         public int Count { get; set; }
         public Disposition Disposition { get; set; }
         public IDictionary<Resource, int> Resources { get; set; }
-        public int? ArtifactId { get; set; }
+        public Artifact Artifact { get; set; }
         public bool AlwaysAttacts { get; set; }
         public bool KeepsSize { get; set; }
     }

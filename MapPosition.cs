@@ -24,9 +24,9 @@ namespace H3Mapper
             return string.Format("X: {0}, Y: {1}, Z: {2}", X, Y, Z);
         }
 
-        public bool IsZero()
+        public bool IsInvalid()
         {
-            return X == 0 && Y == 0 && Z == 0;
+            return X == 0 && Y == 0 && Z == 0 || Z > 1;
         }
     }
 }
