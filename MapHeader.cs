@@ -38,7 +38,7 @@ namespace H3Mapper
             builder.AppendLine("Description: " + Description);
             builder.AppendLine("Difficulty: " + Difficulty);
             builder.AppendLine("Experience level limit: " + ExperienceLevelLimit);
-            for (int i = 0; i < Players.Length; i++)
+            for (var i = 0; i < Players.Length; i++)
             {
                 AppendPlayer(builder, Players[i]);
             }

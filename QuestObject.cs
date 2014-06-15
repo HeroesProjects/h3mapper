@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace H3Mapper
 {
-    public class QuestObject:MapObject
+    public class QuestObject : MapObject
     {
         public QuestType Type { get; set; }
         public IDictionary<PrimarySkillType, int> Skills { get; set; }

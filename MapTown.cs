@@ -1,6 +1,6 @@
 namespace H3Mapper
 {
-    public class MapTown:MapObject
+    public class MapTown : MapObject
     {
         public long Identifier { get; set; }
         public Player Owner { get; set; }

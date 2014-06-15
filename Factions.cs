@@ -3,7 +3,7 @@ using System;
 namespace H3Mapper
 {
     [Flags]
-    public enum Factions:ushort
+    public enum Factions : ushort
     {
         None = 0,
         Castle = 1 << 0,

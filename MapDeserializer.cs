@@ -9,13 +9,13 @@ namespace H3Mapper
 {
     public class MapDeserializer
     {
-        private readonly Stream map;
-
         private readonly IDictionary<Type, Func<Stream, object>> deserializers =
             new Dictionary<Type, Func<Stream, object>>();
 
         private readonly IDictionary<Type, Func<byte[], object>> deserializers2 =
             new Dictionary<Type, Func<byte[], object>>();
+
+        private readonly Stream map;
 
         public MapDeserializer(Stream mapFile)
         {
@@ -33,7 +33,7 @@ namespace H3Mapper
 
         private T Convert<T>(byte[] raw)
         {
-            return (T)Convert(raw, typeof (T));
+            return (T) Convert(raw, typeof (T));
         }
 
         private object Convert(byte[] raw, Type type)
@@ -45,7 +45,7 @@ namespace H3Mapper
             }
             if (type.IsEnum)
             {
-                return Convert(raw,type.GetEnumUnderlyingType());
+                return Convert(raw, type.GetEnumUnderlyingType());
             }
             if (type == typeof (bool))
             {
@@ -71,11 +71,11 @@ namespace H3Mapper
             {
                 return ConvertInt16(raw);
             }
-            if (type == typeof(ushort))
+            if (type == typeof (ushort))
             {
                 return ConvertUInt16(raw);
             }
-            if (type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>))
             {
                 return Convert(raw, type.GetGenericArguments()[0]);
             }
@@ -129,12 +129,12 @@ namespace H3Mapper
 
         public T Read<T>()
         {
-            Func<Stream,object> deserializer;
+            Func<Stream, object> deserializer;
             if (deserializers.TryGetValue(typeof (T), out deserializer))
             {
                 return (T) deserializer(map);
             }
-            return Read<T>(SizeOf(typeof(T)));
+            return Read<T>(SizeOf(typeof (T)));
         }
 
         private int SizeOf(Type type)
@@ -163,7 +163,7 @@ namespace H3Mapper
                 }
                 return stringLenght;
             }
-            if (type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>))
             {
                 return SizeOf(type.GetGenericArguments()[0]);
             }

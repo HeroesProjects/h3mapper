@@ -55,7 +55,7 @@ namespace H3Mapper
             header.Terrain = ReadTerrain(s, header);
             header.CustomObjects = ReadCustomObjects(s, header.Format);
             header.Objects = ReadMapObjects(s, header.Format, header.CustomObjects);
-            header.Events = ReadEvents(s, header.Format);
+            header.Events = ReadEvents(s, header.Format, false);
             return header;
         }
 
@@ -140,7 +140,7 @@ namespace H3Mapper
                         mo = ReadMagicShrine(s);
                         break;
                     case ObjectId.PandorasBox:
-                        mo = ReadPandorasBox(s,format);
+                        mo = ReadPandorasBox(s, format);
                         break;
                     case ObjectId.Grail:
                         mo = ReadGrail(s);
@@ -148,7 +148,7 @@ namespace H3Mapper
                     case ObjectId.RandomDwelling:
                     case ObjectId.RandomDwellingFaction:
                     case ObjectId.RandomDwellingLevel:
-                        mo = ReadDwelling(s,template.Id);
+                        mo = ReadDwelling(s, template.Id);
                         break;
                     case ObjectId.QuestGuard:
                         mo = ReadQuest(s, format);
@@ -177,7 +177,7 @@ namespace H3Mapper
             }
             else
             {
-                h.PowerRating = s.Read<byte>();// max value is 8, as only 8 heroes can be active on a map
+                h.PowerRating = s.Read<byte>(); // max value is 8, as only 8 heroes can be active on a map
             }
             return h;
         }
@@ -281,7 +281,7 @@ namespace H3Mapper
             // TODO: add
             s.Skip(9);
 
-            m.Events = ReadEvents(s, format);
+            m.Events = ReadEvents(s, format, true);
             if (format > MapFormat.AB)
             {
                 m.Alignment = s.Read<byte>();
@@ -326,12 +326,11 @@ namespace H3Mapper
         private int[] ReadCastleCreatures(MapDeserializer s)
         {
             var creatures = new int[7];
-            for (int i = 0; i < creatures.Length; i++)
+            for (var i = 0; i < creatures.Length; i++)
             {
                 creatures[i] = s.Read<ushort>();
             }
             return creatures;
-
         }
 
         private MapArtifact ReadArtifact(MapDeserializer s, MapFormat format, ObjectId id)
@@ -454,8 +453,6 @@ namespace H3Mapper
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("Unknown reward type: " + r.Type);
-
-
             }
             return r;
         }

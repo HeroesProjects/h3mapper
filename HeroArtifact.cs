@@ -4,6 +4,5 @@ namespace H3Mapper
     {
         public int ArtifactId { get; set; }
         public int Slot { get; set; }
-
     }
 }

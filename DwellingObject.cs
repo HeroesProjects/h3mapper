@@ -1,6 +1,6 @@
 namespace H3Mapper
 {
-    public class DwellingObject:MapObject
+    public class DwellingObject : MapObject
     {
         public Player Player { get; set; }
         public Factions AllowedFactions { get; set; }

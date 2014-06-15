@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace H3Mapper
 {
-    public class PandorasBoxObject:MapObject
+    public class PandorasBoxObject : MapObject
     {
         public long GainedExperience { get; set; }
         public long ManaDifference { get; set; }

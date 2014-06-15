@@ -1,6 +1,6 @@
 namespace H3Mapper
 {
-    public enum HeroClass:byte
+    public enum HeroClass : byte
     {
     }
 }

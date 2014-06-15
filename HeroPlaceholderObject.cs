@@ -1,6 +1,6 @@
 namespace H3Mapper
 {
-    public class HeroPlaceholderObject:MapObject
+    public class HeroPlaceholderObject : MapObject
     {
         public Player Owner { get; set; }
         public int PowerRating { get; set; }

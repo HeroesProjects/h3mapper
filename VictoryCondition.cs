@@ -13,7 +13,10 @@ namespace H3Mapper
 
         public override string ToString()
         {
-            return string.Format("Type: {0}, AllowNormalVictory: {1}, AppliesToAI: {2}, ObjectType: {3}, Value: {4}, Position: {5}, HallLevel: {6}, CastleLevel: {7}", Type, AllowNormalVictory, AppliesToAI, ObjectType, Value, Position, HallLevel, CastleLevel);
+            return
+                string.Format(
+                    "Type: {0}, AllowNormalVictory: {1}, AppliesToAI: {2}, ObjectType: {3}, Value: {4}, Position: {5}, HallLevel: {6}, CastleLevel: {7}",
+                    Type, AllowNormalVictory, AppliesToAI, ObjectType, Value, Position, HallLevel, CastleLevel);
         }
     }
 }

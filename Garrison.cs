@@ -1,6 +1,6 @@
 namespace H3Mapper
 {
-    public class Garrison:MapObject
+    public class Garrison : MapObject
     {
         public Player Owner { get; set; }
         public MapCreature[] Creatues { get; set; }

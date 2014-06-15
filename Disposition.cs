@@ -1,6 +1,6 @@
 namespace H3Mapper
 {
-    public enum Disposition:byte
+    public enum Disposition : byte
     {
         Compliant,
         Friendly,

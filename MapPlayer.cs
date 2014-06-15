@@ -5,15 +5,18 @@ namespace H3Mapper
 {
     public class MapPlayer
     {
-        private readonly IList<HeroInfo> heroInfos = new List<HeroInfo>(); 
-        public IEnumerable<HeroInfo> Heroes
-        {
-            get { return heroInfos.AsEnumerable(); }
-        }
+        private readonly IList<HeroInfo> heroInfos = new List<HeroInfo>();
+
         public MapPlayer()
         {
             GenerateHeroAtMainTown = true;
         }
+
+        public IEnumerable<HeroInfo> Heroes
+        {
+            get { return heroInfos.AsEnumerable(); }
+        }
+
         public bool CanHumanPlay { get; set; }
         public bool CanAIPlay { get; set; }
 
