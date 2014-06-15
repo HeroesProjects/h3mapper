@@ -38,7 +38,11 @@ namespace H3Mapper
             get { throw new NotImplementedException(); }
         }
 
-        public override long Position { get; set; }
+        public override long Position
+        {
+            get { return location; }
+            set { throw new NotSupportedException(); }
+        }
 
         public override void Flush()
         {

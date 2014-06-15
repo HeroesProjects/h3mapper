@@ -23,5 +23,10 @@ namespace H3Mapper
         {
             return string.Format("X: {0}, Y: {1}, Z: {2}", X, Y, Z);
         }
+
+        public bool IsZero()
+        {
+            return X == 0 && Y == 0 && Z == 0;
+        }
     }
 }

@@ -7,7 +7,7 @@ namespace H3Mapper
         public string Name { get; set; }
         public string Message { get; set; }
         public IDictionary<Resource, int> Resources { get; set; }
-        public Player Players { get; set; }
+        public Players Players { get; set; }
         public bool HumanAffected { get; set; }
         public bool ComputerAffected { get; set; }
         public int FirstOccurence { get; set; }

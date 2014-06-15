@@ -10,7 +10,7 @@ namespace H3Mapper
     {
         public MapHeader Read(Stream mapFile)
         {
-            var s = new MapDeserializer(mapFile);
+            var s = new MapDeserializer(mapFile, Console.WriteLine);
 
             var header = new MapHeader();
 
@@ -24,7 +24,7 @@ namespace H3Mapper
             header.HasSecondLevel = s.Read<bool>();
             header.Name = s.Read<string>();
             header.Description = s.Read<string>();
-            header.Difficulty = s.Read<byte>();
+            header.Difficulty = s.Read<Difficulty>();
             if (header.Format > MapFormat.RoE)
             {
                 header.ExperienceLevelLimit = s.Read<byte>();
@@ -61,7 +61,7 @@ namespace H3Mapper
 
         private MapObject[] ReadMapObjects(MapDeserializer s, MapFormat format, CustomObject[] templates)
         {
-            var count = s.Read<int>();
+            var count = s.Read<uint>();
             if (count == 0)
             {
                 return null;
@@ -71,7 +71,15 @@ namespace H3Mapper
             {
                 var mo = default(MapObject);
                 var position = ReadPosition(s);
+                if (position.IsZero())
+                {
+                    s.Log("Map object " + i + " at zero position");
+                }
                 var templateIndex = s.Read<int>();
+                if (templateIndex < 0 || templateIndex >= templates.Length)
+                {
+                    throw new ArgumentOutOfRangeException(string.Format("Map Object at {0} is misaligned.", i));
+                }
                 var template = templates[templateIndex];
                 s.Skip(5); //why?
                 switch (template.Id)
@@ -85,6 +93,7 @@ namespace H3Mapper
                         mo = ReadMapHero(s, format);
                         break;
                     case ObjectId.Monster:
+                    case ObjectId.RandomMonster:
                     case ObjectId.RandomMonsterl1:
                     case ObjectId.RandomMonsterl2:
                     case ObjectId.RandomMonsterl3:
@@ -119,6 +128,10 @@ namespace H3Mapper
                     case ObjectId.RandomRelicArtifact:
                     case ObjectId.SpellScroll:
                         mo = ReadArtifact(s, format, template.Id);
+                        break;
+                    case ObjectId.RandomResource:
+                    case ObjectId.Resource:
+                        mo = ReadMapResource(s, format);
                         break;
                     case ObjectId.RandomTown:
                     case ObjectId.Town:
@@ -164,6 +177,15 @@ namespace H3Mapper
                 objects[i] = mo;
             }
             return objects;
+        }
+
+        private MapResourceObject ReadMapResource(MapDeserializer s, MapFormat format)
+        {
+            var r = new MapResourceObject();
+            ReadMessageAndGuards(r, s, format);
+            r.Amount = s.Read<uint>();
+            s.Skip(4);
+            return r;
         }
 
         private HeroPlaceholderObject ReadHeroPlaceholder(MapDeserializer s)
@@ -300,7 +322,7 @@ namespace H3Mapper
                 e.Name = s.Read<string>();
                 e.Message = s.Read<string>();
                 e.Resources = ReadResources(s);
-                e.Players = s.Read<Player>();
+                e.Players = s.Read<Players>();
                 if (format > MapFormat.AB)
                 {
                     e.HumanAffected = s.Read<bool>();

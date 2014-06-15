@@ -52,6 +52,7 @@
     <Compile Include="BuildingLevel3.cs" />
     <Compile Include="CountingStream.cs" />
     <Compile Include="CustomObject.cs" />
+    <Compile Include="Difficulty.cs" />
     <Compile Include="DisposedHero.cs" />
     <Compile Include="Disposition.cs" />
     <Compile Include="DwellingObject.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="MapHeroInstance.cs" />
     <Compile Include="MapMonster.cs" />
     <Compile Include="MapPlayerObject.cs" />
+    <Compile Include="MapResourceObject.cs" />
     <Compile Include="MapTown.cs" />
     <Compile Include="PandorasBoxObject.cs" />
     <Compile Include="Players.cs" />

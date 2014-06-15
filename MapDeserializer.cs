@@ -15,14 +15,20 @@ namespace H3Mapper
         private readonly IDictionary<Type, Func<byte[], object>> deserializers2 =
             new Dictionary<Type, Func<byte[], object>>();
 
+        private readonly Action<string> log;
         private readonly Stream map;
 
-        public MapDeserializer(Stream mapFile)
+        public MapDeserializer(Stream mapFile, Action<string> log)
         {
             map = mapFile;
+            this.log = log;
             deserializers2.Add(typeof (BitArray), b => new BitArray(b));
         }
 
+        public string Location
+        {
+            get { return map.Position.ToString("X8"); }
+        }
 
         public T Read<T>(int byteCount)
         {
@@ -45,7 +51,12 @@ namespace H3Mapper
             }
             if (type.IsEnum)
             {
-                return Convert(raw, type.GetEnumUnderlyingType());
+                var value = Convert(raw, type.GetEnumUnderlyingType());
+                if (Enum.IsDefined(type, value) == false)
+                {
+                    log("Unrecognised value for " + type.Name + ": " + value);
+                }
+                return value;
             }
             if (type == typeof (bool))
             {
@@ -181,6 +192,11 @@ namespace H3Mapper
                 var garbage = new byte[byteCount];
                 map.Read(garbage, 0, garbage.Length);
             }
+        }
+
+        public void Log(string message)
+        {
+            log("Log at " + Location + ": " + message);
         }
     }
 }

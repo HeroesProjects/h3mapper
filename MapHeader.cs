@@ -10,7 +10,7 @@ namespace H3Mapper
         public bool HasSecondLevel { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public int Difficulty { get; set; }
+        public Difficulty Difficulty { get; set; }
         public byte ExperienceLevelLimit { get; set; }
         public MapPlayer[] Players { get; set; }
         public VictoryCondition VictoryCondition { get; set; }

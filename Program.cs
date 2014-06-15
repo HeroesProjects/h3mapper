@@ -7,7 +7,7 @@ using Newtonsoft.Json.Converters;
 
 namespace H3Mapper
 {
-    class Program
+    internal class Program
     {
         private static int Main(string[] args)
         {
