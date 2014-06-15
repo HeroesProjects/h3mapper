@@ -73,7 +73,7 @@ namespace H3Mapper
                 var position = ReadPosition(s);
                 if (position.IsZero())
                 {
-                    s.Log("Map object " + i + " at zero position");
+                    s.Log("Map object " + i + " at zero position.");
                 }
                 var templateIndex = s.Read<int>();
                 if (templateIndex < 0 || templateIndex >= templates.Length)
@@ -441,6 +441,8 @@ namespace H3Mapper
             r.Type = s.Read<RewardType>();
             switch (r.Type)
             {
+                case RewardType.None:
+                    break;
                 case RewardType.Experience:
                 case RewardType.SpellPoints:
                     r.Value = s.Read<uint>();
@@ -508,8 +510,7 @@ namespace H3Mapper
                 case QuestType.DefeatASpecificHero:
                 case QuestType.DefeatASpecificMonster:
                     // NOTE: Position or ID?
-                    q.Location = ReadPosition(s);
-                    s.Skip(1);
+                    q.ReferencedId = s.Read<uint>();
                     break;
                 case QuestType.ReturnWithArtifacts:
                     var count = s.Read<byte>();
@@ -535,6 +536,10 @@ namespace H3Mapper
                 default:
                     throw new ArgumentOutOfRangeException("Unknkown quest type " + q.Type);
             }
+            q.Deadline = (int?) s.ReadNullable(uint.MaxValue);
+            q.FirstVisitText = s.Read<string>();
+            q.NextVisitText = s.Read<string>();
+            q.CompletedText = s.Read<string>();
             return q;
         }
 
@@ -614,9 +619,13 @@ namespace H3Mapper
             {
                 h.Army = ReadCreatures(s, format, 7);
             }
-            h.ArmyFormationType = s.Read<byte>();
-
-            h.Inventory = ReadHeroInventory(s, format);
+            h.ArmyFormationType = s.Read<Formation>();
+            
+            var hasArtifacts = s.Read<bool>();
+            if (hasArtifacts)
+            {
+                h.Inventory = ReadHeroInventory(s, format);
+            }
             h.PatrolRadius = s.ReadNullable(byte.MaxValue);
             if (format > MapFormat.RoE)
             {

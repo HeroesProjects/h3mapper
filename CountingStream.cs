@@ -6,16 +6,10 @@ namespace H3Mapper
     public class CountingStream : Stream
     {
         private readonly Stream inner;
-        private int location;
 
         public CountingStream(Stream inner)
         {
             this.inner = inner;
-        }
-
-        public int Location
-        {
-            get { return location; }
         }
 
         public override bool CanRead
@@ -38,11 +32,7 @@ namespace H3Mapper
             get { throw new NotImplementedException(); }
         }
 
-        public override long Position
-        {
-            get { return location; }
-            set { throw new NotSupportedException(); }
-        }
+        public override long Position { get; set; }
 
         public override void Flush()
         {
@@ -62,7 +52,7 @@ namespace H3Mapper
         public override int Read(byte[] buffer, int offset, int count)
         {
             var read = inner.Read(buffer, offset, count);
-            location += read;
+            Position += read;
             return read;
         }
 

@@ -5,7 +5,7 @@ namespace H3Mapper
     [Flags]
     public enum Terrains : ushort
     {
-        None = 0,
+        None = ushort.MaxValue,
         Water = 1 << 0,
         Lava = 1 << 1,
         Underground = 1 << 2,

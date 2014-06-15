@@ -12,7 +12,7 @@ namespace H3Mapper
         public int? PortraitId { get; set; }
         public SecondarySkill[] SecondarySkills { get; set; }
         public MapCreature[] Army { get; set; }
-        public int ArmyFormationType { get; set; }
+        public Formation ArmyFormationType { get; set; }
         public HeroArtifact[] Inventory { get; set; }
         public int? PatrolRadius { get; set; }
         public string Bio { get; set; }
