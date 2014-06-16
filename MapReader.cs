@@ -255,7 +255,15 @@ namespace H3Mapper
         private MagicShrineObject ReadMagicShrine(MapDeserializer s)
         {
             var m = new MagicShrineObject();
-            m.SpellId = s.ReadNullable(byte.MaxValue);
+            var spellId = s.ReadNullable(byte.MaxValue);
+            if (spellId.HasValue)
+            {
+                m.Spell = new Spell
+                {
+                    SpellId = spellId.Value,
+                    SpellName = TryGetValueForId(spellId.Value, SpellIdMapping)
+                };
+            }
             s.Skip(3);
             return m;
         }
@@ -365,8 +373,10 @@ namespace H3Mapper
             ReadMessageAndGuards(a, s, format);
             if (id == ObjectId.SpellScroll)
             {
-                a.SpellId = s.Read<uint>();
-                a.SpellName = TryGetValueForId((int) a.SpellId, SpellIdMapping);
+                var sp = new Spell();
+                sp.SpellId = s.Read<int>();
+                sp.SpellName = TryGetValueForId(sp.SpellId, SpellIdMapping);
+                a.Spell = sp;
             }
             return a;
         }
@@ -668,7 +678,7 @@ namespace H3Mapper
                 var hasSpells = s.Read<bool>();
                 if (hasSpells)
                 {
-                    h.Spells = s.Read<BitArray>(9).OfType<bool>().ToArray();
+                    h.Spells = ReadSpellsFromBitmask(ReadBitmask(s, 9, 70));
                 }
             }
             else if (format == MapFormat.AB)
@@ -676,9 +686,14 @@ namespace H3Mapper
                 var spellId = s.ReadNullable(byte.MaxValue);
                 if (spellId.HasValue)
                 {
-                    // NOTE: not sure this is the right thing
-                    h.Spells = new bool[spellId.Value + 1];
-                    h.Spells[spellId.Value] = true;
+                    h.Spells = new[]
+                    {
+                        new Spell
+                        {
+                            SpellId = spellId.Value,
+                            SpellName = TryGetValueForId(spellId.Value, SpellIdMapping)
+                        }
+                    };
                 }
             }
             if (format > MapFormat.AB)
@@ -730,12 +745,17 @@ namespace H3Mapper
             return artifacts;
         }
 
-        private static int[] ReadSpells(MapDeserializer s, byte spellCount)
+        private Spell[] ReadSpells(MapDeserializer s, byte spellCount)
         {
-            var spells = new int[spellCount];
+            var spells = new Spell[spellCount];
             for (var i = 0; i < spellCount; i++)
             {
-                spells[i] = s.Read<byte>();
+                var spellId = s.Read<byte>();
+                spells[i] = new Spell
+                {
+                    SpellId = spellId,
+                    SpellName = TryGetValueForId(spellId, SpellIdMapping)
+                };
             }
             return spells;
         }
@@ -900,7 +920,7 @@ namespace H3Mapper
                     var hasCustomSpells = s.Read<bool>();
                     if (hasCustomSpells)
                     {
-                        h.BitMaskSpells = s.Read<BitArray>(9).OfType<bool>().ToArray();
+                        h.Spells = ReadSpellsFromBitmask(ReadBitmask(s, 9, 70));
                     }
                     var hasPrimarySkills = s.Read<bool>();
                     if (hasPrimarySkills)
@@ -911,6 +931,23 @@ namespace H3Mapper
                 }
             }
             return list.ToArray();
+        }
+
+        private Spell[] ReadSpellsFromBitmask(bool[] bitmask)
+        {
+            var spells = new List<Spell>();
+            for (var i = 0; i < bitmask.Length; i++)
+            {
+                if (bitmask[i])
+                {
+                    spells.Add(new Spell
+                    {
+                        SpellId = i,
+                        SpellName = TryGetValueForId(i, SpellIdMapping)
+                    });
+                }
+            }
+            return spells.ToArray();
         }
 
         private static SecondarySkill[] ReadSecondarySkills(MapDeserializer s, int secondarySkillCount)
@@ -1023,7 +1060,7 @@ namespace H3Mapper
 
             var sa = new MapSpellsAndAbilities
             {
-                BitMaskSpells = s.Read<BitArray>(9).OfType<bool>().ToArray(),
+                AllowedSpells = ReadSpellsFromBitmask(ReadBitmask(s, 9, 70)),
                 BitMaskAbilities = s.Read<BitArray>(4).OfType<bool>().ToArray()
             };
             return sa;

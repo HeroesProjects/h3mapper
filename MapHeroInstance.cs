@@ -17,7 +17,7 @@ namespace H3Mapper
         public int? PatrolRadius { get; set; }
         public string Bio { get; set; }
         public HeroSex? Sex { get; set; }
-        public bool[] Spells { get; set; }
+        public Spell[] Spells { get; set; }
         public IDictionary<PrimarySkillType, int> PrimarySkills { get; set; }
     }
 }

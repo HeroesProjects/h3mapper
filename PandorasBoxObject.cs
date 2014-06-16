@@ -12,7 +12,7 @@ namespace H3Mapper
         public IDictionary<PrimarySkillType, int> PrimarySkills { get; set; }
         public SecondarySkill[] SecondarySkills { get; set; }
         public Artifact[] Artifacts { get; set; }
-        public int[] Spells { get; set; }
+        public Spell[] Spells { get; set; }
         public MapCreature[] Creatures { get; set; }
     }
 }

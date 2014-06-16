@@ -83,6 +83,7 @@
     <Compile Include="Scholar.cs" />
     <Compile Include="ScholarBonusType.cs" />
     <Compile Include="SeerHutObject.cs" />
+    <Compile Include="Spell.cs" />
     <Compile Include="TimedEvents.cs" />
     <Compile Include="UnitLevel.cs" />
     <Compile Include="LossCondition.cs" />

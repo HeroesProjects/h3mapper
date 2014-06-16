@@ -2,6 +2,6 @@ namespace H3Mapper
 {
     public class MagicShrineObject : MapObject
     {
-        public int? SpellId { get; set; }
+        public Spell Spell { get; set; }
     }
 }

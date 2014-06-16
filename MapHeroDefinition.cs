@@ -11,6 +11,6 @@ namespace H3Mapper
         public string Bio { get; set; }
         public HeroSex? Sex { get; set; }
         public IDictionary<PrimarySkillType, int> PrimarySkills { get; set; }
-        public bool[] BitMaskSpells { get; set; }
+        public Spell[] Spells { get; set; }
     }
 }
