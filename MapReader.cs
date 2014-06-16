@@ -1,22 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace H3Mapper
 {
     public class MapReader
     {
-        public Action<string> WriteInvalidObjects;
         public IDictionary<int, string> HeroIdMapping { get; set; }
         public IDictionary<int, string> SpellIdMapping { get; set; }
         public IDictionary<int, string> ArtifactIdMapping { get; set; }
 
-        public H3Map Read(Stream mapFile)
+        public H3Map Read(MapDeserializer s)
         {
-            var s = new MapDeserializer(mapFile, Console.WriteLine);
-
             var header = new H3Map();
 
             header.Format = s.Read<MapFormat>();
@@ -59,13 +55,12 @@ namespace H3Mapper
             header.PrefedinedHeroes = ReadPredefinedHeroes(s, header.Format);
             header.Terrain = ReadTerrain(s, header);
             header.CustomObjects = ReadCustomObjects(s, header.Format);
-            header.Objects = ReadMapObjects(s, header.Format, header.CustomObjects, WriteInvalidObjects);
+            header.Objects = ReadMapObjects(s, header.Format, header.CustomObjects);
             header.Events = ReadEvents(s, header.Format, false);
             return header;
         }
 
-        private MapObject[] ReadMapObjects(MapDeserializer s, MapFormat format, CustomObject[] templates,
-            Action<string> logUnknownObject)
+        private MapObject[] ReadMapObjects(MapDeserializer s, MapFormat format, CustomObject[] templates)
         {
             var count = s.Read<uint>();
             if (count == 0)
@@ -87,12 +82,6 @@ namespace H3Mapper
                     throw new ArgumentOutOfRangeException(string.Format("Map Object at {0} is misaligned.", i));
                 }
                 var template = templates[templateIndex];
-
-                if (Enum.IsDefined(typeof (ObjectId), template.Id) == false)
-                {
-                    logUnknownObject(string.Format("{0} - {1}/{2} - {3}", position, template.Id, template.SubId,
-                        template.AnimationFile));
-                }
                 s.Skip(5); //why?
                 switch (template.Id)
                 {
@@ -223,8 +212,15 @@ namespace H3Mapper
             s.Skip(3);
             if (id != ObjectId.RandomDwellingFaction)
             {
-                s.Skip(4);
-                d.AllowedFactions = s.Read<Factions>();
+                var sameAsCastleId = s.ReadNullable(0u);
+                if (sameAsCastleId.HasValue)
+                {
+                    d.SameAsCastle = sameAsCastleId.Value;
+                }
+                else
+                {
+                    d.AllowedFactions = s.Read<Factions>();
+                }
             }
             if (id != ObjectId.RandomDwellingLevel)
             {

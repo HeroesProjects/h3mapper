@@ -19,28 +19,23 @@ namespace H3Mapper
             }
             try
             {
-                var mapFilePath = args[0];
-                var extension = Path.ChangeExtension(mapFilePath, ".log");
-                using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
+                var path = args[0];
+                if (File.Exists(path))
                 {
-                    using (var log = new StreamWriter(File.OpenWrite(extension)))
+                    Process(path);
+                }
+                else
+                {
+                    if (Directory.Exists(path))
                     {
-                        var reader = new MapReader();
-                        reader.WriteInvalidObjects = log.WriteLine;
-                        reader.HeroIdMapping = ReadIdMap("heroes.txt");
-                        reader.SpellIdMapping = ReadIdMap("spells.txt");
-                        reader.ArtifactIdMapping = ReadIdMap("artifacts.txt");
-                        var mapHeader = reader.Read(new CountingStream(mapFile));
-
-                        var output = Path.ChangeExtension(mapFilePath, ".json");
-                        var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
-                            new JsonSerializerSettings
-                            {
-                                Converters = {new StringEnumConverter()}
-                            });
-                        File.WriteAllText(output, json);
-                        Console.WriteLine("Successfully processed.");
-                        Console.WriteLine("Output saved as " + output);
+                        foreach (var file in Directory.EnumerateFiles(path,"*.h3m"))
+                        {
+                            Process(file);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Given path: '{0}' does not point to an existing file or directory", path);
                     }
                 }
             }
@@ -52,6 +47,29 @@ namespace H3Mapper
             Console.Write("Press any key to close");
             Console.ReadKey(true);
             return 0;
+        }
+
+        private static void Process(string mapFilePath)
+        {
+            Console.WriteLine("--Processing " + mapFilePath);
+            using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
+            {
+                var reader = new MapReader();
+                reader.HeroIdMapping = ReadIdMap("heroes.txt");
+                reader.SpellIdMapping = ReadIdMap("spells.txt");
+                reader.ArtifactIdMapping = ReadIdMap("artifacts.txt");
+                var mapHeader = reader.Read(new MapDeserializer(new CountingStream(mapFile), Console.WriteLine));
+
+                var output = Path.ChangeExtension(mapFilePath, ".json");
+                var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
+                    new JsonSerializerSettings
+                    {
+                        Converters = {new StringEnumConverter()}
+                    });
+                File.WriteAllText(output, json);
+                Console.WriteLine("Successfully processed.");
+                Console.WriteLine("Output saved as " + output);
+            }
         }
 
         private static IDictionary<int, string> ReadIdMap(string mapFile)
