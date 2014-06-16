@@ -8,15 +8,16 @@ namespace H3Mapper
 {
     public class MapReader
     {
+        public Action<string> WriteInvalidObjects;
         public IDictionary<int, string> HeroIdMapping { get; set; }
         public IDictionary<int, string> SpellIdMapping { get; set; }
         public IDictionary<int, string> ArtifactIdMapping { get; set; }
 
-        public MapHeader Read(Stream mapFile)
+        public H3Map Read(Stream mapFile)
         {
             var s = new MapDeserializer(mapFile, Console.WriteLine);
 
-            var header = new MapHeader();
+            var header = new H3Map();
 
             header.Format = s.Read<MapFormat>();
             if (IsHota(header.Format))
@@ -58,12 +59,13 @@ namespace H3Mapper
             header.PrefedinedHeroes = ReadPredefinedHeroes(s, header.Format);
             header.Terrain = ReadTerrain(s, header);
             header.CustomObjects = ReadCustomObjects(s, header.Format);
-            header.Objects = ReadMapObjects(s, header.Format, header.CustomObjects);
+            header.Objects = ReadMapObjects(s, header.Format, header.CustomObjects, WriteInvalidObjects);
             header.Events = ReadEvents(s, header.Format, false);
             return header;
         }
 
-        private MapObject[] ReadMapObjects(MapDeserializer s, MapFormat format, CustomObject[] templates)
+        private MapObject[] ReadMapObjects(MapDeserializer s, MapFormat format, CustomObject[] templates,
+            Action<string> logUnknownObject)
         {
             var count = s.Read<uint>();
             if (count == 0)
@@ -85,6 +87,12 @@ namespace H3Mapper
                     throw new ArgumentOutOfRangeException(string.Format("Map Object at {0} is misaligned.", i));
                 }
                 var template = templates[templateIndex];
+
+                if (Enum.IsDefined(typeof (ObjectId), template.Id) == false)
+                {
+                    logUnknownObject(string.Format("{0} - {1}/{2} - {3}", position, template.Id, template.SubId,
+                        template.AnimationFile));
+                }
                 s.Skip(5); //why?
                 switch (template.Id)
                 {
@@ -843,7 +851,7 @@ namespace H3Mapper
             return co;
         }
 
-        private MapTerrain ReadTerrain(MapDeserializer s, MapHeader header)
+        private MapTerrain ReadTerrain(MapDeserializer s, H3Map header)
         {
             var terrain = new MapTerrain();
 
@@ -856,7 +864,7 @@ namespace H3Mapper
             return terrain;
         }
 
-        private MapTile[] ReadTerrainLevel(MapDeserializer s, MapHeader header, int level)
+        private MapTile[] ReadTerrainLevel(MapDeserializer s, H3Map header, int level)
         {
             var tiles = new List<MapTile>();
             for (var x = 0; x < header.Size; x++)

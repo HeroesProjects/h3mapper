@@ -20,22 +20,28 @@ namespace H3Mapper
             try
             {
                 var mapFilePath = args[0];
+                var extension = Path.ChangeExtension(mapFilePath, ".log");
                 using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
                 {
-                    var reader = new MapReader();
-                    reader.HeroIdMapping = ReadIdMap("heroes.txt");
-                    reader.SpellIdMapping = ReadIdMap("spells.txt");
-                    reader.ArtifactIdMapping = ReadIdMap("artifacts.txt");
-                    var mapHeader = reader.Read(new CountingStream(mapFile));
-
-                    var output = Path.ChangeExtension(mapFilePath, ".json");
-                    var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented, new JsonSerializerSettings
+                    using (var log = new StreamWriter(File.OpenWrite(extension)))
                     {
-                        Converters = {new StringEnumConverter()}
-                    });
-                    File.WriteAllText(output, json);
-                    Console.WriteLine("Successfully processed.");
-                    Console.WriteLine("Output saved as " + output);
+                        var reader = new MapReader();
+                        reader.WriteInvalidObjects = log.WriteLine;
+                        reader.HeroIdMapping = ReadIdMap("heroes.txt");
+                        reader.SpellIdMapping = ReadIdMap("spells.txt");
+                        reader.ArtifactIdMapping = ReadIdMap("artifacts.txt");
+                        var mapHeader = reader.Read(new CountingStream(mapFile));
+
+                        var output = Path.ChangeExtension(mapFilePath, ".json");
+                        var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
+                            new JsonSerializerSettings
+                            {
+                                Converters = {new StringEnumConverter()}
+                            });
+                        File.WriteAllText(output, json);
+                        Console.WriteLine("Successfully processed.");
+                        Console.WriteLine("Output saved as " + output);
+                    }
                 }
             }
             catch (Exception e)
@@ -48,13 +54,13 @@ namespace H3Mapper
             return 0;
         }
 
-        private static IDictionary<int,string> ReadIdMap(string mapFile)
+        private static IDictionary<int, string> ReadIdMap(string mapFile)
         {
             var map = new Dictionary<int, string>();
             if (!File.Exists(mapFile))
             {
                 Console.WriteLine("ID mapping file " + mapFile + " doesn't exist. Skipping.");
-                
+
                 return map;
             }
             var lines = File.ReadAllLines(mapFile);

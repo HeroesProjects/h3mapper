@@ -29,6 +29,7 @@ namespace H3Mapper
         {
             get { return map.Position.ToString("X8"); }
         }
+
         public long Location
         {
             get { return map.Position; }

@@ -90,7 +90,7 @@
     <Compile Include="LossConditionType.cs" />
     <Compile Include="MapDeserializer.cs" />
     <Compile Include="MapFormat.cs" />
-    <Compile Include="MapHeader.cs" />
+    <Compile Include="H3Map.cs" />
     <Compile Include="MapAllowedHeroes.cs" />
     <Compile Include="MapHeroDefinition.cs" />
     <Compile Include="MapObject.cs" />

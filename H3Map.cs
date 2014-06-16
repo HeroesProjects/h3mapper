@@ -1,0 +1,28 @@
+namespace H3Mapper
+{
+    public class H3Map
+    {
+        public MapFormat Format { get; set; }
+        public bool HasPlayers { get; set; }
+        public int Size { get; set; }
+        public bool HasSecondLevel { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public Difficulty Difficulty { get; set; }
+        public byte ExperienceLevelLimit { get; set; }
+        public MapPlayer[] Players { get; set; }
+        public VictoryCondition VictoryCondition { get; set; }
+        public LossCondition LossCondition { get; set; }
+        public int TeamCount { get; set; }
+        public MapAllowedHeroes AllowedHeroes { get; set; }
+        public DisposedHero[] DisposedHeroes { get; set; }
+        public Artifact[] BannedArtifacts { get; set; }
+        public MapSpellsAndAbilities AllowedSpellsAndAbilities { get; set; }
+        public MapRumor[] Rumors { get; set; }
+        public MapHeroDefinition[] PrefedinedHeroes { get; set; }
+        public MapTerrain Terrain { get; set; }
+        public CustomObject[] CustomObjects { get; set; }
+        public MapObject[] Objects { get; set; }
+        public TimedEvents[] Events { get; set; }
+    }
+}
