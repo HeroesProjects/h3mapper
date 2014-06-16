@@ -1,6 +1,6 @@
 namespace H3Mapper
 {
-    public enum Resource
+    public enum Resource:byte
     {
         Wood,
         Mercury,
