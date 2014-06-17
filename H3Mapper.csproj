@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Flags\ArtifactSlot.cs" />
+    <Compile Include="Flags\SecondarySkillType.cs" />
     <Compile Include="Identifier.cs" />
     <Compile Include="Flags\AITactic.cs" />
     <Compile Include="Flags\Factions.cs" />

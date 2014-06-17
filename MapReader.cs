@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using H3Mapper.Flags;
 using H3Mapper.MapObjects;
-using Serilog;
 
 namespace H3Mapper
 {
@@ -51,6 +50,16 @@ namespace H3Mapper
             }
             header.AllowedHeroes = ReadAllowedHeroes(s, header.Format);
             header.DisposedHeroes = ReadDisposedHeroes(s, header.Format);
+            if (IsHota(header.Format))
+            {
+                s.Skip(27);
+                header.AllowSpecialWeeks = s.Read<bool>();
+                s.Skip(3);
+            }
+            else
+            {
+                s.Skip(31);
+            }
             header.BannedArtifacts = ReadAllowedArtifacts(s, header.Format);
             header.AllowedSpellsAndAbilities = ReadAllowedSpellsAndAbilities(s, header.Format);
             if (IsHota(header.Format))
@@ -952,7 +961,7 @@ namespace H3Mapper
             {
                 skills[i] = new SecondarySkill
                 {
-                    Type = s.Read<byte>(),
+                    Type = s.Read<SecondarySkillType>(),
                     Level = s.Read<SecondarySkillLevel>()
                 };
             }
@@ -1088,9 +1097,6 @@ namespace H3Mapper
                     };
                 }
             }
-
-            //omitting NULLS
-            s.Skip(31);
             return dh;
         }
 
@@ -1236,45 +1242,38 @@ namespace H3Mapper
             var player = new MapPlayer();
             player.CanHumanPlay = s.Read<bool>();
             player.CanAIPlay = s.Read<bool>();
-            if (player.Disabled)
+            player.AITactic = s.Read<AITactic>();
+            if (format > MapFormat.AB)
             {
-                s.Skip(GetPlayerBytesToSkip(format));
+                player.P7 = s.Read<byte>();
             }
-            else
-            {
-                player.AITactic = s.Read<AITactic>();
-                if (format > MapFormat.AB)
-                {
-                    player.P7 = s.Read<byte>();
-                }
-                player.AllowedFactions = Fractions(s, format);
-                player.IsFactionRandom = s.Read<bool>();
-                player.HasHomeTown = s.Read<bool>();
+            player.AllowedFactions = Fractions(s, format);
+            player.IsFactionRandom = s.Read<bool>();
+            player.HasHomeTown = s.Read<bool>();
 
-                if (player.HasHomeTown)
+            if (player.HasHomeTown)
+            {
+                if (format != MapFormat.RoE)
                 {
-                    if (format != MapFormat.RoE)
-                    {
-                        player.GenerateHeroAtMainTown = s.Read<bool>();
-                        player.GenerateHero = s.Read<bool>();
-                    }
-                    player.HomeTownPosition = ReadPosition(s);
+                    player.GenerateHeroAtMainTown = s.Read<bool>();
+                    player.GenerateHero = s.Read<bool>();
                 }
-                player.HasRandomHero = s.Read<bool>();
-                player.MainCustomHeroId = s.ReadNullable(byte.MaxValue);
-                if (player.MainCustomHeroId.HasValue)
+                player.HomeTownPosition = ReadPosition(s);
+            }
+            player.HasRandomHero = s.Read<bool>();
+            player.MainCustomHeroId = s.ReadNullable(byte.MaxValue);
+            if (player.MainCustomHeroId.HasValue)
+            {
+                player.MainCustomHeroPortraitId = s.ReadNullable(byte.MaxValue);
+                player.MainCustomHeroName = s.Read<string>();
+            }
+            if (format > MapFormat.RoE)
+            {
+                player.PowerPlaceholders = s.Read<byte>();
+                var heroCount = s.Read<int>();
+                for (var i = 0; i < heroCount; i++)
                 {
-                    player.MainCustomHeroPortraitId = s.ReadNullable(byte.MaxValue);
-                    player.MainCustomHeroName = s.Read<string>();
-                }
-                if (format > MapFormat.RoE)
-                {
-                    player.PowerPlaceholders = s.Read<byte>();
-                    var heroCount = s.Read<int>();
-                    for (var i = 0; i < heroCount; i++)
-                    {
-                        player.AddHero(ReadHero(s));
-                    }
+                    player.AddHero(ReadHero(s));
                 }
             }
             return player;
@@ -1306,22 +1305,6 @@ namespace H3Mapper
                 return (Factions) s.Read<byte>();
             }
             return (Factions) s.Read<short>();
-        }
-
-        private int GetPlayerBytesToSkip(MapFormat format)
-        {
-            switch (format)
-            {
-                case MapFormat.RoE:
-                    return 6;
-                case MapFormat.AB:
-                    return 12;
-                case MapFormat.SoD:
-                case MapFormat.HotA:
-                    return 13;
-                default:
-                    return 13;
-            }
         }
     }
 }

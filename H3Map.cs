@@ -5,6 +5,11 @@ namespace H3Mapper
 {
     public class H3Map
     {
+        public H3Map()
+        {
+            AllowSpecialWeeks = true;
+        }
+
         public MapFormat Format { get; set; }
         public bool HasPlayers { get; set; }
         public int Size { get; set; }
@@ -27,5 +32,6 @@ namespace H3Mapper
         public CustomObject[] CustomObjects { get; set; }
         public MapObject[] Objects { get; set; }
         public TimedEvents[] Events { get; set; }
+        public bool AllowSpecialWeeks { get; set; }
     }
 }

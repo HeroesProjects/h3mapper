@@ -5,18 +5,46 @@ namespace H3Mapper
 {
     public class IDMappings
     {
-        public IDictionary<int, string> Heroes { get; set; }
+        public IDMappings(IDictionary<int, string> heroes, IDictionary<int, string> spells, IDictionary<int, string> artifacts, IDictionary<int, string> monsters)
+        {
+            this.heroes = heroes;
+            this.spells = spells;
+            this.artifacts = artifacts;
+            this.monsters = monsters;
+        }
 
-        public IDictionary<int, string> Spells { get; set; }
+        private readonly IDictionary<int, string> heroes;
 
-        public IDictionary<int, string> Artifacts { get; set; }
+        private readonly IDictionary<int, string> monsters;
+
+        private readonly IDictionary<int, string> spells;
+
+        private readonly IDictionary<int, string> artifacts;
 
         public Identifier GetSpell(int spellId)
         {
             return new Identifier
             {
                 Value = spellId,
-                Name = TryGetValueForId(spellId, Spells, "spell")
+                Name = TryGetValueForId(spellId, spells, "spell")
+            };
+        }
+
+        public Identifier GetHero(int heroId)
+        {
+            return new Identifier
+            {
+                Value = heroId,
+                Name = TryGetValueForId(heroId, heroes, "hero")
+            };
+        }
+
+        public Identifier GetMonster(int monsterId)
+        {
+            return new Identifier
+            {
+                Value = monsterId,
+                Name = TryGetValueForId(monsterId, monsters, "monster")
             };
         }
 
@@ -25,7 +53,7 @@ namespace H3Mapper
             return new Identifier
             {
                 Value = artifactId,
-                Name = TryGetValueForId(artifactId, Artifacts, "artifact")
+                Name = TryGetValueForId(artifactId, artifacts, "artifact")
             };
         }
 
