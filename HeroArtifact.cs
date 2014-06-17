@@ -1,9 +1,10 @@
+using H3Mapper.Flags;
+
 namespace H3Mapper
 {
     public class HeroArtifact
     {
-        public int ArtifactId { get; set; }
-        public int Slot { get; set; }
-        public string ArtifactName { get; set; }
+        public Identifier Artifact { get; set; }
+        public ArtifactSlot Slot { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace H3Mapper.MapObjects
         public QuestType Type { get; set; }
         public IDictionary<PrimarySkillType, int> Skills { get; set; }
         public long Experience { get; set; }
-        public Artifact[] Artifacts { get; set; }
+        public Identifier[] Artifacts { get; set; }
         public MapCreature[] Creatues { get; set; }
         public IDictionary<Resource, int> Resources { get; set; }
         public int HeroId { get; set; }

@@ -12,8 +12,8 @@ namespace H3Mapper.MapObjects
         public IDictionary<Resource, int> Resources { get; set; }
         public IDictionary<PrimarySkillType, int> PrimarySkills { get; set; }
         public SecondarySkill[] SecondarySkills { get; set; }
-        public Artifact[] Artifacts { get; set; }
-        public Spell[] Spells { get; set; }
+        public Identifier[] Artifacts { get; set; }
+        public Identifier[] Spells { get; set; }
         public MapCreature[] Creatures { get; set; }
     }
 }

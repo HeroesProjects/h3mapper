@@ -82,10 +82,7 @@ namespace H3Mapper
             Log.Debug("Processing {file}", mapFilePath);
             using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
             {
-                var reader = new MapReader();
-                reader.HeroIdMapping = idMappings.Heroes;
-                reader.SpellIdMapping = idMappings.Spells;
-                reader.ArtifactIdMapping = idMappings.Artifacts;
+                var reader = new MapReader(idMappings);
                 var mapHeader = reader.Read(new MapDeserializer(new CountingStream(mapFile)));
 
                 var output = Path.ChangeExtension(mapFilePath, ".json");

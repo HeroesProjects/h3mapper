@@ -54,7 +54,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Artifact.cs" />
+    <Compile Include="Flags\ArtifactSlot.cs" />
+    <Compile Include="Identifier.cs" />
     <Compile Include="Flags\AITactic.cs" />
     <Compile Include="Flags\Factions.cs" />
     <Compile Include="Flags\HeroClass.cs" />
@@ -99,7 +100,7 @@
     <Compile Include="MapObjects\GrailObject.cs" />
     <Compile Include="MapObjects\HeroPlaceholderObject.cs" />
     <Compile Include="MapObjects\MagicShrineObject.cs" />
-    <Compile Include="MapObjects\ArtifactObject.cs" />
+    <Compile Include="MapObjects\SpellScrollObject.cs" />
     <Compile Include="MapObjects\EventObject.cs" />
     <Compile Include="MapObjects\HeroObject.cs" />
     <Compile Include="MapObjects\MonsterObject.cs" />
@@ -113,7 +114,6 @@
     <Compile Include="MapObjects\SeerHutObject.cs" />
     <Compile Include="MapObjects\WitchHutObject.cs" />
     <Compile Include="QuestReward.cs" />
-    <Compile Include="Spell.cs" />
     <Compile Include="TimedEvents.cs" />
     <Compile Include="LossCondition.cs" />
     <Compile Include="MapDeserializer.cs" />

@@ -7,7 +7,7 @@ namespace H3Mapper
 
         public override string ToString()
         {
-            return string.Format("Id: {0}, Name: {1}", Id, Name);
+            return string.Format("Value: {0}, Name: {1}", Id, Name);
         }
     }
 }
