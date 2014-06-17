@@ -13,6 +13,8 @@ namespace H3Mapper
         TakeDwellings,
         TakeMines,
         TransportItem,
+        BeatAllMonsters,
+        Survive,
         WinStandard = 255
     }
 }

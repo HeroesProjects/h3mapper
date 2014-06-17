@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using Serilog;
 
 namespace H3Mapper
 {
@@ -71,10 +73,11 @@ namespace H3Mapper
             for (var i = 0; i < count; i++)
             {
                 var mo = default(MapObject);
+                var location = s.Location;
                 var position = ReadPosition(s);
                 if (position.IsInvalid())
                 {
-                    s.Log("Map object " + i + " at zero position.");
+                    Log.Information("Found suspicious location {location} at {position:X8}", location, position);
                 }
                 var templateIndex = s.Read<int>();
                 if (templateIndex < 0 || templateIndex >= templates.Length)
@@ -82,6 +85,10 @@ namespace H3Mapper
                     throw new ArgumentOutOfRangeException(string.Format("Map Object at {0} is misaligned.", i));
                 }
                 var template = templates[templateIndex];
+                if(!Enum.IsDefined(typeof(ObjectId),template.Id))
+                {
+                    
+                }
                 s.Skip(5); //why?
                 switch (template.Id)
                 {
@@ -138,14 +145,22 @@ namespace H3Mapper
                     case ObjectId.Town:
                         mo = ReadTown(s, format);
                         break;
-                    case ObjectId.Mine:
                     case ObjectId.AbandonedMine:
+                        mo = ReadAbandonedMine(s);
+                        break;
                     case ObjectId.CreatureGenerator1:
                     case ObjectId.CreatureGenerator2:
                     case ObjectId.CreatureGenerator3:
                     case ObjectId.CreatureGenerator4:
                     case ObjectId.Shipyard:
-                    case ObjectId.lighthouse:
+                    case ObjectId.Lighthouse:
+                        mo = ReadPlayerObject(s);
+                        break;
+                    case ObjectId.Mine:
+                        if (template.SubId == 7)
+                        {
+                            goto case ObjectId.AbandonedMine; // SubId == 7 means abandoned mine
+                        }
                         mo = ReadPlayerObject(s);
                         break;
                     case ObjectId.ShrineOfMagicGesture:
@@ -178,6 +193,13 @@ namespace H3Mapper
                 objects[i] = mo;
             }
             return objects;
+        }
+
+        private MapObject ReadAbandonedMine(MapDeserializer s)
+        {
+            var m = new AbandonedMineObject();
+            m.PotentialResources = s.Read<Resources>();
+            return m;
         }
 
         private MapResourceObject ReadMapResource(MapDeserializer s, MapFormat format)
@@ -233,8 +255,7 @@ namespace H3Mapper
         private GrailObject ReadGrail(MapDeserializer s)
         {
             var g = new GrailObject();
-            g.Radius = s.Read<byte>(); // limited to 127
-            s.Skip(3);
+            g.Radius = s.Read<int>(); // limited to 127
             return g;
         }
 
@@ -819,6 +840,10 @@ namespace H3Mapper
             {
                 return null;
             }
+            if (count > 10000)
+            {
+                throw new ArgumentOutOfRangeException("Count " + count + " looks wrong. Probably there is a bug here.");
+            }
             var co = new CustomObject[count];
             for (var i = 0; i < count; i++)
             {
@@ -860,32 +885,39 @@ namespace H3Mapper
             return terrain;
         }
 
-        private MapTile[] ReadTerrainLevel(MapDeserializer s, H3Map header, int level)
+        private MapTile[][] ReadTerrainLevel(MapDeserializer s, H3Map header, int level)
         {
-            var tiles = new List<MapTile>();
-            for (var x = 0; x < header.Size; x++)
+            var tiles = new MapTile[header.Size][];
+            for (var y = 0; y < header.Size; y++)
             {
-                for (var y = 0; y < header.Size; y++)
+                var row = new MapTile[header.Size];
+                tiles[y] = row;
+                for (var x = 0; x < header.Size; x++)
                 {
-                    tiles.Add(new MapTile(x, y, level)
+                    var tile = new MapTile(x, y, level)
                     {
-                        TerrainType = s.Read<byte>(),
-                        TerrainView = s.Read<byte>(),
-                        RiverType = s.Read<byte>(),
-                        RiverDirection = s.Read<byte>(),
-                        RoadType = s.Read<byte>(),
-                        RoadDirection = s.Read<byte>(),
-                        Flags = s.Read<byte>()
-                    });
+                        TerrainType = s.Read<Terrain>(),
+                        TerrainView = (TerrainView) s.Read<byte>(),
+                        RiverType = s.Read<RiverType>(),
+                        RiverDirection = (RiverDirection) s.Read<byte>(),
+                        RoadType = s.Read<RoadType>(),
+                        RoadDirection = (RoadDirection) s.Read<byte>(),
+                        Flags = (TileMirroring) s.Read<byte>() //two eldest bytes - not used
+                    };
+                    row[x] = tile;
                 }
             }
-            return tiles.ToArray();
+            return tiles;
         }
 
         private MapHeroDefinition[] ReadPredefinedHeroes(MapDeserializer s, MapFormat format)
         {
             // is there a way to be smart and detect it instead?
-            const int heroCount = 156;
+            var heroCount = 156;
+            if (IsHota(format))
+            {
+                heroCount = s.Read<int>();
+            }
             var list = new List<MapHeroDefinition>();
             if (format > MapFormat.AB)
             {
@@ -1160,7 +1192,6 @@ namespace H3Mapper
                         break;
                     case LossConditionType.TimeExpires:
                         lc.Value = s.Read<short>();
-
                         break;
                 }
             }
@@ -1198,8 +1229,6 @@ namespace H3Mapper
                         break;
                     case VictoryConditionType.BuildCity:
                         vc.Position = ReadPosition(s);
-                        vc.ObjectType = s.Read<byte>();
-                        vc.Value = s.Read<int>();
                         vc.HallLevel = s.Read<BuildingLevel3>();
                         vc.CastleLevel = s.Read<BuildingLevel3>();
                         break;
@@ -1222,6 +1251,13 @@ namespace H3Mapper
                         break;
                     case VictoryConditionType.TakeDwellings:
                     case VictoryConditionType.TakeMines:
+                        break;
+                    case VictoryConditionType.BeatAllMonsters: // HotA
+                        Debug.Assert(IsHota(mapFormat));
+                        break;
+                    case VictoryConditionType.Survive: // HotA
+                        Debug.Assert(IsHota(mapFormat));
+                        vc.Value = s.Read<int>();
                         break;
                     default:
                         throw new NotSupportedException();

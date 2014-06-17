@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Serilog;
 
 namespace H3Mapper
 {
@@ -19,46 +20,72 @@ namespace H3Mapper
             }
             try
             {
+                ConfigureLogging();
+
                 var path = args[0];
-                if (File.Exists(path))
-                {
-                    Process(path);
-                }
-                else
-                {
-                    if (Directory.Exists(path))
-                    {
-                        foreach (var file in Directory.EnumerateFiles(path,"*.h3m"))
-                        {
-                            Process(file);
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Given path: '{0}' does not point to an existing file or directory", path);
-                    }
-                }
+                var mappings = ConfigureMappings();
+                Run(path, mappings);
             }
             catch (Exception e)
             {
-                Console.WriteLine("ERROR");
-                Console.WriteLine(e);
+                Log.Error(e, "Error processing the file(s)");
             }
             Console.Write("Press any key to close");
             Console.ReadKey(true);
             return 0;
         }
 
-        private static void Process(string mapFilePath)
+        private static void Run(string path, IDMappings mappings)
         {
-            Console.WriteLine("--Processing " + mapFilePath);
+            if (File.Exists(path))
+            {
+                Process(mappings, path);
+            }
+            else
+            {
+                if (Directory.Exists(path))
+                {
+                    foreach (var file in Directory.EnumerateFiles(path, "*.h3m"))
+                    {
+                        Process(mappings, file);
+                    }
+                }
+                else
+                {
+                    Log.Information("Given path: '{path}' does not point to an existing file or directory", path);
+                }
+            }
+        }
+
+        private static IDMappings ConfigureMappings()
+        {
+            var mappings = new IDMappings
+            {
+                Heroes = ReadIdMap("heroes.txt"),
+                Spells = ReadIdMap("spells.txt"),
+                Artifacts = ReadIdMap("artifacts.txt")
+            };
+            return mappings;
+        }
+
+        private static void ConfigureLogging()
+        {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.ColoredConsole()
+                .MinimumLevel.Debug()
+                .CreateLogger();
+        }
+
+        private static void Process(IDMappings idMappings, string mapFilePath)
+        {
+            Log.Debug("Processing {file}", mapFilePath);
             using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
             {
                 var reader = new MapReader();
-                reader.HeroIdMapping = ReadIdMap("heroes.txt");
-                reader.SpellIdMapping = ReadIdMap("spells.txt");
-                reader.ArtifactIdMapping = ReadIdMap("artifacts.txt");
-                var mapHeader = reader.Read(new MapDeserializer(new CountingStream(mapFile), Console.WriteLine));
+                reader.HeroIdMapping = idMappings.Heroes;
+                reader.SpellIdMapping = idMappings.Spells;
+                reader.ArtifactIdMapping = idMappings.Artifacts;
+                var mapHeader = reader.Read(new MapDeserializer(new CountingStream(mapFile)));
 
                 var output = Path.ChangeExtension(mapFilePath, ".json");
                 var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
@@ -77,8 +104,7 @@ namespace H3Mapper
             var map = new Dictionary<int, string>();
             if (!File.Exists(mapFile))
             {
-                Console.WriteLine("ID mapping file " + mapFile + " doesn't exist. Skipping.");
-
+                Log.Information("ID mapping file {file} doesn't exist. Skipping.", mapFile);
                 return map;
             }
             var lines = File.ReadAllLines(mapFile);

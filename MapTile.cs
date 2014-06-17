@@ -8,12 +8,12 @@ namespace H3Mapper
         }
 
         public MapPosition Location { get; set; }
-        public int TerrainType { get; set; }
-        public int TerrainView { get; set; }
-        public int RiverType { get; set; }
-        public int RiverDirection { get; set; }
-        public int RoadType { get; set; }
-        public int RoadDirection { get; set; }
-        public int Flags { get; set; }
+        public Terrain TerrainType { get; set; }
+        public TerrainView TerrainView { get; set; }
+        public RiverType RiverType { get; set; }
+        public RiverDirection RiverDirection { get; set; }
+        public RoadType RoadType { get; set; }
+        public RoadDirection RoadDirection { get; set; }
+        public TileMirroring Flags { get; set; }
     }
 }

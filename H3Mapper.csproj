@@ -39,6 +39,12 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Serilog">
+      <HintPath>packages\Serilog.1.3.25\lib\net45\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.FullNetFx">
+      <HintPath>packages\Serilog.1.3.25\lib\net45\Serilog.FullNetFx.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbandonedMineObject.cs" />
     <Compile Include="AITactic.cs" />
     <Compile Include="Artifact.cs" />
     <Compile Include="BuildingLevel3.cs" />
@@ -66,6 +73,7 @@
     <Compile Include="HeroInfo.cs" />
     <Compile Include="HeroPlaceholderObject.cs" />
     <Compile Include="HeroSex.cs" />
+    <Compile Include="IDMappings.cs" />
     <Compile Include="MagicShrineObject.cs" />
     <Compile Include="MapArtifact.cs" />
     <Compile Include="MapCreature.cs" />
@@ -79,11 +87,19 @@
     <Compile Include="Players.cs" />
     <Compile Include="QuestObject.cs" />
     <Compile Include="QuestReward.cs" />
+    <Compile Include="Resources.cs" />
     <Compile Include="RewardType.cs" />
+    <Compile Include="RiverDirection.cs" />
+    <Compile Include="RiverType.cs" />
+    <Compile Include="RoadDirection.cs" />
+    <Compile Include="RoadType.cs" />
     <Compile Include="Scholar.cs" />
     <Compile Include="ScholarBonusType.cs" />
     <Compile Include="SeerHutObject.cs" />
     <Compile Include="Spell.cs" />
+    <Compile Include="Terrain.cs" />
+    <Compile Include="TerrainView.cs" />
+    <Compile Include="TileMirroring.cs" />
     <Compile Include="TimedEvents.cs" />
     <Compile Include="UnitLevel.cs" />
     <Compile Include="LossCondition.cs" />

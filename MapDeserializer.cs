@@ -2,8 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Serilog;
 
 namespace H3Mapper
 {
@@ -14,14 +16,11 @@ namespace H3Mapper
 
         private readonly IDictionary<Type, Func<byte[], object>> deserializers2 =
             new Dictionary<Type, Func<byte[], object>>();
-
-        private readonly Action<string> log;
         private readonly Stream map;
 
-        public MapDeserializer(Stream mapFile, Action<string> log)
+        public MapDeserializer(Stream mapFile)
         {
             map = mapFile;
-            this.log = log;
             deserializers2.Add(typeof (BitArray), b => new BitArray(b));
         }
 
@@ -56,11 +55,12 @@ namespace H3Mapper
             }
             if (type.IsEnum)
             {
+                var location = Location;
                 var value = Convert(raw, type.GetEnumUnderlyingType());
                 var enumValue = Enum.ToObject(type, value);
                 if (enumValue.ToString() == value.ToString())
                 {
-                    log("Unrecognised value for " + type.Name + ": " + value);
+                    Log.Debug("Unrecognised value for {type}: {value} at {location:X8}", type, value, location);
                 }
                 return value;
             }
@@ -171,7 +171,7 @@ namespace H3Mapper
             if (type == typeof (string))
             {
                 var stringLenght = Read<int>();
-                if (stringLenght > 5000)
+                if (stringLenght > 50000)
                 {
                     throw new ArgumentOutOfRangeException("",
                         string.Format(
@@ -189,20 +189,17 @@ namespace H3Mapper
 
         public void Skip(int byteCount)
         {
-            if (map.CanSeek)
+            var garbage = new byte[byteCount];
+            var location = Location;
+            map.Read(garbage, 0, garbage.Length);
+            if (!garbage.All(b => b == 0))
             {
-                map.Seek(byteCount, SeekOrigin.Current);
+                Log.Information(
+                    "Skipped {count} bytes at {location:X8}, but not all of them are empty. Bytes: {bytes}",
+                    byteCount,
+                    location,
+                    BitConverter.ToString(garbage));
             }
-            else
-            {
-                var garbage = new byte[byteCount];
-                map.Read(garbage, 0, garbage.Length);
-            }
-        }
-
-        public void Log(string message)
-        {
-            log("Log at " + LocationHex + ": " + message);
         }
     }
 }
