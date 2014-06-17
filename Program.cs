@@ -73,7 +73,9 @@ namespace H3Mapper
         {
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.ColoredConsole()
+#if DEBUG
                 .MinimumLevel.Debug()
+#endif
                 .CreateLogger();
         }
 

@@ -80,19 +80,12 @@ namespace H3Mapper
                 var mo = default(MapObject);
                 var location = s.Location;
                 var position = ReadPosition(s);
-                if (position.IsInvalid())
-                {
-                    Log.Information("Found suspicious location {location} at {position:X8}", location, position);
-                }
                 var templateIndex = s.Read<int>();
                 if (templateIndex < 0 || templateIndex >= templates.Length)
                 {
                     throw new ArgumentOutOfRangeException(string.Format("Map Object at {0} is misaligned.", i));
                 }
                 var template = templates[templateIndex];
-                if (!Enum.IsDefined(typeof (ObjectId), template.Id))
-                {
-                }
                 s.Skip(5); //why?
                 switch (template.Id)
                 {

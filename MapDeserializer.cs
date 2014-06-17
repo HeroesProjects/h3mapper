@@ -195,7 +195,7 @@ namespace H3Mapper
             map.Read(garbage, 0, garbage.Length);
             if (!garbage.All(b => b == 0))
             {
-                Log.Information(
+                Log.Debug(
                     "Skipped {count} bytes at {location:X8}, but not all of them are empty. Bytes: {bytes}",
                     byteCount,
                     location,
