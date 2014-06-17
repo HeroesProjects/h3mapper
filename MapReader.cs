@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using H3Mapper.Flags;
+using H3Mapper.MapObjects;
 using Serilog;
 
 namespace H3Mapper
@@ -85,9 +87,8 @@ namespace H3Mapper
                     throw new ArgumentOutOfRangeException(string.Format("Map Object at {0} is misaligned.", i));
                 }
                 var template = templates[templateIndex];
-                if(!Enum.IsDefined(typeof(ObjectId),template.Id))
+                if (!Enum.IsDefined(typeof (ObjectId), template.Id))
                 {
-                    
                 }
                 s.Skip(5); //why?
                 switch (template.Id)
@@ -202,9 +203,9 @@ namespace H3Mapper
             return m;
         }
 
-        private MapResourceObject ReadMapResource(MapDeserializer s, MapFormat format)
+        private ResourceObject ReadMapResource(MapDeserializer s, MapFormat format)
         {
-            var r = new MapResourceObject();
+            var r = new ResourceObject();
             ReadMessageAndGuards(r, s, format);
             r.Amount = s.Read<uint>();
             s.Skip(4);
@@ -293,17 +294,17 @@ namespace H3Mapper
             return m;
         }
 
-        private MapPlayerObject ReadPlayerObject(MapDeserializer s)
+        private PlayerOwnedObject ReadPlayerObject(MapDeserializer s)
         {
-            var m = new MapPlayerObject();
+            var m = new PlayerOwnedObject();
             m.Owner = s.Read<Player>();
             s.Skip(3);
             return m;
         }
 
-        private MapTown ReadTown(MapDeserializer s, MapFormat format)
+        private TownObject ReadTown(MapDeserializer s, MapFormat format)
         {
-            var m = new MapTown();
+            var m = new TownObject();
             if (format > MapFormat.RoE)
             {
                 m.Identifier = s.Read<uint>();
@@ -392,9 +393,9 @@ namespace H3Mapper
             return creatures;
         }
 
-        private MapArtifact ReadArtifact(MapDeserializer s, MapFormat format, ObjectId id)
+        private ArtifactObject ReadArtifact(MapDeserializer s, MapFormat format, ObjectId id)
         {
-            var a = new MapArtifact();
+            var a = new ArtifactObject();
             ReadMessageAndGuards(a, s, format);
             if (id == ObjectId.SpellScroll)
             {
@@ -406,9 +407,9 @@ namespace H3Mapper
             return a;
         }
 
-        private Garrison ReadGarrison(MapDeserializer s, MapFormat format)
+        private GarrisonObject ReadGarrison(MapDeserializer s, MapFormat format)
         {
-            var g = new Garrison();
+            var g = new GarrisonObject();
             g.Owner = s.Read<Player>();
             s.Skip(3);
             g.Creatues = ReadCreatures(s, format, 7);
@@ -439,18 +440,18 @@ namespace H3Mapper
             return bits.ToArray();
         }
 
-        private Scholar ReadScholar(MapDeserializer s)
+        private ScholarObject ReadScholar(MapDeserializer s)
         {
-            var sc = new Scholar();
+            var sc = new ScholarObject();
             sc.BonusType = s.Read<ScholarBonusType>();
             sc.BonusId = s.Read<byte>();
             s.Skip(6);
             return sc;
         }
 
-        private WitchHut ReadWitchHut(MapDeserializer s, MapFormat format)
+        private WitchHutObject ReadWitchHut(MapDeserializer s, MapFormat format)
         {
-            var h = new WitchHut();
+            var h = new WitchHutObject();
             if (format > MapFormat.RoE)
             {
                 h.AllowedSkills = s.Read<BitArray>(4).OfType<bool>().ToArray();
@@ -607,9 +608,9 @@ namespace H3Mapper
             return m;
         }
 
-        private MapMonster ReadMapMonster(MapDeserializer s, MapFormat format)
+        private MonsterObject ReadMapMonster(MapDeserializer s, MapFormat format)
         {
-            var m = new MapMonster();
+            var m = new MonsterObject();
             if (format > MapFormat.RoE)
             {
                 m.Identifier = s.Read<uint>();
@@ -641,7 +642,7 @@ namespace H3Mapper
 
         private MapObject ReadMapHero(MapDeserializer s, MapFormat format)
         {
-            var h = new MapHeroInstance();
+            var h = new HeroObject();
             if (format > MapFormat.RoE)
             {
                 h.Indentifier = s.Read<uint>();
@@ -735,7 +736,7 @@ namespace H3Mapper
 
         private MapObject ReadMapEvent(MapDeserializer s, MapFormat format)
         {
-            var e = new MapEvent();
+            var e = new EventObject();
             ReadMessageAndGuards(e, s, format);
             e.GainedExperience = s.Read<int>();
             e.ManaDifference = s.Read<int>();
@@ -1229,8 +1230,8 @@ namespace H3Mapper
                         break;
                     case VictoryConditionType.BuildCity:
                         vc.Position = ReadPosition(s);
-                        vc.HallLevel = s.Read<BuildingLevel3>();
-                        vc.CastleLevel = s.Read<BuildingLevel3>();
+                        vc.HallLevel = s.Read<BuildingLevel>();
+                        vc.CastleLevel = s.Read<BuildingLevel>();
                         break;
                     case VictoryConditionType.BuildGrail:
                         var position = ReadPosition(s);

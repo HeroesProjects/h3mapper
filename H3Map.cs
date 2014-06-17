@@ -1,3 +1,6 @@
+using H3Mapper.Flags;
+using H3Mapper.MapObjects;
+
 namespace H3Mapper
 {
     public class H3Map

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
+using H3Mapper.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Serilog;

@@ -1,3 +1,5 @@
+using H3Mapper.Flags;
+
 namespace H3Mapper
 {
     public class VictoryCondition
@@ -8,8 +10,8 @@ namespace H3Mapper
         public int ObjectType { get; set; }
         public int Value { get; set; }
         public MapPosition Position { get; set; }
-        public BuildingLevel3 HallLevel { get; set; }
-        public BuildingLevel3 CastleLevel { get; set; }
+        public BuildingLevel HallLevel { get; set; }
+        public BuildingLevel CastleLevel { get; set; }
 
         public override string ToString()
         {

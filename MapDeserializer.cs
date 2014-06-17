@@ -16,6 +16,7 @@ namespace H3Mapper
 
         private readonly IDictionary<Type, Func<byte[], object>> deserializers2 =
             new Dictionary<Type, Func<byte[], object>>();
+
         private readonly Stream map;
 
         public MapDeserializer(Stream mapFile)

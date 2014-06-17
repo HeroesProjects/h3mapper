@@ -1,3 +1,5 @@
+using H3Mapper.Flags;
+
 namespace H3Mapper
 {
     public class MapTile
