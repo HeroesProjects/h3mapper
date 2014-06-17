@@ -13,6 +13,8 @@ namespace H3Mapper.MapObjects
         public bool[] ForbiddenBuildingIds { get; set; }
         public bool HasFort { get; set; }
         public TimedEvents[] Events { get; set; }
-        public int Alignment { get; set; }
+        public Player Alignment { get; set; }
+        public Identifier[] SpellsWillAppear { get; set; }
+        public Identifier[] SpellsMayAppear { get; set; }
     }
 }

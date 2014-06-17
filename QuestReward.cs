@@ -11,7 +11,6 @@ namespace H3Mapper
         public PrimarySkillType SkillType { get; set; }
         public int SecondarySkillId { get; set; }
         public int ItemId { get; set; }
-        public string ItemName { get; set; }
         public Identifier Artifact { get; set; }
     }
 }

@@ -60,8 +60,8 @@ namespace H3Mapper
 
             if (header.Format >= MapFormat.SoD)
             {
-                header.AllowedSpells = ReadSpellsFromBitmask(ReadBitmask(s, 9, 70));
-                header.AllowedSecondarySkills = ReadSecondarySkillsFromBitmask(ReadBitmask(s, 4, 28));
+                header.AllowedSpells = ReadSpellsFromBitmask(s);
+                header.AllowedSecondarySkills = ReadSecondarySkillsFromBitmask(s);
             }
             header.Rumors = ReadRumors(s);
             header.PrefedinedHeroes = ReadPredefinedHeroes(s, header.Format);
@@ -329,18 +329,15 @@ namespace H3Mapper
             }
             if (format > MapFormat.RoE)
             {
-                //obligatory spells
-                // TODO: add 
-                s.Skip(9);
+                m.SpellsWillAppear = ReadSpellsFromBitmask(s);
             }
-            // allowed spells
-            // TODO: add
-            s.Skip(9);
+            m.SpellsMayAppear = ReadSpellsFromBitmask(s);
 
             m.Events = ReadEvents(s, format, true);
             if (format > MapFormat.AB)
             {
-                m.Alignment = s.Read<byte>();
+                // this only applies to random castles
+                m.Alignment = s.Read<Player>();
             }
             s.Skip(3);
             return m;
@@ -682,7 +679,7 @@ namespace H3Mapper
                 var hasSpells = s.Read<bool>();
                 if (hasSpells)
                 {
-                    h.Identifiers = ReadSpellsFromBitmask(ReadBitmask(s, 9, 70));
+                    h.Identifiers = ReadSpellsFromBitmask(s);
                 }
             }
             else if (format == MapFormat.AB)
@@ -923,7 +920,7 @@ namespace H3Mapper
                     var hasCustomSpells = s.Read<bool>();
                     if (hasCustomSpells)
                     {
-                        h.Spells = ReadSpellsFromBitmask(ReadBitmask(s, 9, 70));
+                        h.Spells = ReadSpellsFromBitmask(s);
                     }
                     var hasPrimarySkills = s.Read<bool>();
                     if (hasPrimarySkills)
@@ -936,8 +933,9 @@ namespace H3Mapper
             return list.ToArray();
         }
 
-        private Identifier[] ReadSpellsFromBitmask(bool[] bitmask)
+        private Identifier[] ReadSpellsFromBitmask(MapDeserializer s)
         {
+            var bitmask = ReadBitmask(s, 9, 70);
             var spells = new List<Identifier>();
             for (var i = 0; i < bitmask.Length; i++)
             {
@@ -1046,8 +1044,9 @@ namespace H3Mapper
             return rumors;
         }
 
-        private SecondarySkillType[] ReadSecondarySkillsFromBitmask(bool[] bits)
+        private SecondarySkillType[] ReadSecondarySkillsFromBitmask(MapDeserializer s)
         {
+            var bits = ReadBitmask(s, 4, 28);
             var skills = new List<SecondarySkillType>();
             for (int i = 0; i < bits.Length; i++)
             {
