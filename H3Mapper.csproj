@@ -125,7 +125,6 @@
     <Compile Include="MapPosition.cs" />
     <Compile Include="MapReader.cs" />
     <Compile Include="MapRumor.cs" />
-    <Compile Include="MapSpellsAndAbilities.cs" />
     <Compile Include="MapTerrain.cs" />
     <Compile Include="MapTile.cs" />
     <Compile Include="Program.cs" />

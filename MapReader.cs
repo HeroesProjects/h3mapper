@@ -50,22 +50,18 @@ namespace H3Mapper
             }
             header.AllowedHeroes = ReadAllowedHeroes(s, header.Format);
             header.DisposedHeroes = ReadDisposedHeroes(s, header.Format);
+            s.Skip(31);
             if (IsHota(header.Format))
             {
-                s.Skip(27);
                 header.AllowSpecialWeeks = s.Read<bool>();
                 s.Skip(3);
             }
-            else
+            header.AllowedArtifacts = ReadAllowedArtifacts(s, header.Format);
+
+            if (header.Format >= MapFormat.SoD)
             {
-                s.Skip(31);
-            }
-            header.BannedArtifacts = ReadAllowedArtifacts(s, header.Format);
-            header.AllowedSpellsAndAbilities = ReadAllowedSpellsAndAbilities(s, header.Format);
-            if (IsHota(header.Format))
-            {
-                // something is wrong above, not sure which one... between heroes and 
-                s.Skip(11);
+                header.AllowedSpells = ReadSpellsFromBitmask(ReadBitmask(s, 9, 70));
+                header.AllowedSecondarySkills = ReadSecondarySkillsFromBitmask(ReadBitmask(s, 4, 28));
             }
             header.Rumors = ReadRumors(s);
             header.PrefedinedHeroes = ReadPredefinedHeroes(s, header.Format);
@@ -87,7 +83,6 @@ namespace H3Mapper
             for (var i = 0; i < count; i++)
             {
                 var mo = default(MapObject);
-                var location = s.Location;
                 var position = ReadPosition(s);
                 var templateIndex = s.Read<int>();
                 if (templateIndex < 0 || templateIndex >= templates.Length)
@@ -1051,33 +1046,46 @@ namespace H3Mapper
             return rumors;
         }
 
-        private MapSpellsAndAbilities ReadAllowedSpellsAndAbilities(MapDeserializer s, MapFormat format)
+        private SecondarySkillType[] ReadSecondarySkillsFromBitmask(bool[] bits)
         {
-            if (format < MapFormat.SoD) return null;
-
-            var sa = new MapSpellsAndAbilities
+            var skills = new List<SecondarySkillType>();
+            for (int i = 0; i < bits.Length; i++)
             {
-                AllowedSpells = ReadSpellsFromBitmask(ReadBitmask(s, 9, 70)),
-                BitMaskAbilities = s.Read<BitArray>(4).OfType<bool>().ToArray()
-            };
-            return sa;
+                if (bits[i] == false)
+                {
+                    skills.Add((SecondarySkillType) i);
+                }
+            }
+            return skills.ToArray();
         }
 
         private Identifier[] ReadAllowedArtifacts(MapDeserializer s, MapFormat format)
         {
             if (format == MapFormat.RoE) return null;
-            var byteCount = format == MapFormat.AB ? 17 : 18;
-            var bits = s.Read<BitArray>(byteCount);
+            var bits = GetAllowedArtifactsBits(s, format);
             var artifacts = new List<Identifier>(bits.Length);
             for (var i = 0; i < bits.Length; i++)
             {
-                if (bits.Get(i))
+                if (bits[i] == false)
                 {
                     artifacts.Add(ids.GetArtifact(i));
                 }
             }
             return artifacts.ToArray();
         }
+
+        private bool[] GetAllowedArtifactsBits(MapDeserializer s, MapFormat format)
+        {
+            if (IsHota(format))
+            {
+                var count = s.Read<byte>();
+                s.Skip(3);
+                return ReadBitmask(s, (int) Math.Ceiling(count/8d), count);
+            }
+
+            return ReadBitmask(s, format == MapFormat.AB ? 17 : 18);
+        }
+
 
         private DisposedHero[] ReadDisposedHeroes(MapDeserializer s, MapFormat format)
         {
