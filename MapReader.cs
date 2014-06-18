@@ -275,7 +275,7 @@ namespace H3Mapper
             p.SecondarySkills = ReadSecondarySkills(s, s.Read<byte>());
             p.Artifacts = ReadArtifacts(s, format, s.Read<byte>());
             p.Spells = ReadSpells(s, s.Read<byte>());
-            p.Creatures = ReadCreatures(s, format, s.Read<byte>());
+            p.Monsters = ReadCreatures(s, format, s.Read<byte>());
             s.Skip(8);
             return p;
         }
@@ -496,8 +496,11 @@ namespace H3Mapper
                     r.Value = s.Read<byte>();
                     break;
                 case RewardType.SecondarySkill:
-                    r.SecondarySkillId = s.Read<byte>();
-                    r.Value = s.Read<byte>();
+                    r.SecondarySkill = new SecondarySkill
+                    {
+                        Type = s.Read<SecondarySkillType>(),
+                        Level = s.Read<SecondarySkillLevel>()
+                    };
                     break;
                 case RewardType.Artifact:
                     var itemId = ReadVersionDependantId(s, format).Value;
@@ -507,7 +510,7 @@ namespace H3Mapper
                     r.ItemId = s.Read<byte>();
                     break;
                 case RewardType.Creatures:
-                    r.ItemId = ReadVersionDependantId(s, format).Value;
+                    r.Monster = ids.GetMonster(ReadVersionDependantId(s, format).Value);
                     r.Value = s.Read<ushort>();
                     break;
                 default:
@@ -591,6 +594,7 @@ namespace H3Mapper
 
         private MonsterObject ReadMapMonster(MapDeserializer s, MapFormat format)
         {
+            // NOTE: where does the monster type come from?
             var m = new MonsterObject();
             if (format > MapFormat.RoE)
             {
@@ -602,8 +606,6 @@ namespace H3Mapper
             if (hasMessage)
             {
                 m.Message = s.Read<string>();
-
-                //TODO: should it be inside of that 
                 m.Resources = ReadResources(s);
                 var artifactId = ReadVersionDependantId(s, format);
                 if (artifactId != null)
@@ -720,7 +722,7 @@ namespace H3Mapper
             e.SecondarySkills = ReadSecondarySkills(s, s.Read<byte>());
             e.Artifacts = ReadArtifacts(s, format, s.Read<byte>());
             e.Spells = ReadSpells(s, s.Read<byte>());
-            e.Creatures = ReadCreatures(s, format, s.Read<byte>());
+            e.Monsters = ReadCreatures(s, format, s.Read<byte>());
             s.Skip(8);
             e.CanBeTriggeredByPlayers = s.Read<Players>();
             e.CanBeTriggeredByAI = s.Read<bool>();
@@ -767,18 +769,18 @@ namespace H3Mapper
             }
         }
 
-        private MapCreature[] ReadCreatures(MapDeserializer s, MapFormat format, byte creatureCount)
+        private MapMonster[] ReadCreatures(MapDeserializer s, MapFormat format, byte creatureCount)
         {
-            var creatures = new MapCreature[creatureCount];
+            var creatures = new MapMonster[creatureCount];
             for (var i = 0; i < creatureCount; i++)
             {
                 var typeId = ReadVersionDependantId(s, format);
                 var count = s.Read<ushort>();
                 if (typeId.HasValue)
                 {
-                    creatures[i] = new MapCreature
+                    creatures[i] = new MapMonster
                     {
-                        TypeId = typeId.Value,
+                        Monster = ids.GetMonster(typeId.Value),
                         Count = count
                     };
                 }

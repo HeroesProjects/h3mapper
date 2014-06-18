@@ -9,8 +9,9 @@ namespace H3Mapper
         public int Modifier { get; set; }
         public Resource ResourceType { get; set; }
         public PrimarySkillType SkillType { get; set; }
-        public int SecondarySkillId { get; set; }
         public int ItemId { get; set; }
         public Identifier Artifact { get; set; }
+        public SecondarySkill SecondarySkill { get; set; }
+        public Identifier Monster { get; set; }
     }
 }

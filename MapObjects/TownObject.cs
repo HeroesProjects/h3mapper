@@ -7,7 +7,7 @@ namespace H3Mapper.MapObjects
         public long Identifier { get; set; }
         public Player Owner { get; set; }
         public string Name { get; set; }
-        public MapCreature[] Garrison { get; set; }
+        public MapMonster[] Garrison { get; set; }
         public Formation GarrisonFormation { get; set; }
         public bool[] BuiltBuildingIds { get; set; }
         public bool[] ForbiddenBuildingIds { get; set; }

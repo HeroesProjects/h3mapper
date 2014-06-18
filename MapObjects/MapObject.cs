@@ -20,6 +20,6 @@ namespace H3Mapper.MapObjects
 
         public MapPosition Position { get; set; }
         public string Message { get; set; }
-        public MapCreature[] Guards { get; set; }
+        public MapMonster[] Guards { get; set; }
     }
 }

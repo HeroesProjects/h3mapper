@@ -95,7 +95,7 @@
     <Compile Include="HeroArtifact.cs" />
     <Compile Include="HeroInfo.cs" />
     <Compile Include="IDMappings.cs" />
-    <Compile Include="MapCreature.cs" />
+    <Compile Include="MapMonster.cs" />
     <Compile Include="MapObjects\AbandonedMineObject.cs" />
     <Compile Include="MapObjects\DwellingObject.cs" />
     <Compile Include="MapObjects\GarrisonObject.cs" />

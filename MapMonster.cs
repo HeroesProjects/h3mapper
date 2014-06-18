@@ -1,8 +1,8 @@
 namespace H3Mapper
 {
-    public class MapCreature
+    public class MapMonster
     {
-        public int TypeId { get; set; }
+        public Identifier Monster { get; set; }
         public int Count { get; set; }
     }
 }
