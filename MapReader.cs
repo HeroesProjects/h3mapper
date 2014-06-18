@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using H3Mapper.Flags;
+using H3Mapper.Internal;
 using H3Mapper.MapObjects;
+using Serilog;
 
 namespace H3Mapper
 {
@@ -976,46 +978,38 @@ namespace H3Mapper
 
         private HeroArtifact[] ReadHeroInventory(MapDeserializer s, MapFormat format)
         {
-            var artifactSlots = 16;
+            const int artifactSlots = 18;
             var artifacts = new List<HeroArtifact>();
             for (var i = 0; i < artifactSlots; i++)
             {
-                ReadArtifactForSlot(s, format, artifacts, i);
+                artifacts.TryAdd(ReadArtifactForSlot(s, format, (ArtifactSlot) i));
             }
             if (format > MapFormat.AB)
             {
-                ReadArtifactForSlot(s, format, artifacts, 16);
-            }
-
-            ReadArtifactForSlot(s, format, artifacts, 17); //spellbook
-            if (format > MapFormat.RoE)
-            {
-                ReadArtifactForSlot(s, format, artifacts, 18);
-            }
-            else
-            {
-                s.Skip(1);
+                artifacts.TryAdd(ReadArtifactForSlot(s, format, ArtifactSlot.Misc5));
             }
             //bag artifacts
             var bagSize = s.Read<ushort>();
             for (var i = 0; i < bagSize; i++)
             {
-                ReadArtifactForSlot(s, format, artifacts, 19 + i);
+                artifacts.TryAdd(ReadArtifactForSlot(s, format, ArtifactSlot.Backpack));
             }
             return artifacts.ToArray();
         }
 
-        private void ReadArtifactForSlot(MapDeserializer s, MapFormat format, List<HeroArtifact> artifacts, int i)
+        private HeroArtifact ReadArtifactForSlot(MapDeserializer s, MapFormat format, ArtifactSlot slot)
         {
             var artifactId = ReadVersionDependantId(s, format);
             if (artifactId.HasValue)
             {
-                artifacts.Add(new HeroArtifact
+                var artifact = new HeroArtifact
                 {
                     Artifact = ids.GetArtifact(artifactId.Value),
-                    Slot = (ArtifactSlot) i
-                });
+                    Slot = slot
+                };
+                return artifact;
             }
+            return null;
         }
 
 

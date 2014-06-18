@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using H3Mapper.Internal;
 using Newtonsoft.Json;
@@ -14,7 +15,7 @@ namespace H3Mapper
     {
         private static int Main(string[] args)
         {
-            if (args.Length != 1)
+            if (args.Length == 0)
             {
                 ShowHelp();
                 return -1;
@@ -24,8 +25,9 @@ namespace H3Mapper
                 ConfigureLogging();
 
                 var path = args[0];
+                
                 var mappings = ConfigureMappings();
-                Run(path, mappings);
+                Run(path, mappings, args.Contains("-s"));
             }
             catch (Exception e)
             {
@@ -36,11 +38,11 @@ namespace H3Mapper
             return 0;
         }
 
-        private static void Run(string path, IDMappings mappings)
+        private static void Run(string path, IDMappings mappings, bool skipOutput)
         {
             if (File.Exists(path))
             {
-                Process(mappings, path);
+                Process(mappings, path,skipOutput);
             }
             else
             {
@@ -48,7 +50,7 @@ namespace H3Mapper
                 {
                     foreach (var file in Directory.EnumerateFiles(path, "*.h3m"))
                     {
-                        Process(mappings, file);
+                        Process(mappings, file,skipOutput);
                     }
                 }
                 else
@@ -77,23 +79,25 @@ namespace H3Mapper
                 .CreateLogger();
         }
 
-        private static void Process(IDMappings idMappings, string mapFilePath)
+        private static void Process(IDMappings idMappings, string mapFilePath, bool skipOutput)
         {
             Log.Debug("Processing {file}", mapFilePath);
             using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
             {
                 var reader = new MapReader(idMappings);
                 var mapHeader = reader.Read(new MapDeserializer(new CountingStream(mapFile)));
-
-                var output = Path.ChangeExtension(mapFilePath, ".json");
-                var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
-                    new JsonSerializerSettings
-                    {
-                        Converters = {new StringEnumConverter()}
-                    });
-                File.WriteAllText(output, json);
                 Console.WriteLine("Successfully processed.");
-                Console.WriteLine("Output saved as " + output);
+                if (!skipOutput)
+                {
+                    var output = Path.ChangeExtension(mapFilePath, ".json");
+                    var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
+                        new JsonSerializerSettings
+                        {
+                            Converters = {new StringEnumConverter()}
+                        });
+                    File.WriteAllText(output, json);
+                    Console.WriteLine("Output saved as " + output);
+                }
             }
         }
 

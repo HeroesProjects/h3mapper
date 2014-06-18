@@ -84,6 +84,7 @@
     <Compile Include="Flags\TileMirroring.cs" />
     <Compile Include="Flags\UnitLevel.cs" />
     <Compile Include="Flags\VictoryConditionType.cs" />
+    <Compile Include="Internal\CollectionExtensions.cs" />
     <Compile Include="Internal\CountingStream.cs" />
     <Compile Include="CustomObject.cs" />
     <Compile Include="Flags\Difficulty.cs" />
