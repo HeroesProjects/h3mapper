@@ -37,9 +37,15 @@ namespace H3Mapper
 
         public T Read<T>(int byteCount)
         {
+            var raw = ReadBytes(byteCount);
+            return Convert<T>(raw);
+        }
+
+        private byte[] ReadBytes(int byteCount)
+        {
             var raw = new byte[byteCount];
             map.Read(raw, 0, raw.Length);
-            return Convert<T>(raw);
+            return raw;
         }
 
         private T Convert<T>(byte[] raw)
@@ -100,7 +106,7 @@ namespace H3Mapper
             throw new NotSupportedException();
         }
 
-        private object ConvertUInt16(byte[] raw)
+        private ushort ConvertUInt16(byte[] raw)
         {
             return BitConverter.ToUInt16(raw, 0);
         }
@@ -115,22 +121,22 @@ namespace H3Mapper
             return Encoding.UTF8.GetString(raw);
         }
 
-        private object ConvertBool(byte[] raw)
+        private bool ConvertBool(byte[] raw)
         {
             return BitConverter.ToBoolean(raw, 0);
         }
 
-        private object ConvertInt32(byte[] raw)
+        private int ConvertInt32(byte[] raw)
         {
             return BitConverter.ToInt32(raw, 0);
         }
 
-        private object ConvertUInt32(byte[] raw)
+        private uint ConvertUInt32(byte[] raw)
         {
             return BitConverter.ToUInt32(raw, 0);
         }
 
-        private object ConvertByte(byte[] raw)
+        private byte ConvertByte(byte[] raw)
         {
             return raw[0];
         }
@@ -147,17 +153,46 @@ namespace H3Mapper
 
         public int Read1ByteNumber()
         {
-            return Read<byte>();
+            var bytes = ReadBytes(1);
+            return ConvertByte(bytes);
         }
 
         public int Read2ByteNumber()
         {
-            return Read<ushort>();
+            var bytes = ReadBytes(2);
+            return ConvertUInt16(bytes);
+        }
+
+        public int Read4ByteNumber()
+        {
+            var location = Location;
+            var bytes = ReadBytes(4);
+            var number = ConvertInt32(bytes);
+            if (0 > number)
+            {
+                Log.Warning(
+                    "Number at {location:X8} is negative ({value}). Probably should have used Read4ByteNumberLong() instead",
+                    location,
+                    number);
+            }
+            return number;
+        }
+
+        public long Read4ByteNumberLong()
+        {
+            var bytes = ReadBytes(4);
+            return ConvertUInt32(bytes);
         }
 
         public bool ReadBool()
         {
-            return Read<bool>();
+            var bytes = ReadBytes(1);
+            return ConvertBool(bytes);
+        }
+
+        public string ReadString()
+        {
+            return Read<string>();
         }
 
         public T Read<T>()
@@ -186,7 +221,7 @@ namespace H3Mapper
             }
             if (type == typeof (string))
             {
-                var stringLenght = Read<int>();
+                var stringLenght = Read4ByteNumber();
                 if (stringLenght > 50000)
                 {
                     throw new ArgumentOutOfRangeException("",
