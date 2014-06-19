@@ -145,6 +145,21 @@ namespace H3Mapper
             return value;
         }
 
+        public int Read1ByteNumber()
+        {
+            return Read<byte>();
+        }
+
+        public int Read2ByteNumber()
+        {
+            return Read<ushort>();
+        }
+
+        public bool ReadBool()
+        {
+            return Read<bool>();
+        }
+
         public T Read<T>()
         {
             Func<Stream, object> deserializer;

@@ -17,7 +17,7 @@ namespace H3Mapper
         public string Name { get; set; }
         public string Description { get; set; }
         public Difficulty Difficulty { get; set; }
-        public byte ExperienceLevelLimit { get; set; }
+        public int ExperienceLevelLimit { get; set; }
         public MapPlayer[] Players { get; set; }
         public VictoryCondition VictoryCondition { get; set; }
         public LossCondition LossCondition { get; set; }
