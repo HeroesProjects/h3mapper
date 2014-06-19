@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -12,15 +11,11 @@ namespace H3Mapper
 {
     public class MapDeserializer
     {
-        private readonly IDictionary<Type, Func<byte[], object>> deserializers2 =
-            new Dictionary<Type, Func<byte[], object>>();
-
         private readonly Stream map;
 
         public MapDeserializer(Stream mapFile)
         {
             map = mapFile;
-            deserializers2.Add(typeof (BitArray), b => new BitArray(b));
         }
 
         public string LocationHex
@@ -33,12 +28,6 @@ namespace H3Mapper
             get { return map.Position; }
         }
 
-        private T Read<T>(int byteCount)
-        {
-            var raw = ReadBytes(byteCount);
-            return Convert<T>(raw);
-        }
-
         private byte[] ReadBytes(int byteCount)
         {
             var raw = new byte[byteCount];
@@ -46,29 +35,8 @@ namespace H3Mapper
             return raw;
         }
 
-        private T Convert<T>(byte[] raw)
-        {
-            return (T) Convert(raw, typeof (T));
-        }
-
         private object Convert(byte[] raw, Type type)
         {
-            Func<byte[], object> deserializer;
-            if (deserializers2.TryGetValue(type, out deserializer))
-            {
-                return deserializer(raw);
-            }
-            if (type.IsEnum)
-            {
-                var location = Location;
-                var value = Convert(raw, type.GetEnumUnderlyingType());
-                var enumValue = Enum.ToObject(type, value);
-                if (enumValue.ToString() == value.ToString())
-                {
-                    Log.Debug("Unrecognised value for {type}: {value} at {location:X8}", type, value, location);
-                }
-                return value;
-            }
             if (type == typeof (bool))
             {
                 return ConvertBool(raw);
@@ -80,10 +48,6 @@ namespace H3Mapper
             if (type == typeof (uint))
             {
                 return ConvertUInt32(raw);
-            }
-            if (type == typeof (string))
-            {
-                return ConvertToString(raw);
             }
             if (type == typeof (byte))
             {
@@ -97,11 +61,12 @@ namespace H3Mapper
             {
                 return ConvertUInt16(raw);
             }
-            if (type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>))
-            {
-                return Convert(raw, type.GetGenericArguments()[0]);
-            }
             throw new NotSupportedException();
+        }
+
+        private static bool IsEnumDefined(Type type, object value)
+        {
+            return Enum.ToObject(type, value).ToString() != value.ToString();
         }
 
         private ushort ConvertUInt16(byte[] raw)
@@ -174,7 +139,7 @@ namespace H3Mapper
 
         public bool[] ReadBitmaskBits(int bitCount)
         {
-            var byteCount = (int)Math.Ceiling((bitCount / (decimal)8));
+            var byteCount = (int) Math.Ceiling((bitCount/(decimal) 8));
             return ReadBitmask(byteCount, bitCount);
         }
 
@@ -212,16 +177,23 @@ namespace H3Mapper
 
         public T ReadEnum<T>() where T : struct
         {
-            Debug.Assert(typeof (T).IsEnum);
-            return Read<T>(SizeOf(typeof (T).GetEnumUnderlyingType()));
+            var type = typeof (T);
+            Debug.Assert(type.IsEnum);
+            var underlyingType = type.GetEnumUnderlyingType();
+            var location = Location;
+
+            var bytes = ReadBytes(SizeOf(underlyingType));
+            var rawValue = Convert(bytes, underlyingType);
+
+            if (IsEnumDefined(type, rawValue) == false)
+            {
+                Log.Debug("Unrecognised value for {type}: {value} at {location:X8}", type, rawValue, location);
+            }
+            return (T) rawValue;
         }
 
         private int SizeOf(Type type)
         {
-            if (type.IsEnum)
-            {
-                return SizeOf(type.GetEnumUnderlyingType());
-            }
             if (type == typeof (bool))
             {
                 return 1;
@@ -229,10 +201,6 @@ namespace H3Mapper
             if (type.IsPrimitive)
             {
                 return Marshal.SizeOf(type);
-            }
-            if (type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>))
-            {
-                return SizeOf(type.GetGenericArguments()[0]);
             }
             throw new NotSupportedException();
         }
