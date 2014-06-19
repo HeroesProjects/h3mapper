@@ -68,14 +68,14 @@ namespace H3Mapper
             header.Rumors = ReadRumors(s);
             header.PrefedinedHeroes = ReadPredefinedHeroes(s, header.Format);
             header.Terrain = ReadTerrain(s, header);
-            header.CustomObjects = ReadCustomObjects(s, header.Format);
-            header.Objects = ReadMapObjects(s, header.Format, header.CustomObjects);
+            header.Objects = ReadMapObjects(s, header.Format);
             header.Events = ReadEvents(s, header.Format, false);
             return header;
         }
 
-        private MapObject[] ReadMapObjects(MapDeserializer s, MapFormat format, CustomObject[] templates)
+        private MapObject[] ReadMapObjects(MapDeserializer s, MapFormat format)
         {
+            var templates = ReadMapObjectTemplates(s);
             var count = s.Read<uint>();
             if (count == 0)
             {
@@ -483,10 +483,10 @@ namespace H3Mapper
                     break;
                 case RewardType.Morale:
                 case RewardType.Luck:
-                    r.Modifier = s.Read<byte>();
+                    r.LuckMorale = s.Read<LuckMoraleModifier>();
                     break;
                 case RewardType.Resource:
-                    r.ResourceType = s.Read<Resource>();
+                    r.Resource = s.Read<Resource>();
                     var value = s.Read<uint>();
                     //only the first 3 bytes are used
                     r.Value = value & 0x00ffffff;
@@ -507,7 +507,7 @@ namespace H3Mapper
                     r.Artifact = ids.GetArtifact(itemId);
                     break;
                 case RewardType.Spell:
-                    r.ItemId = s.Read<byte>();
+                    r.Spell = ids.GetSpell(s.Read<byte>());
                     break;
                 case RewardType.Creatures:
                     r.Monster = ids.GetMonster(ReadVersionDependantId(s, format).Value);
@@ -801,7 +801,7 @@ namespace H3Mapper
             return resources;
         }
 
-        private CustomObject[] ReadCustomObjects(MapDeserializer s, MapFormat format)
+        private MapObjectTemplate[] ReadMapObjectTemplates(MapDeserializer s)
         {
             var count = s.Read<int>();
             if (count == 0)
@@ -812,10 +812,10 @@ namespace H3Mapper
             {
                 throw new ArgumentOutOfRangeException("Count " + count + " looks wrong. Probably there is a bug here.");
             }
-            var co = new CustomObject[count];
+            var co = new MapObjectTemplate[count];
             for (var i = 0; i < count; i++)
             {
-                var o = new CustomObject();
+                var o = new MapObjectTemplate();
                 o.AnimationFile = s.Read<string>();
                 var blockMask = new bool[6];
                 var visitMask = new bool[6];

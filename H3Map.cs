@@ -28,7 +28,6 @@ namespace H3Mapper
         public MapRumor[] Rumors { get; set; }
         public MapHeroDefinition[] PrefedinedHeroes { get; set; }
         public MapTerrain Terrain { get; set; }
-        public CustomObject[] CustomObjects { get; set; }
         public MapObject[] Objects { get; set; }
         public TimedEvents[] Events { get; set; }
         public bool AllowSpecialWeeks { get; set; }

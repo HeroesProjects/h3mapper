@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Flags\ArtifactSlot.cs" />
+    <Compile Include="Flags\LuckMoraleModifier.cs" />
     <Compile Include="Flags\SecondarySkillType.cs" />
     <Compile Include="Identifier.cs" />
     <Compile Include="Flags\AITactic.cs" />
@@ -86,7 +87,7 @@
     <Compile Include="Flags\VictoryConditionType.cs" />
     <Compile Include="Internal\CollectionExtensions.cs" />
     <Compile Include="Internal\CountingStream.cs" />
-    <Compile Include="CustomObject.cs" />
+    <Compile Include="MapObjectTemplate.cs" />
     <Compile Include="Flags\Difficulty.cs" />
     <Compile Include="DisposedHero.cs" />
     <Compile Include="Flags\Disposition.cs" />

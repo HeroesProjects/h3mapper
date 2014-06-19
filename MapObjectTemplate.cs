@@ -2,7 +2,7 @@ using H3Mapper.Flags;
 
 namespace H3Mapper
 {
-    public class CustomObject
+    public class MapObjectTemplate
     {
         public string AnimationFile { get; set; }
         public Terrains SupportedTerrainTypes { get; set; }

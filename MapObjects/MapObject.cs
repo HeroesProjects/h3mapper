@@ -2,9 +2,9 @@ namespace H3Mapper.MapObjects
 {
     public class MapObject
     {
-        private readonly CustomObject template;
+        private readonly MapObjectTemplate template;
 
-        public MapObject(CustomObject template)
+        public MapObject(MapObjectTemplate template)
         {
             this.template = template;
         }
@@ -13,7 +13,7 @@ namespace H3Mapper.MapObjects
         {
         }
 
-        public CustomObject Template
+        public MapObjectTemplate Template
         {
             get { return template; }
         }
