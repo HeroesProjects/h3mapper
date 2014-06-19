@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -11,9 +12,6 @@ namespace H3Mapper
 {
     public class MapDeserializer
     {
-        private readonly IDictionary<Type, Func<Stream, object>> deserializers =
-            new Dictionary<Type, Func<Stream, object>>();
-
         private readonly IDictionary<Type, Func<byte[], object>> deserializers2 =
             new Dictionary<Type, Func<byte[], object>>();
 
@@ -35,7 +33,7 @@ namespace H3Mapper
             get { return map.Position; }
         }
 
-        public T Read<T>(int byteCount)
+        private T Read<T>(int byteCount)
         {
             var raw = ReadBytes(byteCount);
             return Convert<T>(raw);
@@ -116,7 +114,7 @@ namespace H3Mapper
             return BitConverter.ToInt16(raw, 0);
         }
 
-        private object ConvertToString(byte[] raw)
+        private string ConvertToString(byte[] raw)
         {
             return Encoding.UTF8.GetString(raw);
         }
@@ -139,16 +137,6 @@ namespace H3Mapper
         private byte ConvertByte(byte[] raw)
         {
             return raw[0];
-        }
-
-        public T? ReadNullable<T>(T nullValue) where T : struct
-        {
-            var value = Read<T>();
-            if (Equals(value, nullValue))
-            {
-                return null;
-            }
-            return value;
         }
 
         public int Read1ByteNumber()
@@ -184,6 +172,24 @@ namespace H3Mapper
             return ConvertUInt32(bytes);
         }
 
+        public bool[] ReadBitmaskBits(int bitCount)
+        {
+            var byteCount = (int)Math.Ceiling((bitCount / (decimal)8));
+            return ReadBitmask(byteCount, bitCount);
+        }
+
+        public bool[] ReadBitmask(int byteCount)
+        {
+            return ReadBitmask(byteCount, byteCount*8);
+        }
+
+        private bool[] ReadBitmask(int byteCount, int bitCount)
+        {
+            var bytes = ReadBytes(byteCount);
+            var bitArray = new BitArray(bytes);
+            return bitArray.OfType<bool>().Take(bitCount).ToArray();
+        }
+
         public bool ReadBool()
         {
             var bytes = ReadBytes(1);
@@ -192,17 +198,22 @@ namespace H3Mapper
 
         public string ReadString()
         {
-            return Read<string>();
+            var stringLenght = Read4ByteNumber();
+            if (stringLenght > 50000)
+            {
+                throw new ArgumentOutOfRangeException("",
+                    string.Format(
+                        "The string length of {0} looks a bit large. Perhaps something wrong with the file?",
+                        stringLenght));
+            }
+            var bytes = ReadBytes(stringLenght);
+            return ConvertToString(bytes);
         }
 
-        public T Read<T>()
+        public T ReadEnum<T>() where T : struct
         {
-            Func<Stream, object> deserializer;
-            if (deserializers.TryGetValue(typeof (T), out deserializer))
-            {
-                return (T) deserializer(map);
-            }
-            return Read<T>(SizeOf(typeof (T)));
+            Debug.Assert(typeof (T).IsEnum);
+            return Read<T>(SizeOf(typeof (T).GetEnumUnderlyingType()));
         }
 
         private int SizeOf(Type type)
@@ -218,18 +229,6 @@ namespace H3Mapper
             if (type.IsPrimitive)
             {
                 return Marshal.SizeOf(type);
-            }
-            if (type == typeof (string))
-            {
-                var stringLenght = Read4ByteNumber();
-                if (stringLenght > 50000)
-                {
-                    throw new ArgumentOutOfRangeException("",
-                        string.Format(
-                            "The string length of {0} looks a bit large. Perhaps something wrong with the file?",
-                            stringLenght));
-                }
-                return stringLenght;
             }
             if (type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>))
             {

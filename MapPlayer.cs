@@ -35,7 +35,7 @@ namespace H3Mapper
         public bool GenerateHero { get; set; }
         public MapPosition HomeTownPosition { get; set; }
         public bool HasRandomHero { get; set; }
-        public int? MainCustomHeroId { get; set; }
+        public Identifier MainCustomHero { get; set; }
         public int? MainCustomHeroPortraitId { get; set; }
         public string MainCustomHeroName { get; set; }
         public int PowerPlaceholders { get; set; }
