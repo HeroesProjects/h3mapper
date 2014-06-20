@@ -30,8 +30,8 @@ namespace H3Mapper
             header.HasPlayers = s.ReadBool();
             header.Size = s.Read4ByteNumber();
             header.HasSecondLevel = s.ReadBool();
-            header.Name = s.ReadString();
-            header.Description = s.ReadString();
+            header.Name = s.ReadString(30);
+            header.Description = s.ReadString(3000);
             header.Difficulty = s.ReadEnum<Difficulty>();
             if (header.Format > MapFormat.RoE)
             {
@@ -113,7 +113,7 @@ namespace H3Mapper
                     case ObjectId.RandomMonsterl7:
                         mo = ReadMapMonster(s, format);
                         break;
-                    case ObjectId.oceanbottle:
+                    case ObjectId.OceanBottle:
                     case ObjectId.Sign:
                         mo = ReadMessageObject(s);
                         break;
@@ -310,7 +310,7 @@ namespace H3Mapper
             var hasName = s.ReadBool();
             if (hasName)
             {
-                m.Name = s.ReadString();
+                m.Name = s.ReadString(14);
             }
             var hasGarrison = s.ReadBool();
             if (hasGarrison)
@@ -351,8 +351,8 @@ namespace H3Mapper
             for (var i = 0; i < events.Length; i++)
             {
                 var e = new TimedEvents();
-                e.Name = s.ReadString();
-                e.Message = s.ReadString();
+                e.Name = s.ReadString(7091);
+                e.Message = s.ReadString(30000);
                 e.Resources = ReadResources(s);
                 e.Players = s.ReadEnum<Players>();
                 if (format > MapFormat.AB)
@@ -564,9 +564,9 @@ namespace H3Mapper
             {
                 q.Deadline = (int?) deadline;
             }
-            q.FirstVisitText = s.ReadString();
-            q.NextVisitText = s.ReadString();
-            q.CompletedText = s.ReadString();
+            q.FirstVisitText = s.ReadString(30000);
+            q.NextVisitText = s.ReadString(30000);
+            q.CompletedText = s.ReadString(30000);
             return q;
         }
 
@@ -574,7 +574,7 @@ namespace H3Mapper
         {
             var m = new MapObject
             {
-                Message = s.ReadString()
+                Message = s.ReadString(150)
             };
             s.Skip(4);
             return m;
@@ -593,7 +593,7 @@ namespace H3Mapper
             var hasMessage = s.ReadBool();
             if (hasMessage)
             {
-                m.Message = s.ReadString();
+                m.Message = s.ReadString(30000);
                 m.Resources = ReadResources(s);
                 var artifactId = ReadVersionDependantId(s, format);
                 if (artifactId != null)
@@ -619,7 +619,7 @@ namespace H3Mapper
             var hasName = s.ReadBool();
             if (hasName)
             {
-                h.Name = s.ReadString();
+                h.Name = s.ReadString(12);
             }
             if (format > MapFormat.AB)
             {
@@ -666,7 +666,7 @@ namespace H3Mapper
                 var hasBio = s.ReadBool();
                 if (hasBio)
                 {
-                    h.Bio = s.ReadString();
+                    h.Bio = s.ReadString(30000);
                 }
                 h.Sex = s.ReadEnum<HeroSex>();
             }
@@ -750,7 +750,7 @@ namespace H3Mapper
             var hasMessage = s.ReadBool();
             if (hasMessage)
             {
-                o.Message = s.ReadString();
+                o.Message = s.ReadString(30000);
                 // NOTE: does it belong inside of this if?
                 var hasGuards = s.ReadBool();
                 if (hasGuards)
@@ -808,7 +808,7 @@ namespace H3Mapper
             for (var i = 0; i < count; i++)
             {
                 var o = new MapObjectTemplate();
-                o.AnimationFile = s.ReadString();
+                o.AnimationFile = s.ReadString(255/* not really possible to verify buy they are all really short */);
                 var blockMask = new bool[6];
                 var visitMask = new bool[6];
                 for (var j = 0; j < blockMask.Length; j++)
@@ -910,7 +910,7 @@ namespace H3Mapper
                     var hasBio = s.ReadBool();
                     if (hasBio)
                     {
-                        h.Bio = s.ReadString();
+                        h.Bio = s.ReadString(30000);
                     }
                     h.Sex = s.ReadEnum<HeroSex>();
                     var hasCustomSpells = s.ReadBool();
@@ -1034,8 +1034,8 @@ namespace H3Mapper
             {
                 var r = new MapRumor
                 {
-                    Name = s.ReadString(),
-                    Value = s.ReadString()
+                    Name = s.ReadString(30000),
+                    Value = s.ReadString(300)
                 };
                 rumors[i] = r;
             }
@@ -1097,8 +1097,8 @@ namespace H3Mapper
                     {
                         HeroId = s.Read1ByteNumber(),
                         PortraitId = s.Read1ByteNumber(),
-                        Name = s.ReadString(),
-                        Players = s.Read1ByteNumber()
+                        Name = s.ReadString(12),
+                        Players = s.ReadEnum<Players>()
                     };
                 }
             }
@@ -1283,7 +1283,7 @@ namespace H3Mapper
                 {
                     player.MainCustomHeroPortraitId = portraitId;
                 }
-                player.MainCustomHeroName = s.ReadString();
+                player.MainCustomHeroName = s.ReadString(12);
             }
             if (format > MapFormat.RoE)
             {
@@ -1301,8 +1301,8 @@ namespace H3Mapper
         {
             return new HeroInfo
             {
-                Id = s.Read1ByteNumber(),
-                Name = s.ReadString()
+                Id = ids.GetHero(s.Read1ByteNumber()),
+                Name = s.ReadString(12)
             };
         }
 

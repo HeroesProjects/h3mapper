@@ -87,37 +87,40 @@ namespace H3Mapper
             return raw[0];
         }
 
-        public int Read1ByteNumber()
+        public int Read1ByteNumber(int minValue = 0, int maxValue = byte.MaxValue)
         {
+            var location = Location;
             var bytes = ReadBytes(1);
-            return ConvertByte(bytes);
+            var value = ConvertByte(bytes);
+            EnsureRange(minValue, maxValue, value, location);
+            return value;
         }
 
-        public int Read2ByteNumber()
+        public int Read2ByteNumber(int minValue = 0, int maxValue = ushort.MaxValue)
         {
+            var location = Location;
             var bytes = ReadBytes(2);
-            return ConvertUInt16(bytes);
+            var value = ConvertUInt16(bytes);
+            EnsureRange(minValue, maxValue, value, location);
+            return value;
         }
 
-        public int Read4ByteNumber()
+        public int Read4ByteNumber(int minValue = int.MinValue, int maxValue = int.MaxValue)
         {
             var location = Location;
             var bytes = ReadBytes(4);
-            var number = ConvertInt32(bytes);
-            if (0 > number)
-            {
-                Log.Warning(
-                    "Number at {location:X8} is negative ({value}). Probably should have used Read4ByteNumberLong() instead",
-                    location,
-                    number);
-            }
-            return number;
+            var value = ConvertInt32(bytes);
+            EnsureRange(minValue, maxValue, value, location);
+            return value;
         }
 
-        public long Read4ByteNumberLong()
+        public long Read4ByteNumberLong(long minValue = 0L, long maxValue = uint.MaxValue)
         {
+            var location = Location;
             var bytes = ReadBytes(4);
-            return ConvertUInt32(bytes);
+            var value = ConvertUInt32(bytes);
+            EnsureRange(minValue, maxValue, value, location);
+            return value;
         }
 
         public bool[] ReadBitmaskBits(int bitCount)
@@ -131,6 +134,26 @@ namespace H3Mapper
             return ReadBitmask(byteCount, byteCount*8);
         }
 
+        public bool ReadBool()
+        {
+            var bytes = ReadBytes(1);
+            return ConvertBool(bytes);
+        }
+
+        public string ReadString(int maxLength)
+        {
+            var location = Location;
+            var stringLenght = Read4ByteNumber();
+            if (stringLenght > maxLength)
+            {
+                Log.Warning(
+                    "String at {location:X8} has length of {length} which is above the expected limit of {limit}",
+                    location, stringLenght, maxLength);
+            }
+            var bytes = ReadBytes(stringLenght);
+            return ConvertUtf8String(bytes);
+        }
+
         private bool[] ReadBitmask(int byteCount, int bitCount)
         {
             var bytes = ReadBytes(byteCount);
@@ -138,24 +161,12 @@ namespace H3Mapper
             return bitArray.OfType<bool>().Take(bitCount).ToArray();
         }
 
-        public bool ReadBool()
+        private void EnsureRange(long min, long max, long value, long location)
         {
-            var bytes = ReadBytes(1);
-            return ConvertBool(bytes);
-        }
-
-        public string ReadString()
-        {
-            var stringLenght = Read4ByteNumber();
-            if (stringLenght > 50000)
+            if (value < min || value > max)
             {
-                throw new ArgumentOutOfRangeException("",
-                    string.Format(
-                        "The string length of {0} looks a bit large. Perhaps something wrong with the file?",
-                        stringLenght));
+                Log.Warning("Value {value} at {location:X8} is out of range ({min} - {max})", value, location, min, max);
             }
-            var bytes = ReadBytes(stringLenght);
-            return ConvertUtf8String(bytes);
         }
 
         public T ReadEnum<T>() where T : struct

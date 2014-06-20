@@ -60,7 +60,7 @@ namespace H3Mapper.Flags
         oasis = 56,
         obelisk = 57,
         redwoodobservatory = 58,
-        oceanbottle = 59,
+        OceanBottle = 59,
         pillaroffire = 60,
         staraxis = 61,
         Prison = 62,

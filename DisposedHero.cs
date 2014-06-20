@@ -1,3 +1,5 @@
+using H3Mapper.Flags;
+
 namespace H3Mapper
 {
     public class DisposedHero
@@ -5,6 +7,6 @@ namespace H3Mapper
         public int HeroId { get; set; }
         public int PortraitId { get; set; }
         public string Name { get; set; }
-        public int Players { get; set; }
+        public Players Players { get; set; }
     }
 }
