@@ -5,21 +5,21 @@ namespace H3Mapper
 {
     public class IDMappings
     {
-        public IDMappings(IDictionary<int, string> heroes, IDictionary<int, string> spells, IDictionary<int, string> artifacts, IDictionary<int, string> monsters)
-        {
-            this.heroes = heroes;
-            this.spells = spells;
-            this.artifacts = artifacts;
-            this.monsters = monsters;
-        }
-
+        private readonly IDictionary<int, string> artifacts;
         private readonly IDictionary<int, string> heroes;
 
         private readonly IDictionary<int, string> monsters;
 
         private readonly IDictionary<int, string> spells;
 
-        private readonly IDictionary<int, string> artifacts;
+        public IDMappings(IDictionary<int, string> heroes, IDictionary<int, string> spells,
+            IDictionary<int, string> artifacts, IDictionary<int, string> monsters)
+        {
+            this.heroes = heroes;
+            this.spells = spells;
+            this.artifacts = artifacts;
+            this.monsters = monsters;
+        }
 
         public Identifier GetSpell(int spellId)
         {
@@ -62,7 +62,7 @@ namespace H3Mapper
             string value;
             if (mapping.TryGetValue(id, out value) == false)
             {
-                if (mapping.Count > 0)// to avoid spamming the logs
+                if (mapping.Count > 0) // to avoid spamming the logs
                 {
                     Log.Information("No name for {itemType} {value}", name, id);
                 }

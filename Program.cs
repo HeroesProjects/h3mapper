@@ -42,7 +42,7 @@ namespace H3Mapper
         {
             if (File.Exists(path))
             {
-                Process(mappings, path,skipOutput);
+                Process(mappings, path, skipOutput);
             }
             else
             {
@@ -50,7 +50,7 @@ namespace H3Mapper
                 {
                     foreach (var file in Directory.EnumerateFiles(path, "*.h3m"))
                     {
-                        Process(mappings, file,skipOutput);
+                        Process(mappings, file, skipOutput);
                     }
                 }
                 else

@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
 using H3Mapper.MapObjects;
@@ -237,7 +235,7 @@ namespace H3Mapper
             if (id != ObjectId.RandomDwellingFaction)
             {
                 var sameAsCastleId = s.Read4ByteNumberLong();
-                if (sameAsCastleId!=0)
+                if (sameAsCastleId != 0)
                 {
                     d.SameAsCastle = sameAsCastleId;
                 }
@@ -808,7 +806,7 @@ namespace H3Mapper
             for (var i = 0; i < count; i++)
             {
                 var o = new MapObjectTemplate();
-                o.AnimationFile = s.ReadString(255/* not really possible to verify buy they are all really short */);
+                o.AnimationFile = s.ReadString(255 /* not really possible to verify buy they are all really short */);
                 var blockMask = new bool[6];
                 var visitMask = new bool[6];
                 for (var j = 0; j < blockMask.Length; j++)
@@ -1046,7 +1044,7 @@ namespace H3Mapper
         {
             var bits = s.ReadBitmaskBits(28);
             var skills = new List<SecondarySkillType>();
-            for (int i = 0; i < bits.Length; i++)
+            for (var i = 0; i < bits.Length; i++)
             {
                 if (bits[i] == false)
                 {
@@ -1111,7 +1109,7 @@ namespace H3Mapper
             var byteCount = GetAllowedHeroesByteCount(format);
             var bitmask = s.ReadBitmask(byteCount);
             var allowedHeroes = new List<Identifier>(bitmask.Length);
-            for (int i = 0; i < bitmask.Length; i++)
+            for (var i = 0; i < bitmask.Length; i++)
             {
                 if (bitmask[i])
                 {
