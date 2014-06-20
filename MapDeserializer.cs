@@ -37,25 +37,13 @@ namespace H3Mapper
 
         private object Convert(byte[] raw, Type type)
         {
-            if (type == typeof (bool))
-            {
-                return ConvertBool(raw);
-            }
             if (type == typeof (int))
             {
                 return ConvertInt32(raw);
             }
-            if (type == typeof (uint))
-            {
-                return ConvertUInt32(raw);
-            }
             if (type == typeof (byte))
             {
                 return ConvertByte(raw);
-            }
-            if (type == typeof (short))
-            {
-                return ConvertInt16(raw);
             }
             if (type == typeof (ushort))
             {
@@ -74,12 +62,7 @@ namespace H3Mapper
             return BitConverter.ToUInt16(raw, 0);
         }
 
-        private object ConvertInt16(byte[] raw)
-        {
-            return BitConverter.ToInt16(raw, 0);
-        }
-
-        private string ConvertToString(byte[] raw)
+        private string ConvertUtf8String(byte[] raw)
         {
             return Encoding.UTF8.GetString(raw);
         }
@@ -172,7 +155,7 @@ namespace H3Mapper
                         stringLenght));
             }
             var bytes = ReadBytes(stringLenght);
-            return ConvertToString(bytes);
+            return ConvertUtf8String(bytes);
         }
 
         public T ReadEnum<T>() where T : struct
