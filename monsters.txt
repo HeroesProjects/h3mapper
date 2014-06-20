@@ -1,0 +1,170 @@
+0 : Pikeman
+1 : Halberdier
+2 : Archer
+3 : Marksman
+4 : Griffin
+5 : Royal Griffin
+6 : Swordsman
+7 : Crusader
+8 : Monk
+9 : Zealot
+10 : Cavalier
+11 : Champion
+12 : Angel
+13 : Archangel
+14 : Centaur
+15 : Centaur Captain
+16 : Dwarf
+17 : Battle Dwarf
+18 : Wood Elf
+19 : Grand Elf
+20 : Pegasus
+21 : Silver Pegasus
+22 : Dendroid Guard
+23 : Dendroid Soldier
+24 : Unicorn
+25 : War Unicorn
+26 : Green Dragon
+27 : Gold Dragon
+28 : Gremlin
+29 : Master Gremlin
+30 : Stone Gargoyle
+31 : Obsidian Gargoyle
+32 : Stone Golem
+33 : Iron Golem
+34 : Mage
+35 : Arch Mage
+36 : Genie
+37 : Master Genie
+38 : Naga
+39 : Naga Queen
+40 : Giant
+41 : Titan
+42 : Imp
+43 : Familiar
+44 : Gog
+45 : Magog
+46 : Hell Hound
+47 : Cerberus
+48 : Demon
+49 : Horned Demon
+50 : Pit Fiend
+51 : Pit Lord
+52 : Efreeti
+53 : Efreeti Sultan
+54 : Devil
+55 : Arch Devil
+56 : Skeleton
+57 : Skeleton Warrior
+58 : Walking Dead
+59 : Zombie
+60 : Wight
+61 : Wraith
+62 : Vampire
+63 : Vampire Lord
+64 : Lich
+65 : Power Lich
+66 : Black Knight
+67 : Dread Knight
+68 : Bone Dragon
+69 : Ghost Dragon
+70 : Troglodyte
+71 : Infernal Troglodyte
+72 : Harpy
+73 : Harpy Hag
+74 : Beholder
+75 : Evil Eye
+76 : Medusa
+77 : Medusa Queen
+78 : Minotaur
+79 : Minotaur King
+80 : Manticore
+81 : Scorpicore
+82 : Red Dragon
+83 : Black Dragon
+84 : Goblin
+85 : Hobgoblin
+86 : Wolf Rider
+87 : Wolf Raider
+88 : Orc
+89 : Orc Chieftain
+90 : Ogre
+91 : Ogre Mage
+92 : Roc
+93 : Thunderbird 
+94 : Cyclops
+95 : Cyclops King
+96 : Behemoth
+97 : Ancient Behemoth
+98 : Gnoll
+99 : Gnoll Marauder
+100 : Lizardman
+101 : Lizard Warrior
+102 : Serpent Fly
+103 : Dragon Fly
+104 : Basilisk
+105 : Greater Basilisk
+106 : Gorgon
+107 : Mighty Gorgon
+108 : Vyvern
+109 : Vyvern Monarch
+110 : Hydra
+111 : Chaos Hydra
+
+
+
+116 : Gold Golem
+117 : Diamond Golem
+118 : Pixie
+119 : Sprite
+120 : Air Elemental
+121 : Storm Elemental
+122 : Water Elemental
+123 : Ice Elemental
+124 : Fire Elemental
+125 : Energy Elemental
+126 : Earth Elemental
+127 : Magma Elemental
+128 : Psychic Elemental
+129 : Magic Elemental
+130 : Firebird
+131 : Phoenix
+132 : Azure Dragon
+133 : Crystal Dragon
+134 : Fearie Dragon
+135 : Rust Dragon
+136 : Enchanter
+137 : Sharpshooter
+138 : Halfling
+139 : Peasant
+140 : Boar
+141 : Mummy
+142 : Nomad
+143 : Rogue
+144 : Troll
+145 :
+146 : 
+147 : 
+148 : 
+149 : 
+150 : 
+151 : Sea Dog
+152 : 
+153 : Nymph
+154 : Oceanid
+155 : Crew Mate
+156 : Seaman
+157 : Pirate
+158 : Corsair
+159 : Stormbird
+160 : Ayssid
+161 : Sea Witch
+162 : Sorceress
+163 : Nix
+164 : Nix Warrior
+165 : Sea Serpent
+166 : Haspid
+
+
+
+
