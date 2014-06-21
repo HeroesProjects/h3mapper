@@ -63,10 +63,10 @@ namespace H3Mapper
         private static IDMappings ConfigureMappings()
         {
             return new IDMappings(
-                heroes: ReadIdMap("heroes.txt"),
-                spells: ReadIdMap("spells.txt"),
-                artifacts: ReadIdMap("artifacts.txt"),
-                monsters: ReadIdMap("monsters.txt"));
+                heroes: ReadIdMap("data\\heroes.txt"),
+                spells: ReadIdMap("data\\spells.txt"),
+                artifacts: ReadIdMap("data\\artifacts.txt"),
+                monsters: ReadIdMap("data\\monsters.txt"));
         }
 
         private static void ConfigureLogging()
