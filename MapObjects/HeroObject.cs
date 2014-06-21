@@ -15,7 +15,7 @@ namespace H3Mapper.MapObjects
         public MapMonster[] Army { get; set; }
         public Formation ArmyFormationType { get; set; }
         public HeroArtifact[] Inventory { get; set; }
-        public int? PatrolRadius { get; set; }
+        public PatrolRadius PatrolRadius { get; set; }
         public string Bio { get; set; }
         public HeroSex Sex { get; set; }
         public Identifier[] Identifiers { get; set; }

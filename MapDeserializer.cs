@@ -87,12 +87,15 @@ namespace H3Mapper
             return raw[0];
         }
 
-        public int Read1ByteNumber(int minValue = 0, int maxValue = byte.MaxValue)
+        public int Read1ByteNumber(int minValue = 0, int maxValue = byte.MaxValue, bool allowEmpty = false)
         {
             var location = Location;
             var bytes = ReadBytes(1);
             var value = ConvertByte(bytes);
-            EnsureRange(minValue, maxValue, value, location);
+            if (allowEmpty == false || value != byte.MaxValue)
+            {
+                EnsureRange(minValue, maxValue, value, location);
+            }
             return value;
         }
 
