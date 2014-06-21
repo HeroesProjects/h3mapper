@@ -55,6 +55,8 @@ namespace H3Mapper
                     player.TeamId = s.Read1ByteNumber(maxValue: teamCount - 1);
                 }
             }
+
+
             map.AllowedHeroes = ReadAllowedHeroes(s, info.Format);
             map.DisposedHeroes = ReadDisposedHeroes(s, info.Format);
             s.Skip(31);

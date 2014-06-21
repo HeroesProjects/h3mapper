@@ -65,7 +65,7 @@
 64 : Straker
 65 : Vokial
 66 : Moandor
-77 : Charna
+67 : Charna
 68 : Tamika
 69 : Isra
 70 : Clavius
@@ -165,7 +165,7 @@
 164 : Casmatra
 165 : Eovacius
 166 : Spint
-177 : Andal
+167 : Andal
 168 : Manfred
 169 : Zilare
 170 : Astra

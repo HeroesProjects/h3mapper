@@ -20,6 +20,7 @@ namespace H3Mapper
                 ShowHelp();
                 return -1;
             }
+            var result = 0;
             try
             {
                 ConfigureLogging();
@@ -32,10 +33,11 @@ namespace H3Mapper
             catch (Exception e)
             {
                 Log.Error(e, "Error processing the file(s)");
+                result = e.HResult;
             }
             Console.Write("Press any key to close");
             Console.ReadKey(true);
-            return 0;
+            return result;
         }
 
         private static void Run(string path, IDMappings mappings, bool skipOutput)
@@ -126,7 +128,14 @@ namespace H3Mapper
                     throw new Exception("Invalid line '" + line + "' in " + mapFile + ". " + idRaw +
                                         " is not a recognizable number.");
                 }
-                map[id] = name.Trim();
+                try
+                {
+                    map.Add(id, name.Trim());
+                }
+                catch (ArgumentException e)
+                {
+                    throw new Exception("Invalid line '" + line + "' in " + mapFile + ". Item with the same Id already exists.", e);
+                }
             }
             return map;
         }
