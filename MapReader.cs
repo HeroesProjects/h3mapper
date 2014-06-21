@@ -1166,7 +1166,7 @@ namespace H3Mapper
                         lc.Position = ReadPosition(s, mapSize);
                         break;
                     case LossConditionType.TimeExpires:
-                        lc.Value = s.Read2ByteNumber();
+                        lc.Value = s.Read2ByteNumber(minValue: 2, maxValue: 7*4*12);
                         break;
                 }
             }
@@ -1184,14 +1184,14 @@ namespace H3Mapper
                 switch (type)
                 {
                     case VictoryConditionType.Artifact:
-                        vc.ObjectType = s.Read1ByteNumber();
+                        vc.Identifier = ids.GetArtifact(s.Read1ByteNumber());
                         if (info.Format > MapFormat.RoE)
                         {
                             s.Skip(1);
                         }
                         break;
                     case VictoryConditionType.GatherTroop:
-                        vc.ObjectType = s.Read1ByteNumber();
+                        vc.Identifier = ids.GetMonster(s.Read1ByteNumber());
                         if (info.Format > MapFormat.RoE)
                         {
                             s.Skip(1);
@@ -1199,7 +1199,7 @@ namespace H3Mapper
                         vc.Value = s.Read4ByteNumber(minValue: 1, maxValue: 99999);
                         break;
                     case VictoryConditionType.GatherResource:
-                        vc.ObjectType = s.Read1ByteNumber();
+                        vc.Resource = s.ReadEnum<Resource>();
                         vc.Value = s.Read4ByteNumber(minValue: 1, maxValue: 9999999);
                         break;
                     case VictoryConditionType.BuildCity:
@@ -1220,7 +1220,7 @@ namespace H3Mapper
                         vc.Position = ReadPosition(s, info.Size);
                         break;
                     case VictoryConditionType.TransportItem:
-                        vc.ObjectType = s.Read1ByteNumber();
+                        vc.Identifier = ids.GetArtifact(s.Read1ByteNumber());
                         vc.Position = ReadPosition(s, info.Size);
                         break;
                     case VictoryConditionType.TakeDwellings:
