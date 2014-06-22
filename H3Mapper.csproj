@@ -88,10 +88,12 @@
     <Compile Include="Flags\VictoryConditionType.cs" />
     <Compile Include="Internal\CollectionExtensions.cs" />
     <Compile Include="Internal\CountingStream.cs" />
+    <Compile Include="MapHero.cs" />
+    <Compile Include="MapHeroes.cs" />
     <Compile Include="MapInfo.cs" />
     <Compile Include="MapObjectTemplate.cs" />
     <Compile Include="Flags\Difficulty.cs" />
-    <Compile Include="DisposedHero.cs" />
+    <Compile Include="HeroCustomisations.cs" />
     <Compile Include="Flags\Disposition.cs" />
     <Compile Include="Flags\BuildingLevel.cs" />
     <Compile Include="Flags\Formation.cs" />
@@ -123,8 +125,6 @@
     <Compile Include="LossCondition.cs" />
     <Compile Include="MapDeserializer.cs" />
     <Compile Include="H3Map.cs" />
-    <Compile Include="MapAllowedHeroes.cs" />
-    <Compile Include="MapHeroDefinition.cs" />
     <Compile Include="MapPlayer.cs" />
     <Compile Include="MapPosition.cs" />
     <Compile Include="MapReader.cs" />
