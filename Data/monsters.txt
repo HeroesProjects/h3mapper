@@ -110,9 +110,10 @@
 109 : Vyvern Monarch
 110 : Hydra
 111 : Chaos Hydra
-
-
-
+112 : Air Elemental
+113 : Earth Elemental
+114 : Fire Elemental
+115 : Water Elemental
 116 : Gold Golem
 117 : Diamond Golem
 118 : Pixie
