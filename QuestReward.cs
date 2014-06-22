@@ -5,7 +5,7 @@ namespace H3Mapper
     public class QuestReward
     {
         public RewardType Type { get; set; }
-        public long Value { get; set; }
+        public int Value { get; set; }
         public Resource Resource { get; set; }
         public PrimarySkillType SkillType { get; set; }
         public Identifier Artifact { get; set; }

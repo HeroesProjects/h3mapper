@@ -481,8 +481,10 @@ namespace H3Mapper
                 case RewardType.None:
                     break;
                 case RewardType.Experience:
+                    r.Value = s.Read4ByteNumber(1, 99999999);
+                    break;
                 case RewardType.SpellPoints:
-                    r.Value = s.Read4ByteNumberLong();
+                    r.Value = s.Read4ByteNumber(1, 999);
                     break;
                 case RewardType.Morale:
                 case RewardType.Luck:
@@ -490,8 +492,7 @@ namespace H3Mapper
                     break;
                 case RewardType.Resource:
                     r.Resource = s.ReadEnum<Resource>();
-                    r.Value = s.Read2ByteNumber();
-                    s.Skip(2);
+                    r.Value = s.Read4ByteNumber(1, 99999);
                     break;
                 case RewardType.PrimarySkill:
                     r.SkillType = s.ReadEnum<PrimarySkillType>();
@@ -513,7 +514,7 @@ namespace H3Mapper
                     break;
                 case RewardType.Creatures:
                     r.Monster = ids.GetMonster(ReadVersionDependantId(s, format).Value);
-                    r.Value = s.Read2ByteNumber();
+                    r.Value = s.Read2ByteNumber(1, 9999);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("Unknown reward type: " + r.Type);
