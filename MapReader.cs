@@ -29,6 +29,8 @@ namespace H3Mapper
                     "This is a {format} map. This version is not fully supported yet, some information may be wrong.",
                     info.Format);
             }
+
+            ids.SetCurrentVersion(IsHota(info.Format) ? MapFormat.HotA : info.Format);
             if (IsHota(info.Format))
             {
                 s.Skip(4);
@@ -693,7 +695,8 @@ namespace H3Mapper
             else if (format == MapFormat.AB)
             {
                 var spellId = s.Read1ByteNumber();
-                if (spellId != byte.MaxValue)
+                if (spellId != byte.MaxValue && // no spell
+                    spellId != (byte.MaxValue - 1)) // has 'default'? spell
                 {
                     h.Identifiers = new[]
                     {

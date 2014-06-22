@@ -167,5 +167,18 @@
 166 : Haspid
 
 
-
-
+// random monsters. This doesn't apply to RoE which doesn't have that capability
+65534 : Creature 1
+65533 : Creature 1 Upgrade
+65532 : Creature 2
+65531 : Creature 2 Upgrade
+65530 : Creature 3
+65529 : Creature 3 Upgrade
+65528 : Creature 4
+65527 : Creature 4 Upgrade
+65526 : Creature 5
+65525 : Creature 5 Upgrade
+65524 : Creature 6
+65523 : Creature 6 Upgrade
+65522 : Creature 7
+65521 : Creature 7 Upgrade

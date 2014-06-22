@@ -65,6 +65,6 @@
 64 : Remove Obstacle
 65 : Clone
 66 : Fire Elemental
-77 : Earth Elemental
+67 : Earth Elemental
 68 : Water Elemental
 69 : Air Elemental

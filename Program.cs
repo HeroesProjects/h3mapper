@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using H3Mapper.Flags;
 using H3Mapper.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -103,14 +104,36 @@ namespace H3Mapper
             }
         }
 
-        private static IDictionary<int, string> ReadIdMap(string mapFile)
+        private static IDMappings.IdMap ReadIdMap(string mapFile)
         {
-            var map = new Dictionary<int, string>();
+            var @default = new Dictionary<int, string>();
+            var map = new IDMappings.IdMap(@default);
             if (!File.Exists(mapFile))
             {
                 Log.Information("ID mapping file {file} doesn't exist. Skipping.", mapFile);
                 return map;
             }
+            foreach (var format in new[] {MapFormat.RoE, MapFormat.AB, MapFormat.SoD, MapFormat.HotA, MapFormat.WoG,})
+            {
+                var file = Path.ChangeExtension(mapFile, format + ".txt");
+                if (File.Exists(file))
+                {
+                    var values = new Dictionary<int, string>();
+                    ReadFileValues(file, values);
+                    map.AddFormatMapping(format, values);
+                }
+                else
+                {
+                    Log.Debug("ID mapping file {file} doesn't exist. Skipping.", file);
+                }
+            }
+            ReadFileValues(mapFile, @default);
+            return map;
+        }
+
+        private static void ReadFileValues(string mapFile, Dictionary<int, string> map)
+        {
+            Log.Debug("Reading mapping file {file}", mapFile);
             var lines = File.ReadAllLines(mapFile);
             foreach (var line in lines)
             {
@@ -134,10 +157,10 @@ namespace H3Mapper
                 }
                 catch (ArgumentException e)
                 {
-                    throw new Exception("Invalid line '" + line + "' in " + mapFile + ". Item with the same Id already exists.", e);
+                    throw new Exception(
+                        "Invalid line '" + line + "' in " + mapFile + ". Item with the same Id already exists.", e);
                 }
             }
-            return map;
         }
 
         private static void ShowHelp()
