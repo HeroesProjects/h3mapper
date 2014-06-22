@@ -1122,8 +1122,8 @@ namespace H3Mapper
 
         private void ReadAllowedHeroes(MapDeserializer s, MapHeroes heroes, MapFormat format)
         {
-            var byteCount = GetAllowedHeroesByteCount(format);
-            var bitmask = s.ReadBitmask(byteCount);
+            var bitCount = GetAllowedHeroesCount(s, format);
+            var bitmask = s.ReadBitmaskBits(bitCount);
             for (var i = 0; i < bitmask.Length; i++)
             {
                 if (bitmask[i])
@@ -1131,7 +1131,7 @@ namespace H3Mapper
                     heroes.AddHero(ids.GetHero(i));
                 }
             }
-            if (format > MapFormat.RoE && IsHota(format) == false)
+            if (format > MapFormat.RoE)
             {
                 var placeholderCount = s.Read4ByteNumber();
                 if (placeholderCount > 0)
@@ -1145,14 +1145,14 @@ namespace H3Mapper
             }
         }
 
-        private static int GetAllowedHeroesByteCount(MapFormat format)
+        private static int GetAllowedHeroesCount(MapDeserializer mapDeserializer, MapFormat format)
         {
             if (IsHota(format))
             {
-                return 31;
+                return mapDeserializer.Read4ByteNumber(minValue:0);
             }
             var byteCount = format == MapFormat.RoE ? 16 : 20;
-            return byteCount;
+            return byteCount*8;
         }
 
         private LossCondition ReadLossCondition(MapDeserializer s, int mapSize)
