@@ -1093,7 +1093,7 @@ namespace H3Mapper
                 return s.ReadBitmaskBits(count);
             }
 
-            return s.ReadBitmask(format == MapFormat.AB ? 17 : 18);
+            return s.ReadBitmaskBits(format == MapFormat.AB ? 129 : 144);
         }
 
 

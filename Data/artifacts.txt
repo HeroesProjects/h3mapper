@@ -140,6 +140,9 @@
 138 : Wizard's Well
 139 : Ring of the Magi
 140 : Cornucopia
+141 : Diplomat's Suit
+142 : Mired in Neutrality
+143 : Ironfist of the Ogre
 
 
 
