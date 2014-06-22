@@ -6,6 +6,8 @@ namespace H3Mapper
 {
     public class IDMappings
     {
+        private string emptyValue = "--";
+
         private readonly IdMap artifacts;
         private readonly IdMap heroes;
 
@@ -62,13 +64,17 @@ namespace H3Mapper
         {
             if (mapping.IsEmpty) // to avoid spamming the logs
                 return null;
-
+             
             string value;
             if (mapping.TryGetValue(id, out value) == false)
             {
                 Log.Information("No name for {itemType} {value}", name, id);
             }
-            return value;
+            if (value != emptyValue)
+            {
+                return value;
+            }
+            return null;
         }
 
         public void SetCurrentVersion(MapFormat format)

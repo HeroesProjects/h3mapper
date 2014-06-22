@@ -1,7 +1,9 @@
 141 : Diplomat's Cloak
 142 : Pendant of Reflection
 
-
+// those two slots are unused
+144 : --
+145 : --
 
 146 : Cannon
 147 : Trident of Domination
