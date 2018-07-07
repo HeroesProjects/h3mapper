@@ -1,0 +1,84 @@
+141 : Diplomat's Cloak
+142 : Pendant of Reflection
+
+// those two slots are unused
+144 : --
+145 : --
+
+146 : Cannon
+147 : Trident of Domination
+148 : Shield of Naval Glory
+149 : Crown of the Five Seas
+150 : Royal Armor of Nix
+151 : Wayfarer's Boots
+152 : Runes of Imminency
+153 : Demon's Horseshoe
+154 : Shaman's Puppet
+155 : Ring of Suppression
+156 : Hideous Mask
+157 : Pendant of Downfall
+158 : Ring of Oblivion
+159 : Cape of Silence
+160 : Golden Goose
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,222 @@
+// id : Name
+0 : Spell Book
+1 : Spell Scroll
+2 : Grail
+3 : Catapult
+4 : Ballista
+5 : Ammo Cart
+6 : First Aid Tent
+7 : Centaur's Axe
+8 : Blackshard of the Dead Knight
+9 : Greater Gnoll's Flail
+10 : Ogre's Club of Havoc
+11 : Sword of Hellfire
+12 : Titan's Gladius
+13 : Shield of the Dwarven Lords
+14 : Shield of the Yawning Dead
+15 : Buckler of the Gnoll King
+16 : Targ of the Rampaging Ogre
+17 : Shield of the Damned
+18 : Sentinel's Shield
+19 : Helm of the Alabaster Unicorn
+20 : Skull Helmet
+21 : Helm of Chaos
+22 : Crown of the Supreme Magi
+23 : Hellstorm Helmet
+24 : Thunder Helmet
+25 : Breastplate of Petrified Wood
+26 : Rib Cage
+27 : Scales of the Greater Basilisk
+28 : Tunic of the Cyclops King
+29 : Breastplate of Brimstone
+30 : Titan's Cuirass
+31 : Armor of Wonder
+32 : Sandals of the Saint
+33 : Celestial Necklase of Bliss
+34 : Lion's Shield of Courage
+35 : Sword of Judgement
+36 : Helm of Heavenly Enlightenment
+37 : Quiet Eye of the Dragon
+38 : Red Dragon Flame Tongue
+39 : Dragon Scale Shield
+40 : Dragon Scale Armor
+41 : Dragonbone Greaves
+42 : Dragon Wing Tabard
+43 : Necklace of Dragonteeth
+44 : Crown of Dragontooth
+45 : Still Eye of the Dragon
+46 : Clover of Fortune
+47 : Cards of Prophecy
+48 : Ladybird of Luck
+49 : Badge of Courage
+50 : Crest of Valor
+51 : Glyph of Gallantry
+52 : Speculum
+53 : Spyglass
+54 : Amulet of the Undertaker
+55 : Vampire's Cowl
+56 : Dead Man's Boots
+57 : Garniture of Interference
+58 : Surcoat of Counterpoise
+59 : Boots of Polarity
+60 : Bow of Elfen Cherrywood
+61 : Bowstring of the Unicorn's Mane
+62 : Angel Feather Arrows
+63 : Bird of Perception
+64 : Stoic Watchman
+65 : Emblem of Cognizance
+66 : Statesman's Medal
+67 : Diplomat's Ring
+68 : Ambassador's Sash
+69 : Ring of the Wayfarer
+70 : Equestrian's Gloves
+71 : Necklace of Ocean Guidance
+72 : Angel Wings
+73 : Charm of Mana
+74 : Talisman of Mana
+75 : Mystic Orb of Mana
+76 : Collar of Conjuring
+77 : Ring of Conjuring
+78 : Cape of Conjuring
+79 : Orb of Firmament 
+80 : Orb of Silt
+81 : Orb of Tempestuous Fire
+82 : Orb of Driving Rain
+83 : Recanter's Cloak
+84 : Spirit of Oppression
+85 : Hourglass of the Evil Hour
+86 : Tome of Fire Magic
+87 : Tome of Air Magic
+88 : Tome of Water Magic
+89 : Tome of Earth Magic
+90 : Boots of Levitation
+91 : Golden Bow
+92 : Sphere of Permamence
+93 : Orb of Vulnerability 
+94 : Ring of Vitality
+95 : Ring of Life
+96 : Vial of Lifeblood
+97 : Necklace of Swiftness
+98 : Boots of Speed
+99 : Cape of Velocity
+100 : Pendant of Dispassion
+101 : Pendant of Second Sight
+102 : Pendant of Holiness
+103 : Pendant of Life
+104 : Pendant of Death
+105 : Pendant of Free Will
+106 : Pendant of Negativity
+107 : Pendant of Total Recall
+108 : Pendant of Courage
+109 : Everflowing Crystal Cloak
+110 : Ring of Infinite Gems
+111 : Everpouring Vial of Mercury
+112 : Inexhaustible Cart of Ore
+113 : Eversmoking Ring of Sulphur
+114 : Inexhaustible Cart of Lumber
+115 : Endless Sack of Gold
+116 : Endless Bag of Gold
+117 : Endless Purse of Gold
+118 : Legs of Legion
+119 : Loins of Legion
+120 : Torso of Legion
+121 : Arms of Legion
+122 : Head of Legion
+123 : Sea Captain's Hat
+124 : Spellbinder's Hat
+125 : Shackles of War
+126 : Orb of Inhibition
+127 : Vial of Dragon Blood
+128 : Armageddon's Blade
+129 : Angelic Alliance
+130 : Cloak of the Undead King
+131 : Elixir of Life
+132 : Armor of the Damned
+133 : Statue of Legion
+134 : Power of the Dragon Father
+135 : Titan's Thunder
+136 : Admiral's Hat
+137 : Bow of the Sharpshooter
+138 : Wizard's Well
+139 : Ring of the Magi
+140 : Cornucopia
+141 : Diplomat's Suit
+142 : Mired in Neutrality
+143 : Ironfist of the Ogre
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

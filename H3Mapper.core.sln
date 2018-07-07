@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H3Mapper", "H3Mapper\H3Mapper.csproj", "{6529775A-EFB2-45AE-B821-B96E6F7C3154}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H3Mapper.console", "H3Mapper.console\H3Mapper.console.csproj", "{171B76AB-CC32-4259-9D21-1B817BA349CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6529775A-EFB2-45AE-B821-B96E6F7C3154}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6529775A-EFB2-45AE-B821-B96E6F7C3154}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6529775A-EFB2-45AE-B821-B96E6F7C3154}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6529775A-EFB2-45AE-B821-B96E6F7C3154}.Release|Any CPU.Build.0 = Release|Any CPU
+		{171B76AB-CC32-4259-9D21-1B817BA349CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{171B76AB-CC32-4259-9D21-1B817BA349CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{171B76AB-CC32-4259-9D21-1B817BA349CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{171B76AB-CC32-4259-9D21-1B817BA349CB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

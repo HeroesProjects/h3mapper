@@ -1,0 +1,34 @@
+namespace H3Mapper.Flags
+{
+    public enum SecondarySkillType : byte
+    {
+        Pathfinding,
+        Archery,
+        Logistics,
+        Scouting,
+        Diplomacy,
+        Navigation,
+        Leadership,
+        Wisdom,
+        Mysticism,
+        Luck,
+        Ballistics,
+        EagleEye,
+        Necromancy,
+        Estates,
+        FireMagic,
+        AirMagic,
+        WaterMagic,
+        EarthMagic,
+        Scholar,
+        Tactics,
+        Artillery,
+        Learning,
+        Offence,
+        Armorer,
+        Intelligence,
+        Sorcery,
+        Resistance,
+        FirstAid
+    }
+}
