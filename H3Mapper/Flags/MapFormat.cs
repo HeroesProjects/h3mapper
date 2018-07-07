@@ -2,7 +2,6 @@ namespace H3Mapper.Flags
 {
     public enum MapFormat
     {
-        Empty = 0,
         RoE = 0x0e, // 14
         AB = 0x15, // 21
         SoD = 0x1c, // 28

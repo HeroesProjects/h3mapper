@@ -25,7 +25,7 @@ namespace H3Mapper
             var result = 0;
             try
             {
-                ConfigureLogging();
+                ConfigureLogging(args.Contains("-d"));
 
                 var path = args[0];
 
@@ -68,14 +68,19 @@ namespace H3Mapper
                 ReadIdMap(Path.Combine("data", "monsters.txt")));
         }
 
-        private static void ConfigureLogging()
+        private static void ConfigureLogging(bool forceDebug)
         {
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.ColoredConsole()
+            var configuration = new LoggerConfiguration()
+                .WriteTo.ColoredConsole();
 #if DEBUG
-                .MinimumLevel.Debug()
+            configuration.MinimumLevel.Debug();
+#else
+            if (forceDebug)
+            {
+                configuration.MinimumLevel.Debug();
+            }
 #endif
-                .CreateLogger();
+            Log.Logger = configuration.CreateLogger();
         }
 
         private static void Process(IdMappings idMappings, string mapFilePath, bool skipOutput)
@@ -84,19 +89,21 @@ namespace H3Mapper
             using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
             {
                 var reader = new MapReader(idMappings);
-                var mapHeader = reader.Read(new MapDeserializer(new CountingStream(mapFile)));
+                var mapHeader = reader.Read(new MapDeserializer(new PositionTrackingStream(mapFile)));
                 Console.WriteLine("Successfully processed.");
-                if (!skipOutput)
+                if (skipOutput)
                 {
-                    var output = Path.ChangeExtension(mapFilePath, ".json");
-                    var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
-                        new JsonSerializerSettings
-                        {
-                            Converters = {new StringEnumConverter()}
-                        });
-                    File.WriteAllText(output, json);
-                    Console.WriteLine("Output saved as " + output);
+                    Log.Debug("Skipping writing output file.");
+                    return;
                 }
+                var output = Path.ChangeExtension(mapFilePath, ".json");
+                var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
+                    new JsonSerializerSettings
+                    {
+                        Converters = {new StringEnumConverter()}
+                    });
+                File.WriteAllText(output, json);
+                Console.WriteLine($"Output saved as {output}");
             }
         }
 
@@ -112,7 +119,7 @@ namespace H3Mapper
 
             foreach (var format in new[] {MapFormat.RoE, MapFormat.AB, MapFormat.SoD, MapFormat.HotA, MapFormat.WoG})
             {
-                var file = Path.ChangeExtension(mapFile, format + ".txt");
+                var file = Path.ChangeExtension(mapFile, $"{format}.txt");
                 if (File.Exists(file))
                 {
                     var values = new Dictionary<int, string>();
@@ -131,37 +138,25 @@ namespace H3Mapper
 
         private static void ReadFileValues(string mapFile, Dictionary<int, string> map)
         {
-            Log.Debug("Reading mapping file {file}", mapFile);
-            var lines = File.ReadAllLines(mapFile);
-            foreach (var line in lines)
+            var parser = new DataFileParser();
+            foreach (var idToValue in parser.Parse(mapFile))
             {
-                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//")) continue;
-                var splitLine = line.Split(':');
-                if (splitLine.Length != 2) throw new Exception("Invalid line '" + line + "' in " + mapFile);
-
-                var idRaw = splitLine[0];
-                var name = splitLine[1];
-                int id;
-                if (int.TryParse(idRaw.Trim(), out id) == false)
-                    throw new Exception("Invalid line '" + line + "' in " + mapFile + ". " + idRaw +
-                                        " is not a recognizable number.");
-
                 try
                 {
-                    map.Add(id, name.Trim());
+                    map.Add(idToValue.Key, idToValue.Value);
                 }
                 catch (ArgumentException e)
                 {
                     throw new Exception(
-                        "Invalid line '" + line + "' in " + mapFile + ". Item with the same Id already exists.", e);
+                        $"Invalid item \'{idToValue}\' in {mapFile}. Item with the same Id already exists.",
+                        e);
                 }
             }
         }
 
         private static void ShowHelp()
         {
-            Console.WriteLine("No map file specified. Call as " + Assembly.GetEntryAssembly().GetName().Name +
-                              " map.h3m");
+            Console.WriteLine($"No map file specified. Call as {Assembly.GetEntryAssembly().GetName().Name} map.h3m");
         }
     }
 }

@@ -14,8 +14,7 @@ namespace H3Mapper
 
         public MapHero GetHero(Identifier heroId)
         {
-            MapHero hero;
-            if (heroes.TryGetValue(heroId, out hero) == false)
+            if (heroes.TryGetValue(heroId, out var hero) == false)
             {
                 hero = new MapHero{Id = heroId};
                 heroes.Add(heroId, hero);

@@ -64,9 +64,8 @@ namespace H3Mapper
         {
             if (mapping.IsEmpty) // to avoid spamming the logs
                 return null;
-             
-            string value;
-            if (mapping.TryGetValue(id, out value) == false)
+
+            if (mapping.TryGetValue(id, out var value) == false)
             {
                 Log.Information("No name for {itemType} {value}", name, id);
             }
@@ -119,8 +118,7 @@ namespace H3Mapper
 
             public void SetCurrentSpecific(MapFormat format)
             {
-                IDictionary<int, string> current;
-                if (specific != null && specific.TryGetValue(format, out current))
+                if (specific != null && specific.TryGetValue(format, out var current))
                 {
                     specificCurrent = current;
                 }

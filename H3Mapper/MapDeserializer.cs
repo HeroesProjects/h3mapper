@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using H3Mapper.Internal;
 using Serilog;
 
 namespace H3Mapper
@@ -18,15 +19,9 @@ namespace H3Mapper
             map = mapFile;
         }
 
-        public string LocationHex
-        {
-            get { return map.Position.ToString("X8"); }
-        }
+        public string LocationHex => Location.ToString("X8");
 
-        public long Location
-        {
-            get { return map.Position; }
-        }
+        public long Location => map.Position;
 
         private byte[] ReadBytes(int byteCount)
         {
@@ -37,18 +32,21 @@ namespace H3Mapper
 
         private object Convert(byte[] raw, Type type)
         {
-            if (type == typeof (int))
+            if (type == typeof(int))
             {
                 return ConvertInt32(raw);
             }
-            if (type == typeof (byte))
+
+            if (type == typeof(byte))
             {
                 return ConvertByte(raw);
             }
-            if (type == typeof (ushort))
+
+            if (type == typeof(ushort))
             {
                 return ConvertUInt16(raw);
             }
+
             throw new NotSupportedException();
         }
 
@@ -96,6 +94,7 @@ namespace H3Mapper
             {
                 EnsureRange(minValue, maxValue, value, location);
             }
+
             return value;
         }
 
@@ -128,13 +127,13 @@ namespace H3Mapper
 
         public bool[] ReadBitmaskBits(int bitCount)
         {
-            var byteCount = (int) Math.Ceiling((bitCount/(decimal) 8));
+            var byteCount = (int) Math.Ceiling((bitCount / (decimal) 8));
             return ReadBitmask(byteCount, bitCount);
         }
 
         public bool[] ReadBitmask(int byteCount)
         {
-            return ReadBitmask(byteCount, byteCount*8);
+            return ReadBitmask(byteCount, byteCount * 8);
         }
 
         public bool ReadBool()
@@ -153,6 +152,7 @@ namespace H3Mapper
                     "String at {location:X8} has length of {length} which is above the expected limit of {limit}",
                     location, stringLenght, maxLength);
             }
+
             var bytes = ReadBytes(stringLenght);
             return ConvertUtf8String(bytes);
         }
@@ -168,13 +168,14 @@ namespace H3Mapper
         {
             if (value < min || value > max)
             {
-                Log.Warning("Value {value} at {location:X8} is out of range ({min} - {max})", value, location, min, max);
+                Log.Warning("Value {value} at {location:X8} is out of range ({min} - {max})", value, location, min,
+                    max);
             }
         }
 
         public T ReadEnum<T>() where T : struct
         {
-            var type = typeof (T);
+            var type = typeof(T);
             Debug.Assert(type.IsEnum);
             var underlyingType = type.GetEnumUnderlyingType();
             var location = Location;
@@ -186,28 +187,30 @@ namespace H3Mapper
             {
                 Log.Debug("Unrecognised value for {type}: {value} at {location:X8}", type, rawValue, location);
             }
+
             return (T) rawValue;
         }
 
         private int SizeOf(Type type)
         {
-            if (type == typeof (bool))
+            if (type == typeof(bool))
             {
                 return 1;
             }
+
             if (type.IsPrimitive)
             {
                 return Marshal.SizeOf(type);
             }
+
             throw new NotSupportedException();
         }
 
         public void Skip(int byteCount)
         {
-            var garbage = new byte[byteCount];
             var location = Location;
-            map.Read(garbage, 0, garbage.Length);
-            if (!garbage.All(b => b == 0))
+            var garbage = map.ReadBuffer(byteCount);
+            if (garbage.Any(b => b != 0))
             {
                 Log.Debug(
                     "Skipped {count} bytes at {location:X8}, but not all of them are empty. Bytes: {bytes}",

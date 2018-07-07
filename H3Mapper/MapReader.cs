@@ -517,7 +517,7 @@ namespace H3Mapper
                     r.Value = s.Read2ByteNumber(1, 9999);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("Unknown reward type: " + r.Type);
+                    throw new ArgumentOutOfRangeException($"Unknown reward type: {r.Type}");
             }
             return r;
         }
@@ -576,7 +576,7 @@ namespace H3Mapper
                     q.PlayerId = s.ReadEnum<Player>();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("Unknkown quest type " + q.Type);
+                    throw new ArgumentOutOfRangeException($"Unknkown quest type {q.Type}");
             }
             var deadline = s.Read4ByteNumberLong();
             if (deadline != uint.MaxValue)
@@ -818,7 +818,7 @@ namespace H3Mapper
             }
             if (count > 10000)
             {
-                throw new ArgumentOutOfRangeException("Count " + count + " looks wrong. Probably there is a bug here.");
+                throw new ArgumentOutOfRangeException($"Count {count} looks wrong. Probably there is a bug here.");
             }
             var co = new MapObjectTemplate[count];
             for (var i = 0; i < count; i++)

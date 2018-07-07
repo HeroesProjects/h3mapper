@@ -13,18 +13,12 @@ namespace H3Mapper
             GenerateHeroAtMainTown = true;
         }
 
-        public IEnumerable<HeroInfo> Heroes
-        {
-            get { return heroInfos.AsEnumerable(); }
-        }
+        public IEnumerable<HeroInfo> Heroes => heroInfos.AsEnumerable();
 
         public bool CanHumanPlay { get; set; }
         public bool CanAIPlay { get; set; }
 
-        public bool Disabled
-        {
-            get { return CanAIPlay == false && CanHumanPlay == false; }
-        }
+        public bool Disabled => CanAIPlay == false && CanHumanPlay == false;
 
         public AITactic AITactic { get; set; }
         public int P7 { get; set; }

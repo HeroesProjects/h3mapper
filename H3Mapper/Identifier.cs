@@ -6,6 +6,16 @@ namespace H3Mapper
     [DebuggerDisplay("{Value} {Name}")]
     public class Identifier
     {
+        public int Value { get; set; }
+        public string Name { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1}", Value, Name);
+        }
+
+        public static IEqualityComparer<Identifier> ValueComparer { get; } = new ValueEqualityComparer();
+        
         private sealed class ValueEqualityComparer : IEqualityComparer<Identifier>
         {
             public bool Equals(Identifier x, Identifier y)
@@ -21,21 +31,6 @@ namespace H3Mapper
             {
                 return obj.Value;
             }
-        }
-
-        private static readonly IEqualityComparer<Identifier> ValueComparerInstance = new ValueEqualityComparer();
-
-        public static IEqualityComparer<Identifier> ValueComparer
-        {
-            get { return ValueComparerInstance; }
-        }
-
-        public int Value { get; set; }
-        public string Name { get; set; }
-
-        public override string ToString()
-        {
-            return string.Format("{0} {1}", Value, Name);
         }
     }
 }
