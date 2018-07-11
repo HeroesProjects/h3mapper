@@ -291,7 +291,7 @@ namespace H3Mapper
         private GrailObject ReadGrail(MapDeserializer s)
         {
             var g = new GrailObject();
-            g.Radius = s.Read4ByteNumber(); // limited to 127
+            g.Radius = s.Read4ByteNumber(0, 127);
             return g;
         }
 
@@ -1225,7 +1225,7 @@ namespace H3Mapper
                     for (var i = 0; i < placeholderCount; i++)
                     {
                         var hero = ids.GetHero(s.Read1ByteNumber());
-                        Log.Warning("Found placeholder for {hero}. No idea what to do with it. Ignoring.", hero);
+                        heroes.AddHero(hero);
                     }
                 }
             }
@@ -1361,11 +1361,23 @@ namespace H3Mapper
             player.AITactic = s.ReadEnum<AITactic>();
             if (format > MapFormat.AB)
             {
-                player.P7 = s.Read1ByteNumber();
+                // 1 Configured whether what cities owns a player
+                // that makes no sense
+                // VCMI call it P7 (Unknown and unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L206
+                player.Unknown1 = s.Read1ByteNumber();
             }
 
             player.AllowedFactions = Fractions(s, format);
-            player.IsFactionRandom = s.ReadBool();
+            if (player.Disabled)
+            {
+                // if the player is disabled this can contain garbage
+                s.Read1ByteNumber();
+            }
+            else
+            {
+                player.IsFactionRandom = s.ReadBool();
+            }
+
             player.HasHomeTown = s.ReadBool();
 
             if (player.HasHomeTown)
@@ -1373,7 +1385,9 @@ namespace H3Mapper
                 if (format != MapFormat.RoE)
                 {
                     player.GenerateHeroAtMainTown = s.ReadBool();
-                    player.GenerateHero = s.ReadBool();
+                    // 1 Chief Town player: 1-DA 0-NET
+                    // VCMI call it generateHero (unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L238
+                    player.Unknown2 = s.Read1ByteNumber();
                 }
 
                 player.HomeTownPosition = ReadPosition(s, mapSize);
