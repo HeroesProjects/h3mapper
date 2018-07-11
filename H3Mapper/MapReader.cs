@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
 using H3Mapper.MapObjects;
@@ -19,6 +20,7 @@ namespace H3Mapper
 
         public H3Map Read(MapDeserializer s)
         {
+            // https://github.com/potmdehex/homm3tools/blob/master/h3m/h3mlib/h3m_structures/h3m_description.english.txt
             var map = new H3Map();
             var info = new MapInfo();
             map.Info = info;
@@ -33,7 +35,10 @@ namespace H3Mapper
             ids.SetCurrentVersion(IsHota(info.Format) ? MapFormat.HotA : info.Format);
             if (IsHota(info.Format))
             {
-                s.Skip(4);
+                // there's either 4 empty bytes or 1 followed by 5 empty ones.
+                // not sure about the meaning of that yet...
+                var unknown = s.Read1ByteNumber();
+                s.Skip(unknown == 1 ? 5 : 3);
             }
 
             info.HasPlayers = s.ReadBool();
@@ -46,6 +51,7 @@ namespace H3Mapper
             {
                 info.ExperienceLevelLimit = s.Read1ByteNumber(maxValue: 99);
             }
+
             const int playerCount = 8;
             info.Players = ReadPlayers(s, playerCount, info);
             info.VictoryCondition = ReadVictoryCondition(s, info);
@@ -69,6 +75,7 @@ namespace H3Mapper
                 info.AllowSpecialWeeks = s.ReadBool();
                 s.Skip(3);
             }
+
             map.AllowedArtifacts = ReadAllowedArtifacts(s, info.Format);
 
             if (info.Format >= MapFormat.SoD)
@@ -76,6 +83,7 @@ namespace H3Mapper
                 map.AllowedSpells = ReadSpellsFromBitmask(s);
                 map.AllowedSecondarySkills = ReadSecondarySkillsFromBitmask(s);
             }
+
             map.Rumors = ReadRumors(s);
             ReadHeroConfigurationCustomisations(s, heroes, info.Format);
             map.Terrain = ReadTerrain(s, info);
@@ -97,6 +105,7 @@ namespace H3Mapper
             {
                 return null;
             }
+
             var objects = new MapObject[count];
             for (var i = 0; i < count; i++)
             {
@@ -107,6 +116,7 @@ namespace H3Mapper
                 {
                     throw new ArgumentOutOfRangeException(string.Format("Map Object at {0} is misaligned.", i));
                 }
+
                 var template = templates[templateIndex];
                 s.Skip(5); //why?
                 switch (template.Id)
@@ -180,6 +190,7 @@ namespace H3Mapper
                         {
                             goto case ObjectId.AbandonedMine; // SubId == 7 means abandoned mine
                         }
+
                         mo = ReadPlayerObject(s);
                         break;
                     case ObjectId.ShrineOfMagicGesture:
@@ -208,9 +219,11 @@ namespace H3Mapper
                         mo = new MapObject(template);
                         break;
                 }
+
                 mo.Position = position;
                 objects[i] = mo;
             }
+
             return objects;
         }
 
@@ -244,6 +257,7 @@ namespace H3Mapper
                 // max value is 8, as only 8 heroes can be active on a map
                 h.PowerRating = s.Read1ByteNumber(maxValue: 8);
             }
+
             return h;
         }
 
@@ -264,11 +278,13 @@ namespace H3Mapper
                     d.AllowedFactions = s.ReadEnum<Factions>();
                 }
             }
+
             if (id != ObjectId.RandomDwellingLevel)
             {
                 d.MinLevel = s.ReadEnum<UnitLevel>();
                 d.MaxLevel = s.ReadEnum<UnitLevel>();
             }
+
             return d;
         }
 
@@ -305,6 +321,7 @@ namespace H3Mapper
             {
                 m.Spell = ids.GetSpell(spellId);
             }
+
             s.Skip(3);
             return m;
         }
@@ -324,17 +341,20 @@ namespace H3Mapper
             {
                 m.Identifier = s.Read4ByteNumberLong();
             }
+
             m.Owner = s.ReadEnum<Player>();
             var hasName = s.ReadBool();
             if (hasName)
             {
                 m.Name = s.ReadString(14);
             }
+
             var hasGarrison = s.ReadBool();
             if (hasGarrison)
             {
                 m.Garrison = ReadCreatures(s, format, 7);
             }
+
             m.GarrisonFormation = s.ReadEnum<Formation>();
             var hasCustomBuildings = s.ReadBool();
             if (hasCustomBuildings)
@@ -346,10 +366,12 @@ namespace H3Mapper
             {
                 m.HasFort = s.ReadBool();
             }
+
             if (format > MapFormat.RoE)
             {
                 m.SpellsWillAppear = ReadSpellsFromBitmask(s);
             }
+
             m.SpellsMayAppear = ReadSpellsFromBitmask(s);
 
             m.Events = ReadEvents(s, format, true);
@@ -358,6 +380,7 @@ namespace H3Mapper
                 // this only applies to random castles
                 m.Alignment = s.ReadEnum<Player>();
             }
+
             s.Skip(3);
             return m;
         }
@@ -381,6 +404,7 @@ namespace H3Mapper
                 {
                     e.HumanAffected = true;
                 }
+
                 e.ComputerAffected = s.ReadBool();
                 e.FirstOccurence = s.Read2ByteNumber(maxValue: 672);
                 e.RepeatEvery = s.Read1ByteNumber(maxValue: 28);
@@ -392,6 +416,7 @@ namespace H3Mapper
                     s.Skip(4);
                 }
             }
+
             return events;
         }
 
@@ -402,6 +427,7 @@ namespace H3Mapper
             {
                 creatures[i] = s.Read2ByteNumber();
             }
+
             return creatures;
         }
 
@@ -414,6 +440,7 @@ namespace H3Mapper
             {
                 ss.Spell = ids.GetSpell(s.Read4ByteNumber());
             }
+
             return a;
         }
 
@@ -431,6 +458,7 @@ namespace H3Mapper
             {
                 g.UnitsAreRemovable = s.ReadBool();
             }
+
             s.Skip(8);
             return g;
         }
@@ -452,6 +480,7 @@ namespace H3Mapper
             {
                 h.AllowedSkills = s.ReadBitmask(4);
             }
+
             return h;
         }
 
@@ -469,6 +498,7 @@ namespace H3Mapper
             {
                 s.Skip(3);
             }
+
             return h;
         }
 
@@ -519,6 +549,7 @@ namespace H3Mapper
                 default:
                     throw new ArgumentOutOfRangeException($"Unknown reward type: {r.Type}");
             }
+
             return r;
         }
 
@@ -534,6 +565,7 @@ namespace H3Mapper
                     q.Type = QuestType.ReturnWithArtifacts;
                     q.Artifacts = new[] {ids.GetArtifact(artifactId.Value)};
                 }
+
                 return q;
             }
 
@@ -561,6 +593,7 @@ namespace H3Mapper
                         var id = s.Read2ByteNumber();
                         artifactIds[i] = ids.GetArtifact(id);
                     }
+
                     q.Artifacts = artifactIds;
                     break;
                 case QuestType.ReturnWithCreatures:
@@ -578,11 +611,13 @@ namespace H3Mapper
                 default:
                     throw new ArgumentOutOfRangeException($"Unknkown quest type {q.Type}");
             }
+
             var deadline = s.Read4ByteNumberLong();
             if (deadline != uint.MaxValue)
             {
                 q.Deadline = (int?) deadline;
             }
+
             q.FirstVisitText = s.ReadString(30000);
             q.NextVisitText = s.ReadString(30000);
             q.CompletedText = s.ReadString(30000);
@@ -607,6 +642,7 @@ namespace H3Mapper
             {
                 m.Identifier = s.Read4ByteNumberLong();
             }
+
             m.Count = s.Read2ByteNumber();
             m.Disposition = s.ReadEnum<Disposition>();
             var hasMessage = s.ReadBool();
@@ -620,6 +656,7 @@ namespace H3Mapper
                     m.Artifact = ids.GetArtifact(artifactId.Value);
                 }
             }
+
             m.AlwaysAttacts = s.ReadBool();
             m.KeepsSize = s.ReadBool();
             s.Skip(2);
@@ -633,6 +670,7 @@ namespace H3Mapper
             {
                 h.Indentifier = s.Read4ByteNumberLong();
             }
+
             h.Owner = s.ReadEnum<Player>();
             h.SubId = s.Read1ByteNumber();
             var hasName = s.ReadBool();
@@ -640,6 +678,7 @@ namespace H3Mapper
             {
                 h.Name = s.ReadString(12);
             }
+
             if (format > MapFormat.AB)
             {
                 var hasExperience = s.ReadBool();
@@ -652,22 +691,26 @@ namespace H3Mapper
             {
                 h.Experience = s.Read4ByteNumberLong();
             }
+
             var hasPotrait = s.ReadBool();
             if (hasPotrait)
             {
                 h.PortraitId = s.Read1ByteNumber();
             }
+
             var hasSecondarySkills = s.ReadBool();
             if (hasSecondarySkills)
             {
                 var count = s.Read4ByteNumber();
                 h.SecondarySkills = ReadSecondarySkills(s, count);
             }
+
             var hasArmy = s.ReadBool();
             if (hasArmy)
             {
                 h.Army = ReadCreatures(s, format, 7);
             }
+
             h.ArmyFormationType = s.ReadEnum<Formation>();
 
             var hasArtifacts = s.ReadBool();
@@ -675,6 +718,7 @@ namespace H3Mapper
             {
                 h.Inventory = ReadHeroInventory(s, format);
             }
+
             h.PatrolRadius = s.ReadEnum<PatrolRadius>();
             if (format > MapFormat.RoE)
             {
@@ -683,8 +727,10 @@ namespace H3Mapper
                 {
                     h.Bio = s.ReadString(30000);
                 }
+
                 h.Sex = s.ReadEnum<HeroSex>();
             }
+
             if (format > MapFormat.AB)
             {
                 var hasSpells = s.ReadBool();
@@ -705,6 +751,7 @@ namespace H3Mapper
                     };
                 }
             }
+
             if (format > MapFormat.AB)
             {
                 var hasCustomPrimarySkills = s.ReadBool();
@@ -713,6 +760,7 @@ namespace H3Mapper
                     h.PrimarySkills = ReadPrimarySkills(s);
                 }
             }
+
             s.Skip(16); //really?
             return h;
         }
@@ -747,6 +795,7 @@ namespace H3Mapper
                 var id = ReadVersionDependantId(s, format).Value;
                 artifacts[i] = ids.GetArtifact(id);
             }
+
             return artifacts;
         }
 
@@ -758,6 +807,7 @@ namespace H3Mapper
                 var spellId = s.Read1ByteNumber();
                 spells[i] = ids.GetSpell(spellId);
             }
+
             return spells;
         }
 
@@ -773,6 +823,7 @@ namespace H3Mapper
                 {
                     o.Guards = ReadCreatures(s, format, 7);
                 }
+
                 s.Skip(4);
             }
         }
@@ -793,6 +844,7 @@ namespace H3Mapper
                     };
                 }
             }
+
             return creatures;
         }
 
@@ -800,12 +852,13 @@ namespace H3Mapper
         private IDictionary<Resource, int> ReadResources(MapDeserializer s)
         {
             var resources = new Dictionary<Resource, int>();
-            var keys = Enum.GetValues(typeof (Resource));
+            var keys = Enum.GetValues(typeof(Resource));
             foreach (Resource key in keys)
             {
                 var value = s.Read4ByteNumber();
                 resources.Add(key, value);
             }
+
             return resources;
         }
 
@@ -816,36 +869,46 @@ namespace H3Mapper
             {
                 return null;
             }
+
             if (count > 10000)
             {
                 throw new ArgumentOutOfRangeException($"Count {count} looks wrong. Probably there is a bug here.");
             }
+
             var co = new MapObjectTemplate[count];
             for (var i = 0; i < count; i++)
             {
+                // Good description of how bit masks (block mask and visit mask) work:
+                // https://github.com/potmdehex/homm3tools/blob/master/h3m/h3mlib/h3m_constants/h3m.txt#L144-L171
                 var o = new MapObjectTemplate();
                 o.AnimationFile = s.ReadString(255 /* not really possible to verify buy they are all really short */);
-                var blockMask = new bool[6];
-                var visitMask = new bool[6];
-                for (var j = 0; j < blockMask.Length; j++)
-                {
-                    blockMask[j] = s.ReadBool();
-                }
-                for (var j = 0; j < visitMask.Length; j++)
-                {
-                    visitMask[j] = s.ReadBool();
-                }
+                var blockMask = s.ReadBitmask(6);
+                var visitMask = s.ReadBitmask(6);
+                o.BlockPosition = MapPositionBitmask(blockMask);
+                o.VisitPosition = MapPositionBitmask(visitMask);
                 o.SupportedTerrainTypes = s.ReadEnum<Terrains>();
-                o.SupportedTerrainTypes2 = s.ReadEnum<Terrains>();
+                o.EditorMenuLocation = s.ReadEnum<TerrainMenus>();
                 o.Id = s.ReadEnum<ObjectId>();
                 o.SubId = s.Read4ByteNumber();
                 o.Type = s.ReadEnum<ObjectType>();
-                o.PrintPriority = s.Read1ByteNumber();
+                o.IsBackground = s.ReadBool();
 
                 s.Skip(16); //why?
                 co[i] = o;
             }
+
             return co;
+        }
+
+        private Position MapPositionBitmask(bool[] mask)
+        {
+            var positions = new bool[8, 6];
+            for (var i = 0; i < mask.Length; i++)
+            {
+                positions[i / 6, i % 6] = !mask[i];
+            }
+
+            return new Position {Positions = positions};
         }
 
         private MapTerrain ReadTerrain(MapDeserializer s, MapInfo info)
@@ -873,7 +936,7 @@ namespace H3Mapper
                     var tile = new MapTile(x, y, level)
                     {
                         TerrainType = s.ReadEnum<Terrain>(),
-                        TerrainView = (TerrainView) s.Read1ByteNumber(),
+                        TerrainVariant = s.Read1ByteNumber(),
                         RiverType = s.ReadEnum<RiverType>(),
                         RiverDirection = (RiverDirection) s.Read1ByteNumber(),
                         RoadType = s.ReadEnum<RoadType>(),
@@ -883,6 +946,7 @@ namespace H3Mapper
                     row[x] = tile;
                 }
             }
+
             return tiles;
         }
 
@@ -894,6 +958,7 @@ namespace H3Mapper
             {
                 heroCount = s.Read4ByteNumber();
             }
+
             if (format > MapFormat.AB)
             {
                 for (var id = 0; id < heroCount; id++)
@@ -903,39 +968,46 @@ namespace H3Mapper
                     {
                         continue;
                     }
+
                     var hero = heroes.GetHero(ids.GetHero(id));
                     if (hero.Customisations == null)
                     {
                         hero.Customisations = new HeroCustomisations();
                     }
+
                     var h = hero.Customisations;
                     var hasExperience = s.ReadBool();
                     if (hasExperience)
                     {
                         h.Experience = s.Read4ByteNumber();
                     }
+
                     var hasSecondarySkills = s.ReadBool();
                     if (hasSecondarySkills)
                     {
                         var skills = ReadSecondarySkills(s, s.Read4ByteNumber());
                         h.SecondarySkills = skills;
                     }
+
                     var hasAtrifacts = s.ReadBool();
                     if (hasAtrifacts)
                     {
                         h.Inventory = ReadHeroInventory(s, format);
                     }
+
                     var hasBio = s.ReadBool();
                     if (hasBio)
                     {
                         h.Bio = s.ReadString(30000);
                     }
+
                     h.Sex = s.ReadEnum<HeroSex>();
                     var hasCustomSpells = s.ReadBool();
                     if (hasCustomSpells)
                     {
                         h.Spells = ReadSpellsFromBitmask(s);
                     }
+
                     var hasPrimarySkills = s.ReadBool();
                     if (hasPrimarySkills)
                     {
@@ -957,6 +1029,7 @@ namespace H3Mapper
                     spells.Add(ids.GetSpell(i));
                 }
             }
+
             return spells.ToArray();
         }
 
@@ -971,12 +1044,13 @@ namespace H3Mapper
                     Level = s.ReadEnum<SecondarySkillLevel>()
                 };
             }
+
             return skills;
         }
 
         private static IDictionary<PrimarySkillType, int> ReadPrimarySkills(MapDeserializer s)
         {
-            var primarySkillTypes = Enum.GetValues(typeof (PrimarySkillType));
+            var primarySkillTypes = Enum.GetValues(typeof(PrimarySkillType));
 
             var primarySkills = new Dictionary<PrimarySkillType, int>();
             foreach (PrimarySkillType type in primarySkillTypes)
@@ -984,27 +1058,30 @@ namespace H3Mapper
                 var value = s.Read1ByteNumber(maxValue: 99);
                 primarySkills.Add(type, value);
             }
+
             return primarySkills;
         }
 
         private HeroArtifact[] ReadHeroInventory(MapDeserializer s, MapFormat format)
         {
-            const int artifactSlots = 18;
             var artifacts = new List<HeroArtifact>();
-            for (var i = 0; i < artifactSlots; i++)
+            foreach (var slot in EnumValues.For<ArtifactSlot>().TakeWhile(x => x < ArtifactSlot.Misc5))
             {
-                artifacts.TryAdd(ReadArtifactForSlot(s, format, (ArtifactSlot) i));
+                artifacts.TryAdd(ReadArtifactForSlot(s, format, slot));
             }
+
             if (format > MapFormat.AB)
             {
                 artifacts.TryAdd(ReadArtifactForSlot(s, format, ArtifactSlot.Misc5));
             }
+
             //bag artifacts
             var bagSize = s.Read2ByteNumber();
             for (var i = 0; i < bagSize; i++)
             {
                 artifacts.TryAdd(ReadArtifactForSlot(s, format, ArtifactSlot.Backpack));
             }
+
             return artifacts.ToArray();
         }
 
@@ -1020,6 +1097,7 @@ namespace H3Mapper
                 };
                 return artifact;
             }
+
             return null;
         }
 
@@ -1033,13 +1111,16 @@ namespace H3Mapper
                 {
                     return null;
                 }
+
                 return number;
             }
+
             var number2 = s.Read2ByteNumber();
             if (number2 == ushort.MaxValue)
             {
                 return null;
             }
+
             return number2;
         }
 
@@ -1056,6 +1137,7 @@ namespace H3Mapper
                 };
                 rumors[i] = r;
             }
+
             return rumors;
         }
 
@@ -1070,6 +1152,7 @@ namespace H3Mapper
                     skills.Add((SecondarySkillType) i);
                 }
             }
+
             return skills.ToArray();
         }
 
@@ -1085,6 +1168,7 @@ namespace H3Mapper
                     artifacts.Add(ids.GetArtifact(i));
                 }
             }
+
             return artifacts.ToArray();
         }
 
@@ -1132,6 +1216,7 @@ namespace H3Mapper
                     heroes.AddHero(ids.GetHero(i));
                 }
             }
+
             if (format > MapFormat.RoE)
             {
                 var placeholderCount = s.Read4ByteNumber();
@@ -1150,10 +1235,11 @@ namespace H3Mapper
         {
             if (IsHota(format))
             {
-                return mapDeserializer.Read4ByteNumber(minValue:0);
+                return mapDeserializer.Read4ByteNumber(minValue: 0);
             }
+
             var byteCount = format == MapFormat.RoE ? 16 : 20;
-            return byteCount*8;
+            return byteCount * 8;
         }
 
         private LossCondition ReadLossCondition(MapDeserializer s, int mapSize)
@@ -1169,10 +1255,11 @@ namespace H3Mapper
                         lc.Position = ReadPosition(s, mapSize);
                         break;
                     case LossConditionType.TimeExpires:
-                        lc.Value = s.Read2ByteNumber(2, 7*4*12);
+                        lc.Value = s.Read2ByteNumber(2, 7 * 4 * 12);
                         break;
                 }
             }
+
             return lc;
         }
 
@@ -1192,6 +1279,7 @@ namespace H3Mapper
                         {
                             s.Skip(1);
                         }
+
                         break;
                     case VictoryConditionType.GatherTroop:
                         vc.Identifier = ids.GetMonster(s.Read1ByteNumber());
@@ -1199,6 +1287,7 @@ namespace H3Mapper
                         {
                             s.Skip(1);
                         }
+
                         vc.Value = s.Read4ByteNumber(1, 99999);
                         break;
                     case VictoryConditionType.GatherResource:
@@ -1216,6 +1305,7 @@ namespace H3Mapper
                         {
                             vc.Position = position;
                         }
+
                         break;
                     case VictoryConditionType.BeatHero:
                     case VictoryConditionType.CaptureCity:
@@ -1240,6 +1330,7 @@ namespace H3Mapper
                         throw new NotSupportedException();
                 }
             }
+
             return vc;
         }
 
@@ -1257,6 +1348,7 @@ namespace H3Mapper
             {
                 players[i] = ReadPlayer(s, info.Format, info.Size);
             }
+
             return players;
         }
 
@@ -1265,11 +1357,13 @@ namespace H3Mapper
             var player = new MapPlayer();
             player.CanHumanPlay = s.ReadBool();
             player.CanAIPlay = s.ReadBool();
+            // if both false, player disabled, rest of the data may be garbage
             player.AITactic = s.ReadEnum<AITactic>();
             if (format > MapFormat.AB)
             {
                 player.P7 = s.Read1ByteNumber();
             }
+
             player.AllowedFactions = Fractions(s, format);
             player.IsFactionRandom = s.ReadBool();
             player.HasHomeTown = s.ReadBool();
@@ -1281,8 +1375,10 @@ namespace H3Mapper
                     player.GenerateHeroAtMainTown = s.ReadBool();
                     player.GenerateHero = s.ReadBool();
                 }
+
                 player.HomeTownPosition = ReadPosition(s, mapSize);
             }
+
             player.HasRandomHero = s.ReadBool();
             var heroId = s.Read1ByteNumber();
             if (heroId != byte.MaxValue)
@@ -1293,8 +1389,10 @@ namespace H3Mapper
                 {
                     player.MainCustomHeroPortraitId = portraitId;
                 }
+
                 player.MainCustomHeroName = s.ReadString(12);
             }
+
             if (format > MapFormat.RoE)
             {
                 player.PowerPlaceholders = s.Read1ByteNumber();
@@ -1304,6 +1402,7 @@ namespace H3Mapper
                     player.AddHero(ReadHero(s));
                 }
             }
+
             return player;
         }
 
@@ -1332,9 +1431,10 @@ namespace H3Mapper
         {
             if (format == MapFormat.RoE)
             {
-                return (Factions) s.Read1ByteNumber();
+                return s.ReadEnum<Factions>(1);
             }
-            return (Factions) s.Read2ByteNumber();
+
+            return s.ReadEnum<Factions>(2);
         }
     }
 }

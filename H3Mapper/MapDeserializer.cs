@@ -65,11 +65,6 @@ namespace H3Mapper
             return Encoding.UTF8.GetString(raw);
         }
 
-        private bool ConvertBool(byte[] raw)
-        {
-            return BitConverter.ToBoolean(raw, 0);
-        }
-
         private int ConvertInt32(byte[] raw)
         {
             return BitConverter.ToInt32(raw, 0);
@@ -138,8 +133,20 @@ namespace H3Mapper
 
         public bool ReadBool()
         {
+            var location = Location;
             var bytes = ReadBytes(1);
-            return ConvertBool(bytes);
+            var value = bytes[0];
+            if (value == 0)
+            {
+                return false;
+            }
+
+            if (value != 1)
+            {
+                Log.Warning("Boolean at {location:X8} has unexpected value of {value:X8}", location, value);
+            }
+
+            return true;
         }
 
         public string ReadString(int maxLength)
@@ -173,19 +180,26 @@ namespace H3Mapper
             }
         }
 
-        public T ReadEnum<T>() where T : struct
+        public T ReadEnum<T>(int? bytesCount = null) where T : struct
         {
             var type = typeof(T);
             Debug.Assert(type.IsEnum);
             var underlyingType = type.GetEnumUnderlyingType();
             var location = Location;
 
-            var bytes = ReadBytes(SizeOf(underlyingType));
+            var size = SizeOf(underlyingType);
+            Debug.Assert(size >= bytesCount.GetValueOrDefault(size));
+            var bytes = ReadBytes(bytesCount.GetValueOrDefault(size));
+            if (bytes.Length < size)
+            {
+                Array.Resize(ref bytes, size);
+            }
+
             var rawValue = Convert(bytes, underlyingType);
 
             if (IsEnumDefined(type, rawValue) == false)
             {
-                Log.Debug("Unrecognised value for {type}: {value} at {location:X8}", type, rawValue, location);
+                Log.Debug("Unrecognised value for {type}: {value:X8} at {location:X8}", type, rawValue, location);
             }
 
             return (T) rawValue;

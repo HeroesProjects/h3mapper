@@ -9,7 +9,9 @@ namespace H3Mapper
         public ObjectId Id { get; set; }
         public int SubId { get; set; }
         public ObjectType Type { get; set; }
-        public int PrintPriority { get; set; }
-        public Terrains SupportedTerrainTypes2 { get; set; }
+        public TerrainMenus EditorMenuLocation { get; set; }
+        public Position BlockPosition { get; set; }
+        public Position VisitPosition { get; set; }
+        public bool IsBackground { get; set; }
     }
 }
