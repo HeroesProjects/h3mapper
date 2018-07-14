@@ -55,6 +55,11 @@ namespace H3Mapper
             return Enum.ToObject(type, value).ToString() != value.ToString();
         }
 
+        private short ConvertInt16(byte[] raw)
+        {
+            return BitConverter.ToInt16(raw, 0);
+        }
+
         private ushort ConvertUInt16(byte[] raw)
         {
             return BitConverter.ToUInt16(raw, 0);
@@ -80,7 +85,7 @@ namespace H3Mapper
             return raw[0];
         }
 
-        public int Read1ByteNumber(int minValue = 0, int maxValue = byte.MaxValue, bool allowEmpty = false)
+        public int Read1ByteNumber(byte minValue = 0, byte maxValue = byte.MaxValue, bool allowEmpty = false)
         {
             var location = Location;
             var bytes = ReadBytes(1);
@@ -93,11 +98,29 @@ namespace H3Mapper
             return value;
         }
 
+        public int Read1ByteSignedNumber(sbyte minValue = sbyte.MinValue, sbyte maxValue = sbyte.MaxValue)
+        {
+            var location = Location;
+            var bytes = ReadBytes(1);
+            var value = (sbyte)ConvertByte(bytes);
+            EnsureRange(minValue, maxValue, value, location);
+            return value;
+        }
+
         public int Read2ByteNumber(int minValue = 0, int maxValue = ushort.MaxValue)
         {
             var location = Location;
             var bytes = ReadBytes(2);
             var value = ConvertUInt16(bytes);
+            EnsureRange(minValue, maxValue, value, location);
+            return value;
+        }
+
+        public int Read2ByteNumberSigned(short minValue = short.MinValue, short maxValue = short.MaxValue)
+        {
+            var location = Location;
+            var bytes = ReadBytes(2);
+            var value = ConvertInt16(bytes);
             EnsureRange(minValue, maxValue, value, location);
             return value;
         }
@@ -199,7 +222,7 @@ namespace H3Mapper
 
             if (IsEnumDefined(type, rawValue) == false)
             {
-                Log.Debug("Unrecognised value for {type}: {value:X8} at {location:X8}", type, rawValue, location);
+                Log.Information("Unrecognised value for {type}: {value:X8} at {location:X8}", type, rawValue, location);
             }
 
             return (T) rawValue;

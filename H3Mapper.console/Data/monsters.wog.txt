@@ -1,0 +1,52 @@
+145 : Catapult
+146 : Ballista
+147 : First Aid Tent
+148 : Ammo Cart
+149 : Arrow Towers
+150 : Supreme Archangel
+151 : Diamond Dragon
+152 : Lord of Thunder
+153 : Antichrist
+154 : Blood Dragon
+155 : Darkness Dragon
+156 : Ghost Behemoth
+157 : Hell Hydra
+158 : Sacred Phoenix
+159 : Ghost
+160 : Emissary of War
+161 : Emissary of Peace
+162 : Emissary of Mana
+163 : Emissary of Lore
+164 : Fire Messenger
+165 : Earth Messenger
+166 : Air Messenger
+167 : Water Messenger
+168 : Gorynych
+169 : War zealot
+170 : Arctic Sharpshooter
+171 : Lava Sharpshooter
+172 : Nightmare
+173 : Santa Gremlin
+174 : Paladin (attacker)
+175 : Hierophant (attacker)
+176 : Temple Guardian (attacker)
+177 : Succubus (attacker)
+178 : Soul Eater (attacker)
+179 : Brute (attacker)
+180 : Ogre Leader (attacker)
+181 : Shaman (attacker)
+182 : Astral Spirit (attacker)
+183 : Paladin (defender)
+184 : Hierophant (defender)
+185 : Temple Guardian (defender)
+186 : Succubus (defender)
+187 : Soul Eater (defender)
+188 : Brute (defender)
+189 : Ogre Leader (defender)
+190 : Shaman (defender)
+191 : Astral Spirit (defender)
+192 : Sylvan Centaur
+193 : Sorceress
+194 : Werewolf
+195 : Hell Steed
+196 : Dracolich

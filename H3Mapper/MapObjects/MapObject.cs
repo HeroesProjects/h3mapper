@@ -2,16 +2,7 @@ namespace H3Mapper.MapObjects
 {
     public class MapObject
     {
-        public MapObject(MapObjectTemplate template)
-        {
-            Template = template;
-        }
-
-        public MapObject()
-        {
-        }
-
-        public MapObjectTemplate Template { get; }
+        public MapObjectTemplate Template { get; set; }
 
         public MapPosition Position { get; set; }
         public string Message { get; set; }

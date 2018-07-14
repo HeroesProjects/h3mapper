@@ -16,5 +16,6 @@ namespace H3Mapper.MapObjects
         public Player Alignment { get; set; }
         public Identifier[] SpellsWillAppear { get; set; }
         public Identifier[] SpellsMayAppear { get; set; }
+        public Faction Faction { get; set; }
     }
 }

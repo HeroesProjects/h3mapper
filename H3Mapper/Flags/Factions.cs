@@ -19,6 +19,7 @@ namespace H3Mapper.Flags
         Custom2 = 1 << 10,
         Custom3 = 1 << 11,
         Custom4 = 1 << 12,
-        Cove = Custom1
+        Cove = Custom1,
+        Any = ushort.MaxValue
     }
 }

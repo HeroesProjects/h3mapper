@@ -12,5 +12,6 @@ namespace H3Mapper.MapObjects
         public Identifier Artifact { get; set; }
         public bool AlwaysAttacts { get; set; }
         public bool KeepsSize { get; set; }
+        public Identifier Type { get; set; }
     }
 }
