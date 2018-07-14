@@ -82,9 +82,25 @@ namespace H3Mapper.Flags
         NomadTent = 77, // Nomads
         RogueCavern = 78, // Rogues
         TrollBridge = 79,
-        
-        DragonPeaks = 81, // WoG
-        ChaosPool = 87 // WoG
+        // Below are all WoG
+        PortalOfSplendor = 80,
+        DragonPeaks = 81,
+        StormTemple = 82,
+        UnholyPalace = 83,
+        SpectralVault = 84,
+        CaveOfDarkness = 85,
+        BehemothTomb = 86,
+        ChaosPool = 87,
+        SpiritPyre = 88,
+        VastCavern = 91, // Gorynych
+        DreamHorseShoe = 92, // Nightmare
+        LostFriary = 94, // War Zealot
+        Snowman = 95, // Santa Gremlin
+        SylvanHomestead = 96, // Sylvan Centaur
+        EnchantedTower = 97, // Sorceress
+        HowlingHollow = 98, // Werewolf
+        HellfireRift = 99, // Hell Steed
+        DragonGraveyard = 100, // Dracolich
         
        
     }

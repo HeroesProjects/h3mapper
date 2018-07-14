@@ -203,7 +203,7 @@ namespace H3Mapper
                     case ObjectId.RandomDwelling:
                     case ObjectId.RandomDwellingFaction:
                     case ObjectId.RandomDwellingLevel:
-                        mo = ReadDwelling(s, template.Id);
+                        mo = ReadDwelling(s, template.Id, template.SubId);
                         break;
                     case ObjectId.QuestGuard:
                         mo = ReadQuest(s, info.Format);
@@ -262,6 +262,9 @@ namespace H3Mapper
                 case ObjectId.RandomMonsterLevel6:
                 case ObjectId.RandomMonsterLevel7:
                     return;
+                case ObjectId.RandomDwellingLevel:
+                case ObjectId.RandomDwellingFaction:
+                    return;
                 case ObjectId.KeymastersTent:
                 case ObjectId.BorderGate:
                     if (mo.Template.SubId == 6)
@@ -269,7 +272,7 @@ namespace H3Mapper
                     goto default;
                 case ObjectId.MonolithTwoWay:
                 case ObjectId.MonolithOneWayEntrance:
-                case ObjectId.MonolithOneWayExit:
+                case ObjectId.MonolithOneWayExit: 
                     if (mo.Template.SubId <= 8)
                         return;
                     goto default;
@@ -332,17 +335,21 @@ namespace H3Mapper
             return h;
         }
 
-        private DwellingObject ReadDwelling(MapDeserializer s, ObjectId id)
+        private DwellingObject ReadDwelling(MapDeserializer s, ObjectId id, int subId)
         {
             var d = new DwellingObject();
             d.Player = s.ReadEnum<Player>();
             s.Skip(3);
-            if (id != ObjectId.RandomDwellingFaction)
+            if (id == ObjectId.RandomDwellingFaction)
+            {
+                d.RandomDwellingFaction = EnumValues.Cast<Faction>(subId);
+            }
+            else
             {
                 var sameAsCastleId = s.Read4ByteNumberLong();
                 if (sameAsCastleId != 0)
                 {
-                    d.SameAsCastle = sameAsCastleId;
+                    d.FactionSameAsCastleId = sameAsCastleId;
                 }
                 else
                 {
@@ -350,7 +357,11 @@ namespace H3Mapper
                 }
             }
 
-            if (id != ObjectId.RandomDwellingLevel)
+            if (id == ObjectId.RandomDwellingLevel)
+            {
+                d.MinLevel = d.MaxLevel = EnumValues.Cast<UnitLevel>(subId);
+            }
+            else
             {
                 d.MinLevel = s.ReadEnum<UnitLevel>();
                 d.MaxLevel = s.ReadEnum<UnitLevel>();
