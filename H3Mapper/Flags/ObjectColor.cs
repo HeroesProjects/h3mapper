@@ -1,6 +1,6 @@
 namespace H3Mapper.Flags
 {
-    public enum BorderGuardType
+    public enum ObjectColor
     {
         LightBlue,
         Green,

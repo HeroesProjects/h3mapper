@@ -1,7 +1,13 @@
+using H3Mapper.Flags;
+
 namespace H3Mapper.MapObjects
 {
-    public class WitchHutObject : MapObject
+    public class WitchHutObject : MapObject<ObjectVariantType>
     {
-        public bool[] AllowedSkills { get; set; }
+        public WitchHutObject(int typeRawValue) : base(typeRawValue)
+        {
+        }
+
+        public SecondarySkillType[] AllowedSkills { get; set; }
     }
 }

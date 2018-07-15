@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
 using H3Mapper.MapObjects;
@@ -95,7 +94,11 @@ namespace H3Mapper
 
         private bool IsFullySupported(MapFormat format)
         {
-            return format == MapFormat.RoE || format == MapFormat.AB || format == MapFormat.SoD || IsHota(format);
+            return format == MapFormat.RoE ||
+                   format == MapFormat.AB ||
+                   format == MapFormat.SoD ||
+                   format == MapFormat.WoG ||
+                   format == MapFormat.HotA3;
         }
 
         private MapObject[] ReadMapObjects(MapDeserializer s, MapInfo info)
@@ -151,7 +154,7 @@ namespace H3Mapper
                         mo = ReadSeerHut(s, EnumValues.Cast<SeerHutType>(template.SubId), info.Format);
                         break;
                     case ObjectId.WitchHut:
-                        mo = ReadWitchHut(s, info.Format);
+                        mo = ReadWitchHut(s, info.Format, template.SubId);
                         break;
                     case ObjectId.Scholar:
                         mo = ReadScholar(s);
@@ -161,13 +164,19 @@ namespace H3Mapper
                         mo = ReadGarrison(s, info.Format);
                         break;
                     case ObjectId.Artifact:
+                        mo = ReadArtifact(s, info.Format, template.SubId);
+                        break;
                     case ObjectId.RandomArtifact:
+                        mo = ReadArtifact(s, info.Format, template.SubId);
+                        break;
                     case ObjectId.RandomTreasureArtifact:
                     case ObjectId.RandomMinorArtifact:
                     case ObjectId.RandomMajorArtifact:
                     case ObjectId.RandomRelicArtifact:
+                        mo = ReadArtifact(s, info.Format, null);
+                        break;
                     case ObjectId.SpellScroll:
-                        mo = ReadArtifact(s, info.Format, template.Id);
+                        mo = ReadSpellScroll(s, info.Format);
                         break;
                     case ObjectId.RandomResource:
                     case ObjectId.Resource:
@@ -217,10 +226,22 @@ namespace H3Mapper
                         mo = new MapObject<CreatureBankType>(template.SubId);
                         break;
                     case ObjectId.BorderGate:
-                        mo = new MapObject<BorderGuardType>(template.SubId);
+                    case ObjectId.BorderGuard:
+                        mo = new MapObject<ObjectColor>(template.SubId);
                         break;
                     case ObjectId.Object:
                         mo = new WoGObject(template.SubId);
+                        break;
+                    case ObjectId.Cartographer:
+                        mo = new MapObject<CartographerType>(template.SubId);
+                        break;
+                    case ObjectId.TreasureChest:
+                        mo = new MapObject<TreasureChestType>(template.SubId);
+                        break;
+                    case ObjectId.LearningStone:
+                    case ObjectId.SubterraneanGate:
+                    case ObjectId.LibraryOfEnlightenment:
+                        mo = new MapObject<ObjectVariantType>(template.SubId);
                         break;
                     default:
                         mo = new MapObject();
@@ -271,7 +292,15 @@ namespace H3Mapper
                 case ObjectId.RandomMonsterLevel6:
                 case ObjectId.RandomMonsterLevel7:
                 case ObjectId.BorderGate:
+                case ObjectId.BorderGuard:
                 case ObjectId.Object:
+                case ObjectId.Artifact:
+                case ObjectId.Cartographer:
+                case ObjectId.TreasureChest:
+                case ObjectId.LearningStone:
+                case ObjectId.SubterraneanGate:
+                case ObjectId.LibraryOfEnlightenment:
+                case ObjectId.WitchHut:
                     return;
                 case ObjectId.RandomDwellingLevel:
                 case ObjectId.RandomDwellingFaction:
@@ -279,23 +308,51 @@ namespace H3Mapper
                 case ObjectId.KeymastersTent:
                 case ObjectId.MonolithTwoWay:
                 case ObjectId.MonolithOneWayEntrance:
+
                 case ObjectId.MonolithOneWayExit:
-                    if (mo.Template.SubId <= 8)
-                        return;
-                    goto default;
+                    if (mo.Template.SubId > 8)
+                    {
+                        LogUnexpectedType(mo);
+                    }
+
+                    return;
+
+                case ObjectId.ShrineOfMagicThought:
+                case ObjectId.MagicWell:
+                    if (mo.Template.SubId > 1)
+                    {
+                        LogUnexpectedType(mo);
+                    }
+
+                    return; 
+                case ObjectId.Tavern:
+                    if (mo.Template.SubId != 1)
+                    {
+                        LogUnexpectedType(mo);
+                    }
+
+                    return;
                 case ObjectId.Boat:
-                    if (mo.Template.SubId <= 2)
-                        return;
-                    goto default;
+                    if (mo.Template.SubId > 2)
+                    {
+                        LogUnexpectedType(mo);
+                    }
+
+                    return;
                 default:
                     if (mo.Template.SubId == 0) return;
-                    Log.Information("Unexpected Object Subtype {subid} for object {id}:{type} {location}",
-                        mo.Template.SubId,
-                        mo.Template.Id,
-                        mo.Template.Type,
-                        mo.Position);
+                    LogUnexpectedType(mo);
                     return;
             }
+        }
+
+        private static void LogUnexpectedType(MapObject mo)
+        {
+            Log.Information("Unexpected Object Subtype {subid} for object {id}:{type} {location}",
+                mo.Template.SubId,
+                mo.Template.Id,
+                mo.Template.Type,
+                mo.Position);
         }
 
         private MapObject ReadMine(MapDeserializer s, MineType mineType)
@@ -396,7 +453,7 @@ namespace H3Mapper
             p.ManaDifference = s.Read4ByteNumber(-9999, 9999);
             p.MoraleDifference = s.ReadEnum<LuckMoraleModifier>();
             p.LuckDifference = s.ReadEnum<LuckMoraleModifier>();
-            p.Resources = ReadResources(s, allowNegative: true);
+            p.Resources = ReadResources(s, format, allowNegative: true);
             p.PrimarySkills = ReadPrimarySkills(s);
             p.SecondarySkills = ReadSecondarySkills(s, s.Read1ByteNumber(maxValue: 8));
             p.Artifacts = ReadArtifacts(s, format, s.Read1ByteNumber());
@@ -488,7 +545,7 @@ namespace H3Mapper
                 var e = new TimedEvents();
                 e.Name = s.ReadString(30000);
                 e.Message = s.ReadString(30000);
-                e.Resources = ReadResources(s, allowNegative: true);
+                e.Resources = ReadResources(s, format, allowNegative: true);
                 e.Players = s.ReadEnum<Players>();
                 if (format > MapFormat.AB)
                 {
@@ -525,14 +582,21 @@ namespace H3Mapper
             return creatures;
         }
 
-        private MapObject ReadArtifact(MapDeserializer s, MapFormat format, ObjectId id)
+        private SpellScrollObject ReadSpellScroll(MapDeserializer s, MapFormat format)
         {
-            var a = id == ObjectId.SpellScroll ? new SpellScrollObject() : new MapObject();
+            var spellScroll = new SpellScrollObject();
+            ReadMessageAndGuards(spellScroll, s, format);
+            spellScroll.Spell = ids.GetSpell(s.Read4ByteNumber());
+            return spellScroll;
+        }
+
+        private MapObject ReadArtifact(MapDeserializer s, MapFormat format, int? artifactId)
+        {
+            var a = new ArtifactObject();
             ReadMessageAndGuards(a, s, format);
-            var ss = a as SpellScrollObject;
-            if (ss != null)
+            if (artifactId.HasValue)
             {
-                ss.Spell = ids.GetSpell(s.Read4ByteNumber());
+                a.Artifact = ids.GetArtifact(artifactId.Value);
             }
 
             return a;
@@ -540,19 +604,10 @@ namespace H3Mapper
 
         private GarrisonObject ReadGarrison(MapDeserializer s, MapFormat format)
         {
-            var g = new GarrisonObject();
-            g.Owner = s.ReadEnum<Player>();
+            var g = new GarrisonObject {Owner = s.ReadEnum<Player>()};
             s.Skip(3);
             g.Creatues = ReadCreatures(s, format, 7);
-            if (format == MapFormat.RoE)
-            {
-                g.UnitsAreRemovable = true;
-            }
-            else
-            {
-                g.UnitsAreRemovable = s.ReadBool();
-            }
-
+            g.UnitsAreRemovable = format == MapFormat.RoE || s.ReadBool();
             s.Skip(8);
             return g;
         }
@@ -567,12 +622,22 @@ namespace H3Mapper
             return sc;
         }
 
-        private WitchHutObject ReadWitchHut(MapDeserializer s, MapFormat format)
+        private WitchHutObject ReadWitchHut(MapDeserializer s, MapFormat format, int rawVariant)
         {
-            var h = new WitchHutObject();
+            var h = new WitchHutObject(rawVariant);
             if (format > MapFormat.RoE)
             {
-                h.AllowedSkills = s.ReadBitmask(4);
+                var skills = new List<SecondarySkillType>();
+                var flags = s.ReadBitmask(4);
+                for (var i = 0; i < flags.Length; i++)
+                {
+                    if (flags[i])
+                    {
+                        skills.Add(EnumValues.Cast<SecondarySkillType>(i));
+                    }
+                }
+
+                h.AllowedSkills = skills.ToArray();
             }
 
             return h;
@@ -583,7 +648,6 @@ namespace H3Mapper
             var h = new SeerHutObject();
             h.Type = type;
             h.Quest = ReadQuest(s, format);
-
             if (h.Quest.Type != QuestType.None)
             {
                 h.Reward = ReadReward(s, format);
@@ -695,7 +759,7 @@ namespace H3Mapper
                     q.Creatues = ReadCreatures(s, format, s.Read1ByteNumber(maxValue: 7));
                     break;
                 case QuestType.ReturnWithResources:
-                    q.Resources = ReadResources(s);
+                    q.Resources = ReadResources(s, format);
                     break;
                 case QuestType.BeASpecificHero:
                     q.HeroId = s.Read1ByteNumber();
@@ -725,6 +789,7 @@ namespace H3Mapper
             {
                 Message = s.ReadString(150)
             };
+
             s.Skip(4);
             return m;
         }
@@ -740,11 +805,12 @@ namespace H3Mapper
 
             m.Count = s.Read2ByteNumber();
             m.Disposition = s.ReadEnum<Disposition>();
+
             var hasMessage = s.ReadBool();
             if (hasMessage)
             {
                 m.Message = s.ReadString(30000);
-                m.Resources = ReadResources(s);
+                m.Resources = ReadResources(s, format);
                 var artifactId = ReadVersionDependantId(s, format);
                 if (artifactId != null)
                 {
@@ -769,6 +835,7 @@ namespace H3Mapper
             h.Type = type;
             h.Owner = s.ReadEnum<Player>();
             h.SubId = s.Read1ByteNumber();
+
             var hasName = s.ReadBool();
             if (hasName)
             {
@@ -808,7 +875,6 @@ namespace H3Mapper
             }
 
             h.ArmyFormationType = s.ReadEnum<Formation>();
-
             var hasArtifacts = s.ReadBool();
             if (hasArtifacts)
             {
@@ -869,7 +935,7 @@ namespace H3Mapper
             e.ManaDifference = s.Read4ByteNumber();
             e.MoraleDifference = s.ReadEnum<LuckMoraleModifier>();
             e.LuckDifference = s.ReadEnum<LuckMoraleModifier>();
-            e.Resources = ReadResources(s, allowNegative: true);
+            e.Resources = ReadResources(s, format, allowNegative: true);
             e.PrimarySkills = ReadPrimarySkills(s);
             e.SecondarySkills = ReadSecondarySkills(s, s.Read1ByteNumber(maxValue: 8));
             e.Artifacts = ReadArtifacts(s, format, s.Read1ByteNumber());
@@ -913,7 +979,7 @@ namespace H3Mapper
             if (hasMessage)
             {
                 o.Message = s.ReadString(30000);
-                // NOTE: does it belong inside of this if?
+// NOTE: does it belong inside of this if?
                 var hasGuards = s.ReadBool();
                 if (hasGuards)
                 {
@@ -930,7 +996,7 @@ namespace H3Mapper
             for (var i = 0; i < creatureCount; i++)
             {
                 var typeId = ReadVersionDependantId(s, format);
-                // we only care about range if we actually have guards
+// we only care about range if we actually have guards
                 var count = s.Read2ByteNumberSigned(0, typeId != null ? (short) 9999 : short.MaxValue);
                 if (typeId.HasValue)
                 {
@@ -945,11 +1011,11 @@ namespace H3Mapper
             return creatures;
         }
 
-
-        private IDictionary<Resource, int> ReadResources(MapDeserializer s, bool allowNegative = false)
+        private IDictionary<Resource, int> ReadResources(MapDeserializer s, MapFormat format,
+            bool allowNegative = false)
         {
             var resources = new Dictionary<Resource, int>();
-            var keys = EnumValues.For<Resource>();
+            var keys = EnumValues.For<Resource>().TakeWhile(r => r <= Resource.Gold);
             foreach (var key in keys)
             {
                 var value = s.Read4ByteNumber(allowNegative ? -99999 : 0, 99999);
@@ -975,8 +1041,8 @@ namespace H3Mapper
             var co = new MapObjectTemplate[count];
             for (var i = 0; i < count; i++)
             {
-                // Good description of how bit masks (block mask and visit mask) work:
-                // https://github.com/potmdehex/homm3tools/blob/master/h3m/h3mlib/h3m_constants/h3m.txt#L144-L171
+// Good description of how bit masks (block mask and visit mask) work:
+// https://github.com/potmdehex/homm3tools/blob/master/h3m/h3mlib/h3m_constants/h3m.txt#L144-L171
                 var o = new MapObjectTemplate();
                 o.AnimationFile = s.ReadString(255 /* not really possible to verify buy they are all really short */);
                 var blockMask = s.ReadBitmask(6);
@@ -989,7 +1055,6 @@ namespace H3Mapper
                 o.SubId = s.Read4ByteNumber();
                 o.Type = s.ReadEnum<ObjectType>();
                 o.IsBackground = s.ReadBool();
-
                 s.Skip(16); //why?
                 co[i] = o;
             }
@@ -1011,7 +1076,6 @@ namespace H3Mapper
         private MapTerrain ReadTerrain(MapDeserializer s, MapInfo info)
         {
             var terrain = new MapTerrain();
-
             terrain.Ground = ReadTerrainLevel(s, info, 0);
             if (info.HasSecondLevel)
             {
@@ -1049,7 +1113,7 @@ namespace H3Mapper
 
         private void ReadHeroConfigurationCustomisations(MapDeserializer s, MapHeroes heroes, MapFormat format)
         {
-            // is there a way to be smart and detect it instead?
+// is there a way to be smart and detect it instead?
             var heroCount = 156;
             if (IsHota(format))
             {
@@ -1148,7 +1212,6 @@ namespace H3Mapper
         private static IDictionary<PrimarySkillType, int> ReadPrimarySkills(MapDeserializer s)
         {
             var primarySkillTypes = EnumValues.For<PrimarySkillType>();
-
             var primarySkills = new Dictionary<PrimarySkillType, int>();
             foreach (var type in primarySkillTypes)
             {
@@ -1172,7 +1235,7 @@ namespace H3Mapper
                 artifacts.TryAdd(ReadArtifactForSlot(s, format, ArtifactSlot.Misc5));
             }
 
-            //bag artifacts
+//bag artifacts
             var bagSize = s.Read2ByteNumber();
             for (var i = 0; i < bagSize; i++)
             {
@@ -1197,7 +1260,6 @@ namespace H3Mapper
 
             return null;
         }
-
 
         private int? ReadVersionDependantId(MapDeserializer s, MapFormat format)
         {
@@ -1280,7 +1342,6 @@ namespace H3Mapper
 
             return s.ReadBitmaskBits(format == MapFormat.AB ? 129 : 144);
         }
-
 
         private void ReadHeroCustomisations(MapDeserializer s, MapHeroes heroes, MapFormat format)
         {
@@ -1454,20 +1515,20 @@ namespace H3Mapper
             var player = new MapPlayer();
             player.CanHumanPlay = s.ReadBool();
             player.CanAIPlay = s.ReadBool();
-            // if both false, player disabled, rest of the data may be garbage
+// if both false, player disabled, rest of the data may be garbage
             player.AITactic = s.ReadEnum<AITactic>();
             if (format > MapFormat.AB)
             {
-                // 1 Configured whether what cities owns a player
-                // that makes no sense
-                // VCMI call it P7 (Unknown and unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L206
+// 1 Configured whether what cities owns a player
+// that makes no sense
+// VCMI call it P7 (Unknown and unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L206
                 player.Unknown1 = s.Read1ByteNumber();
             }
 
             player.AllowedFactions = Fractions(s, format);
             if (player.Disabled)
             {
-                // if the player is disabled this can contain garbage
+// if the player is disabled this can contain garbage
                 s.Read1ByteNumber();
             }
             else
@@ -1476,14 +1537,13 @@ namespace H3Mapper
             }
 
             player.HasHomeTown = s.ReadBool();
-
             if (player.HasHomeTown)
             {
                 if (format != MapFormat.RoE)
                 {
                     player.GenerateHeroAtMainTown = s.ReadBool();
-                    // 1 Chief Town player: 1-DA 0-NET
-                    // VCMI call it generateHero (unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L238
+// 1 Chief Town player: 1-DA 0-NET
+// VCMI call it generateHero (unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L238
                     player.Unknown2 = s.Read1ByteNumber();
                 }
 
@@ -1528,8 +1588,8 @@ namespace H3Mapper
 
         private MapPosition ReadPosition(MapDeserializer s, int mapSize, bool allowEmpty = false)
         {
-            // this is the position of a lower right corner of an element
-            // which may be slightly beyond size of the map
+// this is the position of a lower right corner of an element
+// which may be slightly beyond size of the map
             return new MapPosition
             {
                 X = s.Read1ByteNumber(maxValue: (byte) (mapSize + 8), allowEmpty: allowEmpty),

@@ -92,8 +92,11 @@ namespace H3Mapper.Flags
         BehemothTomb = 86,
         ChaosPool = 87,
         SpiritPyre = 88,
+        RockCoveredPosition = 89, // Lava Sharpshooter
+        SnowCoveredPosition = 90, // Arctic Sharpshooter
         VastCavern = 91, // Gorynych
         DreamHorseShoe = 92, // Nightmare
+        NaturalCalamity = 93, // Fire Messenger
         LostFriary = 94, // War Zealot
         Snowman = 95, // Santa Gremlin
         SylvanHomestead = 96, // Sylvan Centaur

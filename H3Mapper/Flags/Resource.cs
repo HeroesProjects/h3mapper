@@ -8,6 +8,7 @@ namespace H3Mapper.Flags
         Sulfur,
         Crystal,
         Gems,
-        Gold
+        Gold,
+        Mithril //  WoG
     }
 }
