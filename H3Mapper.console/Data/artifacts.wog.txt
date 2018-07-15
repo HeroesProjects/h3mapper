@@ -1,0 +1,95 @@
+// id : Name
+146 : Axe of Smashing (commander artifact)
+147 : Mithril Mail (commander artifact)
+148 : Sword of Sharpness (commander artifact)
+149 : Helm of Immortality (commander artifact)
+150 : Pendant of Sorcery (commander artifact)
+151 : Boots of Haste (commander artifact)
+152 : Bow of Seeking (commander artifact)
+153 : Dragon Eye Ring (commander artifact)
+155 : Slava's Ring of Power (commander artifact)
+156 : Warlord's Banner
+161 : Helm (empty artifact)
+162 : Sword (empty artifact)
+163 : Shield (empty artifact)
+164 : Horned Ring (empty artifact)
+165 : 3-Gemmed Ring (empty artifact)
+166 : Neck Broach (empty artifact)
+167 : Armor (empty artifact)
+168 : Surcoat (empty artifact)
+169 : Boots (empty artifact)
+170 : Horn (empty artifact)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

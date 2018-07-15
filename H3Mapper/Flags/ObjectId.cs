@@ -40,7 +40,7 @@ namespace H3Mapper.Flags
         hillfort = 35,
         Grail = 36,
         HutOfMagi = 37,
-        idoloffortune = 38,
+        IdolOfFortune = 38,
         leanto = 39,
         ObjectWithNoDescriptionHotA = 40,
         LibraryOfEnlightenment = 41,

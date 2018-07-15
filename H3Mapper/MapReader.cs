@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -160,8 +161,10 @@ namespace H3Mapper
                         mo = ReadScholar(s);
                         break;
                     case ObjectId.Garrison:
+                        mo = ReadGarrison(s, info.Format, template.SubId, GarrisonOrientation.EastWest);
+                        break;
                     case ObjectId.Garrison2:
-                        mo = ReadGarrison(s, info.Format);
+                        mo = ReadGarrison(s, info.Format, template.SubId, GarrisonOrientation.NorthSouth);
                         break;
                     case ObjectId.Artifact:
                         mo = ReadArtifact(s, info.Format, template.SubId);
@@ -238,11 +241,14 @@ namespace H3Mapper
                     case ObjectId.TreasureChest:
                         mo = new MapObject<TreasureChestType>(template.SubId);
                         break;
+                    case ObjectId.Tavern:
                     case ObjectId.LearningStone:
                     case ObjectId.SubterraneanGate:
                     case ObjectId.LibraryOfEnlightenment:
+                    case ObjectId.IdolOfFortune:
                         mo = new MapObject<ObjectVariantType>(template.SubId);
                         break;
+
                     default:
                         mo = new MapObject();
                         break;
@@ -301,14 +307,16 @@ namespace H3Mapper
                 case ObjectId.SubterraneanGate:
                 case ObjectId.LibraryOfEnlightenment:
                 case ObjectId.WitchHut:
-                    return;
+                case ObjectId.Tavern:
                 case ObjectId.RandomDwellingLevel:
                 case ObjectId.RandomDwellingFaction:
+                case ObjectId.Garrison:
+                case ObjectId.Garrison2:
+                case ObjectId.IdolOfFortune:
                     return;
                 case ObjectId.KeymastersTent:
                 case ObjectId.MonolithTwoWay:
                 case ObjectId.MonolithOneWayEntrance:
-
                 case ObjectId.MonolithOneWayExit:
                     if (mo.Template.SubId > 8)
                     {
@@ -320,13 +328,6 @@ namespace H3Mapper
                 case ObjectId.ShrineOfMagicThought:
                 case ObjectId.MagicWell:
                     if (mo.Template.SubId > 1)
-                    {
-                        LogUnexpectedType(mo);
-                    }
-
-                    return; 
-                case ObjectId.Tavern:
-                    if (mo.Template.SubId != 1)
                     {
                         LogUnexpectedType(mo);
                     }
@@ -602,9 +603,14 @@ namespace H3Mapper
             return a;
         }
 
-        private GarrisonObject ReadGarrison(MapDeserializer s, MapFormat format)
+        private GarrisonObject ReadGarrison(MapDeserializer s, MapFormat format, int garrisonType,
+            GarrisonOrientation orientation)
         {
-            var g = new GarrisonObject {Owner = s.ReadEnum<Player>()};
+            var g = new GarrisonObject(garrisonType)
+            {
+                Owner = s.ReadEnum<Player>(),
+                Orientation = orientation
+            };
             s.Skip(3);
             g.Creatues = ReadCreatures(s, format, 7);
             g.UnitsAreRemovable = format == MapFormat.RoE || s.ReadBool();
@@ -1588,12 +1594,13 @@ namespace H3Mapper
 
         private MapPosition ReadPosition(MapDeserializer s, int mapSize, bool allowEmpty = false)
         {
-// this is the position of a lower right corner of an element
-// which may be slightly beyond size of the map
+            // this is the position of a lower right corner of an element
+            // which may be slightly beyond size of the map
+            var maxValue = (byte) Math.Min(byte.MaxValue, mapSize + 8);
             return new MapPosition
             {
-                X = s.Read1ByteNumber(maxValue: (byte) (mapSize + 8), allowEmpty: allowEmpty),
-                Y = s.Read1ByteNumber(maxValue: (byte) (mapSize + 8), allowEmpty: allowEmpty),
+                X = s.Read1ByteNumber(maxValue: maxValue, allowEmpty: allowEmpty),
+                Y = s.Read1ByteNumber(maxValue: maxValue, allowEmpty: allowEmpty),
                 Z = s.Read1ByteNumber(maxValue: 1, allowEmpty: allowEmpty)
             };
         }
