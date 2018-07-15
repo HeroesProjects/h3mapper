@@ -65,8 +65,7 @@ namespace H3Mapper.Flags
         pillaroffire = 60,
         staraxis = 61,
         Prison = 62,
-        pyramid = 63, //subtype 0
-        wogobject = 63, //subtype > 0
+        Object = 63, //subtype 0 - Pyramid, subtype > 0 - WoG object
         rallyflag = 64,
         RandomArtifact = 65,
         RandomTreasureArtifact = 66,

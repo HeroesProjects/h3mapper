@@ -126,9 +126,11 @@ namespace H3Mapper
                         mo = ReadMapEvent(s, info.Format);
                         break;
                     case ObjectId.Hero:
+                        mo = ReadMapHero(s, EnumValues.Cast<HeroType>(template.SubId), info.Format);
+                        break;
                     case ObjectId.RandomHero:
                     case ObjectId.Prison:
-                        mo = ReadMapHero(s, info.Format);
+                        mo = ReadMapHero(s, null, info.Format);
                         break;
                     case ObjectId.Monster:
                     case ObjectId.RandomMonster:
@@ -212,7 +214,13 @@ namespace H3Mapper
                         mo = ReadHeroPlaceholder(s);
                         break;
                     case ObjectId.CreatureBank:
-                        mo = new CreatureBankObject {Type = EnumValues.Cast<CreatureBankType>(template.SubId)};
+                        mo = new MapObject<CreatureBankType>(template.SubId);
+                        break;
+                    case ObjectId.BorderGate:
+                        mo = new MapObject<BorderGuardType>(template.SubId);
+                        break;
+                    case ObjectId.Object:
+                        mo = new WoGObject(template.SubId);
                         break;
                     default:
                         mo = new MapObject();
@@ -246,6 +254,7 @@ namespace H3Mapper
                 case ObjectId.Mine:
                 case ObjectId.Mine2:
                 case ObjectId.Town:
+                case ObjectId.Hero:
                 case ObjectId.Monster:
                 case ObjectId.Resource:
                 case ObjectId.SeerHut:
@@ -261,19 +270,21 @@ namespace H3Mapper
                 case ObjectId.RandomMonsterLevel5:
                 case ObjectId.RandomMonsterLevel6:
                 case ObjectId.RandomMonsterLevel7:
+                case ObjectId.BorderGate:
+                case ObjectId.Object:
                     return;
                 case ObjectId.RandomDwellingLevel:
                 case ObjectId.RandomDwellingFaction:
                     return;
                 case ObjectId.KeymastersTent:
-                case ObjectId.BorderGate:
-                    if (mo.Template.SubId == 6)
-                        return;
-                    goto default;
                 case ObjectId.MonolithTwoWay:
                 case ObjectId.MonolithOneWayEntrance:
-                case ObjectId.MonolithOneWayExit: 
+                case ObjectId.MonolithOneWayExit:
                     if (mo.Template.SubId <= 8)
+                        return;
+                    goto default;
+                case ObjectId.Boat:
+                    if (mo.Template.SubId <= 2)
                         return;
                     goto default;
                 default:
@@ -747,7 +758,7 @@ namespace H3Mapper
             return m;
         }
 
-        private MapObject ReadMapHero(MapDeserializer s, MapFormat format)
+        private MapObject ReadMapHero(MapDeserializer s, HeroType? type, MapFormat format)
         {
             var h = new HeroObject();
             if (format > MapFormat.RoE)
@@ -755,6 +766,7 @@ namespace H3Mapper
                 h.Indentifier = s.Read4ByteNumberLong();
             }
 
+            h.Type = type;
             h.Owner = s.ReadEnum<Player>();
             h.SubId = s.Read1ByteNumber();
             var hasName = s.ReadBool();
