@@ -19,6 +19,13 @@ namespace H3Mapper.Flags
         TransylvanianTavern = 17,
         HomeOfTheBat = 18,
         LostBottle = 19,
-        Grotto = 20
+        Grotto = 20,
+        // below ones are from HotA
+        BeholdersSanctuary = 21,
+        Mansion = 24,
+        RedTower = 26,
+        BlackTower = 27,
+        IvoryTower = 28,
+        Churchyard = 29
     }
 }

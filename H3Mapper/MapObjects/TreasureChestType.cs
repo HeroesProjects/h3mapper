@@ -3,6 +3,7 @@ namespace H3Mapper.MapObjects
     public enum TreasureChestType
     {
         Standard = 0,
+
         // the rest are WoG
         TreasureChest1 = 1,
         TreasureChest2 = 2,
@@ -14,6 +15,5 @@ namespace H3Mapper.MapObjects
         RubyOfOffence = 8,
         SapphireOfDefense = 9,
         EmeraldOfSpeed = 10
-       
     }
 }

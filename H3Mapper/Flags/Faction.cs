@@ -10,6 +10,7 @@ namespace H3Mapper.Flags
         Dungeon = 5,
         Stronghold = 6,
         Fortress = 7,
-        Conflux = 8
+        Conflux = 8,
+        Cove = 9
     }
 }

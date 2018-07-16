@@ -206,7 +206,7 @@ namespace H3Mapper
                     case ObjectId.ShrineOfMagicGesture:
                     case ObjectId.ShrineOfMagicIncantation:
                     case ObjectId.ShrineOfMagicThought:
-                        mo = ReadMagicShrine(s);
+                        mo = ReadMagicShrine(s, template.Id, template.SubId);
                         break;
                     case ObjectId.PandorasBox:
                         mo = ReadPandorasBox(s, info.Format);
@@ -241,6 +241,15 @@ namespace H3Mapper
                     case ObjectId.TreasureChest:
                         mo = new MapObject<TreasureChestType>(template.SubId);
                         break;
+                    case ObjectId.ResourceWarehouseHotA:
+                        mo = new MapObject<Resource>(template.SubId);
+                        break;
+                    case ObjectId.HillFort:
+                        mo = new MapObject<HillFortType>(template.SubId);
+                        break;
+                    case ObjectId.SchoolOfMagic:
+                        mo = new MapObject<SchoolOfMagicType>(template.SubId);
+                        break;
                     case ObjectId.Tavern:
                     case ObjectId.LearningStone:
                     case ObjectId.SubterraneanGate:
@@ -248,7 +257,12 @@ namespace H3Mapper
                     case ObjectId.IdolOfFortune:
                         mo = new MapObject<ObjectVariantType>(template.SubId);
                         break;
-
+                    case ObjectId.RedwoodObservatory:
+                        mo = new MapObject<ObservatoryType>(template.SubId);
+                        break;
+                    case ObjectId.MonolithTwoWay:
+                        mo = new MapObject<MonolithTwoWayType>(template.SubId);
+                        break;
                     default:
                         mo = new MapObject();
                         break;
@@ -313,6 +327,11 @@ namespace H3Mapper
                 case ObjectId.Garrison:
                 case ObjectId.Garrison2:
                 case ObjectId.IdolOfFortune:
+                case ObjectId.ResourceWarehouseHotA:
+                case ObjectId.HillFort:
+                case ObjectId.SchoolOfMagic:
+                case ObjectId.ShrineOfMagicIncantation:
+                case ObjectId.RedwoodObservatory:
                     return;
                 case ObjectId.KeymastersTent:
                 case ObjectId.MonolithTwoWay:
@@ -324,7 +343,10 @@ namespace H3Mapper
                     }
 
                     return;
-
+                // decorative objects
+                case ObjectId.RockDebrisHotA:
+                case ObjectId.FireHotA:
+                    return;
                 case ObjectId.ShrineOfMagicThought:
                 case ObjectId.MagicWell:
                     if (mo.Template.SubId > 1)
@@ -334,7 +356,7 @@ namespace H3Mapper
 
                     return;
                 case ObjectId.Boat:
-                    if (mo.Template.SubId > 2)
+                    if (mo.Template.SubId > 5)
                     {
                         LogUnexpectedType(mo);
                     }
@@ -464,9 +486,10 @@ namespace H3Mapper
             return p;
         }
 
-        private MagicShrineObject ReadMagicShrine(MapDeserializer s)
+        private MagicShrineObject ReadMagicShrine(MapDeserializer s, ObjectId templateId, int templateSubId)
         {
             var m = new MagicShrineObject();
+            m.SpellLevel = MapSpellLevel(templateId, templateSubId);
             var spellId = s.Read1ByteNumber();
             if (spellId != byte.MaxValue)
             {
@@ -475,6 +498,22 @@ namespace H3Mapper
 
             s.Skip(3);
             return m;
+        }
+
+        private MagicShrineSpellLevel MapSpellLevel(ObjectId templateId, int templateSubId)
+        {
+            if (templateId == ObjectId.ShrineOfMagicIncantation)
+            {
+                return EnumValues.Cast<MagicShrineSpellLevel>(templateSubId);
+            }
+
+            if (templateId == ObjectId.ShrineOfMagicGesture)
+            {
+                return MagicShrineSpellLevel.Two;
+            }
+
+            Debug.Assert(templateId == ObjectId.ShrineOfMagicThought);
+            return MagicShrineSpellLevel.Three;
         }
 
         private PlayerOwnedObject ReadPlayerObject(MapDeserializer s)

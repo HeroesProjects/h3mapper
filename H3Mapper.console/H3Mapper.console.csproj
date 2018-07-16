@@ -24,9 +24,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Data\artifacts.hota.txt" />
-    <Resource Include="Data\artifacts.hota.txt">
+    <Content Include="Data\artifacts.hota.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Remove="Data\artifacts.txt" />

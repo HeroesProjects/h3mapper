@@ -102,7 +102,7 @@ namespace H3Mapper
         {
             var location = Location;
             var bytes = ReadBytes(1);
-            var value = (sbyte)ConvertByte(bytes);
+            var value = (sbyte) ConvertByte(bytes);
             EnsureRange(minValue, maxValue, value, location);
             return value;
         }
@@ -175,12 +175,19 @@ namespace H3Mapper
         public string ReadString(int maxLength)
         {
             var location = Location;
-            var stringLenght = Read4ByteNumber();
+            var stringLenght = Read4ByteNumber(minValue: 0);
             if (stringLenght > maxLength)
             {
                 Log.Warning(
                     "String at {location:X8} has length of {length} which is above the expected limit of {limit}",
                     location, stringLenght, maxLength);
+            }
+
+            if (stringLenght < 0)
+            {
+                throw new ArgumentException(
+                    $"String at {location:x8} has negative length of {stringLenght} which is negative." +
+                    $" It\'s either a bug or the map file is invalid.");
             }
 
             var bytes = ReadBytes(stringLenght);
