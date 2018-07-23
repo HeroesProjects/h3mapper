@@ -25,9 +25,14 @@ namespace H3Mapper
 
         private byte[] ReadBytes(int byteCount)
         {
-            var raw = new byte[byteCount];
-            map.Read(raw, 0, raw.Length);
-            return raw;
+            var buffer = new byte[byteCount];
+            var readCount = map.Read(buffer, 0, buffer.Length);
+            if (readCount != byteCount)
+            {
+                throw new InvalidOperationException(
+                    $"Unexpected amount of data. Expected {byteCount} bytes but {readCount} read.");
+            }
+            return buffer;
         }
 
         private object Convert(byte[] raw, Type type)
@@ -175,22 +180,22 @@ namespace H3Mapper
         public string ReadString(int maxLength)
         {
             var location = Location;
-            var stringLenght = Read4ByteNumber(minValue: 0);
-            if (stringLenght > maxLength)
+            var stringLength = Read4ByteNumber(minValue: 0);
+            if (stringLength > maxLength)
             {
                 Log.Warning(
                     "String at {location:X8} has length of {length} which is above the expected limit of {limit}",
-                    location, stringLenght, maxLength);
+                    location, stringLength, maxLength);
             }
 
-            if (stringLenght < 0)
+            if (stringLength < 0)
             {
                 throw new ArgumentException(
-                    $"String at {location:x8} has negative length of {stringLenght} which is negative." +
+                    $"String at {location:x8} has negative length of {stringLength} which is negative." +
                     $" It\'s either a bug or the map file is invalid.");
             }
 
-            var bytes = ReadBytes(stringLenght);
+            var bytes = ReadBytes(stringLength);
             return ConvertUtf8String(bytes);
         }
 
@@ -253,10 +258,10 @@ namespace H3Mapper
         public void Skip(int byteCount)
         {
             var location = Location;
-            var garbage = map.ReadBuffer(byteCount);
+            var garbage = ReadBytes(byteCount);
             if (garbage.Any(b => b != 0))
             {
-                Log.Debug(
+                Log.Warning(
                     "Skipped {count} bytes at {location:X8}, but not all of them are empty. Bytes: {bytes}",
                     byteCount,
                     location,

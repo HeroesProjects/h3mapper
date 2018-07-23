@@ -46,7 +46,7 @@ namespace H3Mapper
             info.Size = s.Read4ByteNumber();
             info.HasSecondLevel = s.ReadBool();
             info.Name = s.ReadString(30);
-            info.Description = s.ReadString(3000);
+            info.Description = s.ReadString(300);
             info.Difficulty = s.ReadEnum<Difficulty>();
             if (info.Format > MapFormat.RoE)
             {
@@ -1330,7 +1330,7 @@ namespace H3Mapper
 
         private MapRumor[] ReadRumors(MapDeserializer s)
         {
-            var count = s.Read4ByteNumber();
+            var count = s.Read4ByteNumber(0, 30);
             var rumors = new MapRumor[count];
             for (var i = 0; i < count; i++)
             {
@@ -1353,7 +1353,7 @@ namespace H3Mapper
             {
                 if (bits[i] == false)
                 {
-                    skills.Add((SecondarySkillType) i);
+                    skills.Add(EnumValues.Cast<SecondarySkillType>(i));
                 }
             }
 
@@ -1380,9 +1380,19 @@ namespace H3Mapper
         {
             if (IsHota(format))
             {
-                var count = s.Read1ByteNumber();
-                s.Skip(3);
-                return s.ReadBitmaskBits(count);
+                var number = s.Read1ByteNumber();
+                if (number == 16)
+                {
+                    // no idea what that is. 6 bytes started by 0x10, followed by five 0x00
+                    s.Skip(5);
+                    number = s.Read1ByteNumber();
+                }
+                else
+                {
+                    s.Skip(3);
+                }
+
+                return s.ReadBitmaskBits(number);
             }
 
             return s.ReadBitmaskBits(format == MapFormat.AB ? 129 : 144);
