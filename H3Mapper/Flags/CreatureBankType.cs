@@ -22,10 +22,16 @@ namespace H3Mapper.Flags
         Grotto = 20,
         // below ones are from HotA
         BeholdersSanctuary = 21,
+        TempleOfTheSea = 22,
+        PirateCavern = 23,
         Mansion = 24,
+        Spit = 25,
         RedTower = 26,
         BlackTower = 27,
         IvoryTower = 28,
-        Churchyard = 29
+        Churchyard = 29,
+        ExperimentalShop = 30,
+        WolfRaiderPicket = 31,
+        Ruins = 32
     }
 }

@@ -17,5 +17,6 @@ namespace H3Mapper.MapObjects
         public Identifier[] SpellsWillAppear { get; set; }
         public Identifier[] SpellsMayAppear { get; set; }
         public Faction Faction { get; set; }
+        public bool AllowSpellResearch { get; set; } // HotA only
     }
 }

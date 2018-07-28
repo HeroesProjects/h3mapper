@@ -10,9 +10,7 @@ namespace H3Mapper.MapObjects
         YellowPortal = 5,
         RedPortal = 6,
         CyanPortal = 7,
-        
-        
-        
+        WhiteSeaPortal = 8,
         Pink = 9,
         Turquise = 10,
         Yellow = 11,

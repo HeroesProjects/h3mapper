@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
 using H3Mapper.MapObjects;
@@ -263,15 +264,27 @@ namespace H3Mapper
                     case ObjectId.MonolithTwoWay:
                         mo = new MapObject<MonolithTwoWayType>(template.SubId);
                         break;
+                    case ObjectId.WarMachineFactory:
+                        mo = new MapObject<WarMachineFactoryType>(template.SubId);
+                        break;
                     case ObjectId.MonolithOneWayEntrance:
                     case ObjectId.MonolithOneWayExit:
                         mo = new MapObject<MonolithOneWayType>(template.SubId);
                         break;
-                    case (ObjectId)144:
-                    case (ObjectId)204:
-                    case (ObjectId)146:
-                    case (ObjectId)145:
-                    case (ObjectId)160:
+                    case ObjectId.SpecialTerrainHotA:
+                        mo = new MapObject<SpecialTerrainType>(template.SubId);
+                        break;
+                    case ObjectId.SpecialBuildingHotA:
+                        mo = new MapObject<SpecialBuildingType>(template.SubId);
+                        break;
+                    case ObjectId.SeaObjectsHotA:
+                        mo = new MapObject<SeaObjectType>(template.SubId);
+                        break;
+                    case ObjectId.SpecialBuilding2HotA:
+                        mo = new MapObject<SpecialBuilding2Type>(template.SubId);
+                        break;
+                    case ObjectId.ObjectWithNoDescriptionHotA:
+                        mo = LogUnexpectedAnimationFile(new MapObject<DecorativeObjectType>(template.SubId), template);
                         break;
                     default:
                         mo = new MapObject();
@@ -285,6 +298,50 @@ namespace H3Mapper
             }
 
             return objects;
+        }
+
+        private MapObject LogUnexpectedAnimationFile(MapObject<DecorativeObjectType> mo, MapObjectTemplate template)
+        {
+            switch (mo.Type)
+            {
+                case DecorativeObjectType.Sand1:
+                    ExpectAnimationFile(mo, template, "Zsand01.def");
+                    break;
+
+                case DecorativeObjectType.Sand4:
+                    ExpectAnimationFile(mo, template, "Zsand04.def");
+                    break;
+
+                case DecorativeObjectType.Sand5:
+                    ExpectAnimationFile(mo, template, "Zsand05.def");
+                    break;
+                case DecorativeObjectType.Sand6:
+                    ExpectAnimationFile(mo, template, "Zsand06.def");
+                    break;
+                case DecorativeObjectType.Sand7:
+                    ExpectAnimationFile(mo, template, "Zsand07.def");
+                    break;
+                case DecorativeObjectType.Winds:
+                    ExpectAnimationFile(mo, template, "Zwat00.def");
+                    break;
+            }
+
+            return mo;
+        }
+
+        private void ExpectAnimationFile(MapObject<DecorativeObjectType> mo, MapObjectTemplate template,
+            string fileName)
+        {
+            if (fileName.Equals(template.AnimationFile, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return;
+            }
+
+            Log.Information("Unexpected AnimationFile {animationFile} for object {id}:{type} {location}",
+                template.AnimationFile,
+                template.Id,
+                template.Type,
+                mo.Position);
         }
 
         private CreatureGeneratorObject ReadCreatureGenerator(MapDeserializer s, CreatureGeneratorType type)
@@ -345,6 +402,13 @@ namespace H3Mapper
                 case ObjectId.MonolithTwoWay:
                 case ObjectId.MonolithOneWayEntrance:
                 case ObjectId.MonolithOneWayExit:
+                case ObjectId.WarMachineFactory:
+                case ObjectId.SpecialTerrainHotA:
+                case ObjectId.SpecialBuildingHotA:
+                case ObjectId.SpecialBuilding2HotA:
+                case ObjectId.SeaObjectsHotA:
+                case ObjectId.ObjectWithNoDescriptionHotA:
+                case ObjectId.ShrineOfMagicGesture:
                     return;
                 case ObjectId.KeymastersTent:
                     if (mo.Template.SubId > 8)
@@ -506,6 +570,11 @@ namespace H3Mapper
                 m.Spell = ids.GetSpell(spellId);
             }
 
+            if (templateId == ObjectId.ShrineOfMagicGesture)
+            {
+                m.Type = EnumValues.Cast<ShrineType>(templateSubId);
+            }
+
             s.Skip(3);
             return m;
         }
@@ -574,6 +643,10 @@ namespace H3Mapper
             }
 
             m.SpellsMayAppear = ReadSpellsFromBitmask(s);
+            if (IsHota(format))
+            {
+                m.AllowSpellResearch = s.ReadBool();
+            }
 
             m.Events = ReadEvents(s, format, true);
             if (format > MapFormat.AB)

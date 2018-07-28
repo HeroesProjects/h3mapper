@@ -105,6 +105,10 @@ namespace H3Mapper.Flags
         HellfireRift = 99, // Hell Steed
         DragonGraveyard = 100, // Dracolich
         
+        // Below are all HotA
+        Ziggurat = 101, // Fangarm
+        Alehouse = 102, // Leprechaun
+        
        
     }
 }

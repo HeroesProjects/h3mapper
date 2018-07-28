@@ -7,6 +7,7 @@ namespace H3Mapper.Flags
         Mushroom = 1,
         Tree = 2,
         // Below are from HotA
-        Water = 3
+        Water = 3,
+        StoneTower = 5,
     }
 }
