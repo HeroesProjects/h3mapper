@@ -16,7 +16,7 @@ namespace H3Mapper.Flags
         Sand = 1 << 7,
         Dirt = 1 << 8,
         Custom1 = 1 << 9,
-        Custom2 = 1 << 10,
+        Custom2 = 1 << 10, // In HotA this means Highland
         Custom3 = 1 << 11,
         Custom4 = 1 << 12
     }

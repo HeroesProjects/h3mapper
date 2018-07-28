@@ -263,6 +263,16 @@ namespace H3Mapper
                     case ObjectId.MonolithTwoWay:
                         mo = new MapObject<MonolithTwoWayType>(template.SubId);
                         break;
+                    case ObjectId.MonolithOneWayEntrance:
+                    case ObjectId.MonolithOneWayExit:
+                        mo = new MapObject<MonolithOneWayType>(template.SubId);
+                        break;
+                    case (ObjectId)144:
+                    case (ObjectId)204:
+                    case (ObjectId)146:
+                    case (ObjectId)145:
+                    case (ObjectId)160:
+                        break;
                     default:
                         mo = new MapObject();
                         break;
@@ -332,11 +342,11 @@ namespace H3Mapper
                 case ObjectId.SchoolOfMagic:
                 case ObjectId.ShrineOfMagicIncantation:
                 case ObjectId.RedwoodObservatory:
-                    return;
-                case ObjectId.KeymastersTent:
                 case ObjectId.MonolithTwoWay:
                 case ObjectId.MonolithOneWayEntrance:
                 case ObjectId.MonolithOneWayExit:
+                    return;
+                case ObjectId.KeymastersTent:
                     if (mo.Template.SubId > 8)
                     {
                         LogUnexpectedType(mo);
@@ -1230,7 +1240,7 @@ namespace H3Mapper
             var spells = new List<Identifier>();
             for (var i = 0; i < bitmask.Length; i++)
             {
-                if (bitmask[i])
+                if (bitmask[i] == false)
                 {
                     spells.Add(ids.GetSpell(i));
                 }
@@ -1387,10 +1397,8 @@ namespace H3Mapper
                     s.Skip(5);
                     number = s.Read1ByteNumber();
                 }
-                else
-                {
-                    s.Skip(3);
-                }
+
+                s.Skip(3);
 
                 return s.ReadBitmaskBits(number);
             }

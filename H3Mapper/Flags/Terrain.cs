@@ -11,6 +11,7 @@ namespace H3Mapper.Flags
         Subterranean,
         Lava,
         Water,
-        Rock
+        Rock,
+        Highland // HotA
     }
 }

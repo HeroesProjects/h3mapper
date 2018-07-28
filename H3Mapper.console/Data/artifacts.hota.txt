@@ -21,3 +21,6 @@
 159 : Cape of Silence
 160 : Golden Goose
 161 : Horn of the Abyss
+
+// This appears in map files but doesn't seem to be used?
+162 : --
