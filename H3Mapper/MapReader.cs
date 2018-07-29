@@ -124,6 +124,20 @@ namespace H3Mapper
                 }
 
                 var template = templates[templateIndex];
+                if (!EnumValues.IsDefined(template.EditorMenuLocation))
+                {
+                    Log.Information(
+                        "{position}\t{location}\t{Id}\t{SubId}\t{Type}\t{AnimationFile}",
+                        position,
+                        template.EditorMenuLocation,
+                        template.Id,
+                        template.SubId,
+                        template.Type,
+                        template.AnimationFile
+                    );
+                }
+
+
                 s.Skip(5); //why?
                 switch (template.Id)
                 {
@@ -283,9 +297,6 @@ namespace H3Mapper
                     case ObjectId.SpecialBuilding2HotA:
                         mo = new MapObject<SpecialBuilding2Type>(template.SubId);
                         break;
-                    case ObjectId.ObjectWithNoDescriptionHotA:
-                        mo = LogUnexpectedAnimationFile(new MapObject<DecorativeObjectType>(template.SubId), template);
-                        break;
                     default:
                         mo = new MapObject();
                         break;
@@ -298,50 +309,6 @@ namespace H3Mapper
             }
 
             return objects;
-        }
-
-        private MapObject LogUnexpectedAnimationFile(MapObject<DecorativeObjectType> mo, MapObjectTemplate template)
-        {
-            switch (mo.Type)
-            {
-                case DecorativeObjectType.Sand1:
-                    ExpectAnimationFile(mo, template, "Zsand01.def");
-                    break;
-
-                case DecorativeObjectType.Sand4:
-                    ExpectAnimationFile(mo, template, "Zsand04.def");
-                    break;
-
-                case DecorativeObjectType.Sand5:
-                    ExpectAnimationFile(mo, template, "Zsand05.def");
-                    break;
-                case DecorativeObjectType.Sand6:
-                    ExpectAnimationFile(mo, template, "Zsand06.def");
-                    break;
-                case DecorativeObjectType.Sand7:
-                    ExpectAnimationFile(mo, template, "Zsand07.def");
-                    break;
-                case DecorativeObjectType.Winds:
-                    ExpectAnimationFile(mo, template, "Zwat00.def");
-                    break;
-            }
-
-            return mo;
-        }
-
-        private void ExpectAnimationFile(MapObject<DecorativeObjectType> mo, MapObjectTemplate template,
-            string fileName)
-        {
-            if (fileName.Equals(template.AnimationFile, StringComparison.InvariantCultureIgnoreCase))
-            {
-                return;
-            }
-
-            Log.Information("Unexpected AnimationFile {animationFile} for object {id}:{type} {location}",
-                template.AnimationFile,
-                template.Id,
-                template.Type,
-                mo.Position);
         }
 
         private CreatureGeneratorObject ReadCreatureGenerator(MapDeserializer s, CreatureGeneratorType type)
@@ -407,7 +374,6 @@ namespace H3Mapper
                 case ObjectId.SpecialBuildingHotA:
                 case ObjectId.SpecialBuilding2HotA:
                 case ObjectId.SeaObjectsHotA:
-                case ObjectId.ObjectWithNoDescriptionHotA:
                 case ObjectId.ShrineOfMagicGesture:
                     return;
                 case ObjectId.KeymastersTent:
@@ -415,11 +381,13 @@ namespace H3Mapper
                     {
                         LogUnexpectedType(mo);
                     }
-
                     return;
-                // decorative objects
+                // decorative objects. May have SubIds
                 case ObjectId.RockDebrisHotA:
-                case ObjectId.FireHotA:
+                case ObjectId.FirePuddlesWaterfallsHotA:
+                // this has subIds but as far as I can tell, they are not very meaningful.
+                // TODO: figure out if the sub ids actually... mean anything
+                case ObjectId.ObjectWithNoDescriptionHotA:
                     return;
                 case ObjectId.ShrineOfMagicThought:
                 case ObjectId.MagicWell:
@@ -652,7 +620,7 @@ namespace H3Mapper
             if (format > MapFormat.AB)
             {
                 // this only applies to random castles
-                m.Alignment = s.ReadEnum<Player>();
+                m.Alignment = s.ReadEnum<RandomTownAlignment>();
             }
 
             s.Skip(3);
