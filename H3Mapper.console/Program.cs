@@ -76,7 +76,7 @@ namespace H3Mapper
             if (Directory.Exists(path))
             {
                 var result = 0;
-                foreach (var file in Directory.EnumerateFiles(path, "*.h3m"))
+                foreach (var file in Directory.EnumerateFiles(path, "*.h3m", SearchOption.AllDirectories))
                 {
                     var fileResult = Process(mappings, file, skipOutput);
                     if (fileResult != 0)
