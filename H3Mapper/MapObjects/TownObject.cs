@@ -14,8 +14,8 @@ namespace H3Mapper.MapObjects
         public bool HasFort { get; set; }
         public TimedEvents[] Events { get; set; }
         public RandomTownAlignment Alignment { get; set; }
-        public Identifier[] SpellsWillAppear { get; set; }
-        public Identifier[] SpellsMayAppear { get; set; }
+        public Identifier[] SpellsThatMustAppear { get; set; }
+        public Identifier[] SpellsThatMayAppear { get; set; }
         public Faction Faction { get; set; }
         public bool AllowSpellResearch { get; set; } // HotA only
     }

@@ -607,10 +607,10 @@ namespace H3Mapper
 
             if (format > MapFormat.RoE)
             {
-                m.SpellsWillAppear = ReadSpellsFromBitmask(s, activeBitValue: true);
+                m.SpellsThatMustAppear = ReadSpellsFromBitmask(s, activeBitValue: true);
             }
 
-            m.SpellsMayAppear = ReadSpellsFromBitmask(s);
+            m.SpellsThatMayAppear = ReadSpellsFromBitmask(s);
             if (IsHota(format))
             {
                 m.AllowSpellResearch = s.ReadBool();
