@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
 using H3Mapper.MapObjects;
@@ -381,6 +379,7 @@ namespace H3Mapper
                     {
                         LogUnexpectedType(mo);
                     }
+
                     return;
                 // decorative objects. May have SubIds
                 case ObjectId.RockDebrisHotA:
@@ -413,10 +412,11 @@ namespace H3Mapper
 
         private static void LogUnexpectedType(MapObject mo)
         {
-            Log.Information("Unexpected Object Subtype {subid} for object {id}:{type} {location}",
+            Log.Information("Unexpected Object Subtype {subid} for object {id}:{type} {animationFile} {location}",
                 mo.Template.SubId,
                 mo.Template.Id,
                 mo.Template.Type,
+                mo.Template.AnimationFile,
                 mo.Position);
         }
 
@@ -1131,7 +1131,7 @@ namespace H3Mapper
 
             if (count > 10000)
             {
-                throw new ArgumentOutOfRangeException($"Count {count} looks wrong. Probably there is a bug here.");
+                Log.Warning("Map object template count {count} looks wrong. Probably there is a bug here.", count);
             }
 
             var co = new MapObjectTemplate[count];

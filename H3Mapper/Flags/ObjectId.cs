@@ -3,9 +3,8 @@ namespace H3Mapper.Flags
 {
     public enum ObjectId
     {
-        Unknown = 0,
         AltarOfSacrifice = 2,
-        AnchorPoint = 3,
+        // AnchorPoint = 3, // this is never used, that I've seen anyway?
         Arena = 4,
         Artifact = 5,
         PandorasBox = 6,
