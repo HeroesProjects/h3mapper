@@ -607,7 +607,7 @@ namespace H3Mapper
 
             if (format > MapFormat.RoE)
             {
-                m.SpellsWillAppear = ReadSpellsFromBitmask(s);
+                m.SpellsWillAppear = ReadSpellsFromBitmask(s, activeBitValue: true);
             }
 
             m.SpellsMayAppear = ReadSpellsFromBitmask(s);
@@ -1275,13 +1275,14 @@ namespace H3Mapper
             }
         }
 
-        private Identifier[] ReadSpellsFromBitmask(MapDeserializer s)
+        /// <param name="activeBitValue">This is a terrible name. If <c>true</c> inverts the meaning of the bitmask</param>
+        private Identifier[] ReadSpellsFromBitmask(MapDeserializer s, bool activeBitValue = false)
         {
             var bitmask = s.ReadBitmaskBits(70);
             var spells = new List<Identifier>();
             for (var i = 0; i < bitmask.Length; i++)
             {
-                if (bitmask[i] == false)
+                if (bitmask[i] == activeBitValue)
                 {
                     spells.Add(ids.GetSpell(i));
                 }
@@ -1623,9 +1624,9 @@ namespace H3Mapper
             player.AITactic = s.ReadEnum<AITactic>();
             if (format > MapFormat.AB)
             {
-// 1 Configured whether what cities owns a player
-// that makes no sense
-// VCMI call it P7 (Unknown and unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L206
+                // 1 Configured whether what cities owns a player
+                // that makes no sense
+                // VCMI call it P7 (Unknown and unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L206
                 player.Unknown1 = s.Read1ByteNumber();
             }
 
@@ -1633,6 +1634,7 @@ namespace H3Mapper
             if (player.Disabled)
             {
 // if the player is disabled this can contain garbage
+                // TODO: is there any meaning to that?
                 s.Read1ByteNumber();
             }
             else
@@ -1646,8 +1648,8 @@ namespace H3Mapper
                 if (format != MapFormat.RoE)
                 {
                     player.GenerateHeroAtMainTown = s.ReadBool();
-// 1 Chief Town player: 1-DA 0-NET
-// VCMI call it generateHero (unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L238
+                    // 1 Chief Town player: 1-DA 0-NET
+                    // VCMI call it generateHero (unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L238
                     player.Unknown2 = s.Read1ByteNumber();
                 }
 
