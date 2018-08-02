@@ -1,7 +1,9 @@
 namespace H3Mapper.MapObjects
 {
-    // HotA only
-    public enum SpecialBuilding2Type
+    /// <summary>
+    /// Those are just new ones added in HotA
+    /// </summary>
+    public enum Building2Type
     {
         SeafaringAcademy = 0,
         Observatory = 1,

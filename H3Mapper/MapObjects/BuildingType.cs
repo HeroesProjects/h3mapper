@@ -1,7 +1,9 @@
 namespace H3Mapper.MapObjects
 {
-    // HotA only
-    public enum SpecialBuildingType
+    /// <summary>
+    /// Those are just new ones added in HotA
+    /// </summary>
+    public enum BuildingType
     {
         TempleOfLoyalty = 0,
         SkeletonTransformer = 1,

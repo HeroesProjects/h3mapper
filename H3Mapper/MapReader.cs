@@ -37,8 +37,8 @@ namespace H3Mapper
             {
                 // there's either 4 empty bytes or 1 followed by 5 empty ones.
                 // not sure about the meaning of that yet...
-                var unknown = s.Read1ByteNumber();
-                s.Skip(unknown == 1 ? 5 : 3);
+                info.FormatSubversion = s.ReadEnum<MapFormatSubversion>();
+                s.Skip(info.FormatSubversion == MapFormatSubversion.Version1 ? 5 : 3);
             }
 
             info.HasPlayers = s.ReadBool();
@@ -151,21 +151,21 @@ namespace H3Mapper
                         break;
                     case ObjectId.Monster:
                     case ObjectId.RandomMonster:
-                    case ObjectId.RandomMonsterLevel1:
-                    case ObjectId.RandomMonsterLevel2:
-                    case ObjectId.RandomMonsterLevel3:
-                    case ObjectId.RandomMonsterLevel4:
-                    case ObjectId.RandomMonsterLevel5:
-                    case ObjectId.RandomMonsterLevel6:
-                    case ObjectId.RandomMonsterLevel7:
+                    case ObjectId.RandomMonster1:
+                    case ObjectId.RandomMonster2:
+                    case ObjectId.RandomMonster3:
+                    case ObjectId.RandomMonster4:
+                    case ObjectId.RandomMonster5:
+                    case ObjectId.RandomMonster6:
+                    case ObjectId.RandomMonster7:
                         mo = ReadMapMonster(s, template.SubId, info.Format);
                         break;
                     case ObjectId.OceanBottle:
                     case ObjectId.Sign:
                         mo = ReadMessageObject(s);
                         break;
-                    case ObjectId.SeerHut:
-                        mo = ReadSeerHut(s, EnumValues.Cast<SeerHutType>(template.SubId), info.Format);
+                    case ObjectId.SeersHut:
+                        mo = ReadSeersHut(s, EnumValues.Cast<SeerHutType>(template.SubId), info.Format);
                         break;
                     case ObjectId.WitchHut:
                         mo = ReadWitchHut(s, info.Format, template.SubId);
@@ -200,7 +200,7 @@ namespace H3Mapper
                         break;
                     case ObjectId.RandomTown:
                     case ObjectId.Town:
-                        mo = ReadTown(s, EnumValues.Cast<Faction>(template.SubId), info.Format);
+                        mo = ReadTown(s, EnumValues.Cast<Faction>(template.SubId), info);
                         break;
                     case ObjectId.CreatureGenerator1:
                     case ObjectId.CreatureGenerator2:
@@ -228,9 +228,9 @@ namespace H3Mapper
                         mo = ReadGrail(s);
                         break;
                     case ObjectId.RandomDwelling:
-                    case ObjectId.RandomDwellingFaction:
-                    case ObjectId.RandomDwellingLevel:
-                        mo = ReadDwelling(s, template.Id, template.SubId);
+                    case ObjectId.RandomDwelling2:
+                    case ObjectId.RandomDwelling3:
+                        mo = ReadDwelling(s, template.Id, template.SubId, info.Format);
                         break;
                     case ObjectId.QuestGuard:
                         mo = ReadQuest(s, info.Format);
@@ -254,7 +254,7 @@ namespace H3Mapper
                     case ObjectId.TreasureChest:
                         mo = new MapObject<TreasureChestType>(template.SubId);
                         break;
-                    case ObjectId.ResourceWarehouseHotA:
+                    case ObjectId.ResourceWarehouse:
                         mo = new MapObject<Resource>(template.SubId);
                         break;
                     case ObjectId.HillFort:
@@ -283,17 +283,17 @@ namespace H3Mapper
                     case ObjectId.MonolithOneWayExit:
                         mo = new MapObject<MonolithOneWayType>(template.SubId);
                         break;
-                    case ObjectId.SpecialTerrainHotA:
-                        mo = new MapObject<SpecialTerrainType>(template.SubId);
+                    case ObjectId.MagicalTerrain:
+                        mo = new MapObject<MagicalTerrainType>(template.SubId);
                         break;
-                    case ObjectId.SpecialBuildingHotA:
-                        mo = new MapObject<SpecialBuildingType>(template.SubId);
+                    case ObjectId.Building:
+                        mo = new MapObject<BuildingType>(template.SubId);
                         break;
-                    case ObjectId.SeaObjectsHotA:
+                    case ObjectId.SeaObject:
                         mo = new MapObject<SeaObjectType>(template.SubId);
                         break;
-                    case ObjectId.SpecialBuilding2HotA:
-                        mo = new MapObject<SpecialBuilding2Type>(template.SubId);
+                    case ObjectId.Building2:
+                        mo = new MapObject<Building2Type>(template.SubId);
                         break;
                     default:
                         mo = new MapObject();
@@ -330,19 +330,19 @@ namespace H3Mapper
                 case ObjectId.Hero:
                 case ObjectId.Monster:
                 case ObjectId.Resource:
-                case ObjectId.SeerHut:
+                case ObjectId.SeersHut:
                 case ObjectId.CreatureBank:
                 case ObjectId.CreatureGenerator1:
                 case ObjectId.CreatureGenerator2:
                 case ObjectId.CreatureGenerator3:
                 case ObjectId.CreatureGenerator4:
-                case ObjectId.RandomMonsterLevel1:
-                case ObjectId.RandomMonsterLevel2:
-                case ObjectId.RandomMonsterLevel3:
-                case ObjectId.RandomMonsterLevel4:
-                case ObjectId.RandomMonsterLevel5:
-                case ObjectId.RandomMonsterLevel6:
-                case ObjectId.RandomMonsterLevel7:
+                case ObjectId.RandomMonster1:
+                case ObjectId.RandomMonster2:
+                case ObjectId.RandomMonster3:
+                case ObjectId.RandomMonster4:
+                case ObjectId.RandomMonster5:
+                case ObjectId.RandomMonster6:
+                case ObjectId.RandomMonster7:
                 case ObjectId.BorderGate:
                 case ObjectId.BorderGuard:
                 case ObjectId.Object:
@@ -354,12 +354,12 @@ namespace H3Mapper
                 case ObjectId.LibraryOfEnlightenment:
                 case ObjectId.WitchHut:
                 case ObjectId.Tavern:
-                case ObjectId.RandomDwellingLevel:
-                case ObjectId.RandomDwellingFaction:
+                case ObjectId.RandomDwelling2:
+                case ObjectId.RandomDwelling3:
                 case ObjectId.Garrison:
                 case ObjectId.Garrison2:
                 case ObjectId.IdolOfFortune:
-                case ObjectId.ResourceWarehouseHotA:
+                case ObjectId.ResourceWarehouse:
                 case ObjectId.HillFort:
                 case ObjectId.SchoolOfMagic:
                 case ObjectId.ShrineOfMagicIncantation:
@@ -368,10 +368,10 @@ namespace H3Mapper
                 case ObjectId.MonolithOneWayEntrance:
                 case ObjectId.MonolithOneWayExit:
                 case ObjectId.WarMachineFactory:
-                case ObjectId.SpecialTerrainHotA:
-                case ObjectId.SpecialBuildingHotA:
-                case ObjectId.SpecialBuilding2HotA:
-                case ObjectId.SeaObjectsHotA:
+                case ObjectId.SeaObject:
+                case ObjectId.Building:
+                case ObjectId.Building2:
+                case ObjectId.MagicalTerrain:
                 case ObjectId.ShrineOfMagicGesture:
                     return;
                 case ObjectId.KeymastersTent:
@@ -381,12 +381,11 @@ namespace H3Mapper
                     }
 
                     return;
-                // decorative objects. May have SubIds
-                case ObjectId.RockDebrisHotA:
-                case ObjectId.FirePuddlesWaterfallsHotA:
-                // this has subIds but as far as I can tell, they are not very meaningful.
-                // TODO: figure out if the sub ids actually... mean anything
-                case ObjectId.ObjectWithNoDescriptionHotA:
+                // HotA decorative objects. SubId defines the type but they are purely ornamental
+                // TODO: confirm they are roughly the same as ObjectId.DecorativeObject or if it should be renamed
+                case ObjectId.DecorativeObject:
+                case ObjectId.DecorativeObject2:
+                case ObjectId.DecorativeObject3:
                     return;
                 case ObjectId.ShrineOfMagicThought:
                 case ObjectId.MagicWell:
@@ -468,13 +467,14 @@ namespace H3Mapper
             return h;
         }
 
-        private DwellingObject ReadDwelling(MapDeserializer s, ObjectId id, int subId)
+        private DwellingObject ReadDwelling(MapDeserializer s, ObjectId id, int subId, MapFormat format)
         {
             var d = new DwellingObject();
             d.Player = s.ReadEnum<Player>();
             s.Skip(3);
-            if (id == ObjectId.RandomDwellingFaction)
+            if (id == ObjectId.RandomDwelling3)
             {
+                Debug.Assert(IsHota(format));
                 d.RandomDwellingFaction = EnumValues.Cast<Faction>(subId);
             }
             else
@@ -490,8 +490,9 @@ namespace H3Mapper
                 }
             }
 
-            if (id == ObjectId.RandomDwellingLevel)
+            if (id == ObjectId.RandomDwelling2)
             {
+                Debug.Assert(IsHota(format));
                 d.MinLevel = d.MaxLevel = EnumValues.Cast<UnitLevel>(subId);
             }
             else
@@ -571,11 +572,11 @@ namespace H3Mapper
             return m;
         }
 
-        private TownObject ReadTown(MapDeserializer s, Faction faction, MapFormat format)
+        private TownObject ReadTown(MapDeserializer s, Faction faction, MapInfo info)
         {
             var m = new TownObject();
             m.Faction = faction;
-            if (format > MapFormat.RoE)
+            if (info.Format > MapFormat.RoE)
             {
                 m.Identifier = s.Read4ByteNumberLong();
             }
@@ -590,7 +591,7 @@ namespace H3Mapper
             var hasGarrison = s.ReadBool();
             if (hasGarrison)
             {
-                m.Garrison = ReadCreatures(s, format, 7);
+                m.Garrison = ReadCreatures(s, info.Format, 7);
             }
 
             m.GarrisonFormation = s.ReadEnum<Formation>();
@@ -605,19 +606,19 @@ namespace H3Mapper
                 m.HasFort = s.ReadBool();
             }
 
-            if (format > MapFormat.RoE)
+            if (info.Format > MapFormat.RoE)
             {
                 m.SpellsThatMustAppear = ReadSpellsFromBitmask(s, activeBitValue: true);
             }
 
             m.SpellsThatMayAppear = ReadSpellsFromBitmask(s);
-            if (IsHota(format))
+            if (info.FormatSubversion == MapFormatSubversion.Version1)
             {
                 m.AllowSpellResearch = s.ReadBool();
             }
 
-            m.Events = ReadEvents(s, format, true);
-            if (format > MapFormat.AB)
+            m.Events = ReadEvents(s, info.Format, true);
+            if (info.Format > MapFormat.AB)
             {
                 // this only applies to random castles
                 m.Alignment = s.ReadEnum<RandomTownAlignment>();
@@ -739,7 +740,7 @@ namespace H3Mapper
             return h;
         }
 
-        private SeerHutObject ReadSeerHut(MapDeserializer s, SeerHutType type, MapFormat format)
+        private SeerHutObject ReadSeersHut(MapDeserializer s, SeerHutType type, MapFormat format)
         {
             var h = new SeerHutObject();
             h.Type = type;
@@ -852,7 +853,8 @@ namespace H3Mapper
                     q.Artifacts = artifactIds;
                     break;
                 case QuestType.ReturnWithCreatures:
-                    q.Creatues = ReadCreatures(s, format, s.Read1ByteNumber(maxValue: 7));
+                    // NOTE: not sure why HotA allows up to 9 creatures but well... they do
+                    q.Creatues = ReadCreatures(s, format, s.Read1ByteNumber(maxValue: (byte) (IsHota(format) ? 9 : 7)));
                     break;
                 case QuestType.ReturnWithResources:
                     q.Resources = ReadResources(s, format);

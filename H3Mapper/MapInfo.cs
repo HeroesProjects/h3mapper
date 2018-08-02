@@ -10,6 +10,7 @@ namespace H3Mapper
         }
 
         public MapFormat Format { get; set; }
+        public MapFormatSubversion FormatSubversion { get; set; }
         public bool HasPlayers { get; set; }
         public int Size { get; set; }
         public bool HasSecondLevel { get; set; }

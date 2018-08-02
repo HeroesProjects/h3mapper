@@ -6,8 +6,10 @@ namespace H3Mapper.Flags
         StrawHut = 0,
         Mushroom = 1,
         Tree = 2,
+
         // Below are from HotA
         Water = 3,
-        StoneTower = 5,
+        Tower = 4,
+        StoneHut = 5,
     }
 }
