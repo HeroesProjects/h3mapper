@@ -144,7 +144,7 @@ namespace H3Mapper.Flags
         PineTrees = 137,
         Plant = 138,
         DecorativeObject2 = 139, // HotA only (Waterfalls, frogs etc)
-        DecorativeObject3 = 140, // HotA only (Palms, Stones, Piles of stones, Ice blocks, Snow hills, Barchan dunes, Spruces)
+        DecorativeObject3 = 140, // HotA only (Palms, Stones, Snow hills etc)
         MagicalTerrain = 141, // HotA only
         ResourceWarehouse = 142, // HotA only 
         RiverDelta = 143,
@@ -221,8 +221,8 @@ namespace H3Mapper.Flags
         HeroPlaceholder = 214,
         QuestGuard = 215,
         RandomDwelling = 216,
-        RandomDwelling2 = 217, // HotA only, SubId represents UnitLevel
-        RandomDwelling3 = 218, // HotA only, SubId represents Faction
+        RandomDwellingLevel = 217, // SubId represents Level
+        RandomDwellingFaction = 218, // SubId represents Faction
         Garrison2 = 219,
         Mine2 = 220,
         TradingPost2 = 221,

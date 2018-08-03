@@ -177,6 +177,7 @@ namespace H3Mapper
                         mo = ReadGarrison(s, info.Format, template.SubId, GarrisonOrientation.EastWest);
                         break;
                     case ObjectId.Garrison2:
+                        RequireVersionAtLeast(info, MapFormat.AB);
                         mo = ReadGarrison(s, info.Format, template.SubId, GarrisonOrientation.NorthSouth);
                         break;
                     case ObjectId.Artifact:
@@ -228,20 +229,26 @@ namespace H3Mapper
                         mo = ReadGrail(s);
                         break;
                     case ObjectId.RandomDwelling:
-                    case ObjectId.RandomDwelling2:
-                    case ObjectId.RandomDwelling3:
-                        mo = ReadDwelling(s, template.Id, template.SubId, info.Format);
+                    case ObjectId.RandomDwellingLevel:
+                    case ObjectId.RandomDwellingFaction:
+                        RequireVersionAtLeast(info, MapFormat.AB);
+                        mo = ReadDwelling(s, template.Id, template.SubId);
                         break;
                     case ObjectId.QuestGuard:
+                        RequireVersionAtLeast(info, MapFormat.AB);
                         mo = ReadQuest(s, info.Format);
                         break;
                     case ObjectId.HeroPlaceholder:
+                        RequireVersionAtLeast(info, MapFormat.AB);
                         mo = ReadHeroPlaceholder(s);
                         break;
                     case ObjectId.CreatureBank:
                         mo = new MapObject<CreatureBankType>(template.SubId);
                         break;
                     case ObjectId.BorderGate:
+                        RequireVersionAtLeast(info, MapFormat.AB);
+                        mo = new MapObject<ObjectColor>(template.SubId);
+                        break;
                     case ObjectId.BorderGuard:
                         mo = new MapObject<ObjectColor>(template.SubId);
                         break;
@@ -354,8 +361,8 @@ namespace H3Mapper
                 case ObjectId.LibraryOfEnlightenment:
                 case ObjectId.WitchHut:
                 case ObjectId.Tavern:
-                case ObjectId.RandomDwelling2:
-                case ObjectId.RandomDwelling3:
+                case ObjectId.RandomDwellingLevel:
+                case ObjectId.RandomDwellingFaction:
                 case ObjectId.Garrison:
                 case ObjectId.Garrison2:
                 case ObjectId.IdolOfFortune:
@@ -467,14 +474,13 @@ namespace H3Mapper
             return h;
         }
 
-        private DwellingObject ReadDwelling(MapDeserializer s, ObjectId id, int subId, MapFormat format)
+        private DwellingObject ReadDwelling(MapDeserializer s, ObjectId id, int subId)
         {
             var d = new DwellingObject();
             d.Player = s.ReadEnum<Player>();
             s.Skip(3);
-            if (id == ObjectId.RandomDwelling3)
+            if (id == ObjectId.RandomDwellingFaction)
             {
-                Debug.Assert(IsHota(format));
                 d.RandomDwellingFaction = EnumValues.Cast<Faction>(subId);
             }
             else
@@ -490,9 +496,8 @@ namespace H3Mapper
                 }
             }
 
-            if (id == ObjectId.RandomDwelling2)
+            if (id == ObjectId.RandomDwellingLevel)
             {
-                Debug.Assert(IsHota(format));
                 d.MinLevel = d.MaxLevel = EnumValues.Cast<UnitLevel>(subId);
             }
             else
@@ -1715,6 +1720,14 @@ namespace H3Mapper
             }
 
             return s.ReadEnum<Factions>(2);
+        }
+
+        private static void RequireVersionAtLeast(MapInfo info, MapFormat version)
+        {
+            if (info.Format >= version) return;
+            Log.Warning("This map's format is {format} but it has features requiring at least {requiredFormat}",
+                info.Format,
+                version);
         }
     }
 }
