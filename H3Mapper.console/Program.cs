@@ -17,6 +17,7 @@ namespace H3Mapper
     internal class Program
     {
         private static string RootFolder = null;
+
         private static int Main(string[] args)
         {
             if (args.Length == 0)
@@ -29,7 +30,7 @@ namespace H3Mapper
             var result = 0;
             try
             {
-                ConfigureLogging(args.Contains("-d"));
+                ConfigureLogging(args.Contains("-d"), args.Contains("-q"));
 
                 var path = args[0];
 
@@ -98,10 +99,12 @@ namespace H3Mapper
                 ReadIdMap("heroes.txt"),
                 ReadIdMap("spells.txt"),
                 ReadIdMap("artifacts.txt"),
-                ReadIdMap("monsters.txt"));
+                ReadIdMap("monsters.txt"),
+                ReadIdMap("creaturegenerators1.txt"),
+                ReadIdMap("creaturegenerators4.txt"));
         }
 
-        private static void ConfigureLogging(bool forceDebug)
+        private static void ConfigureLogging(bool forceDebug, bool quietMode)
         {
             var configuration = new LoggerConfiguration()
                 .WriteTo.File("logs.log")
@@ -124,49 +127,67 @@ namespace H3Mapper
                     [ConsoleThemeStyle.LevelError] = "\x001B[38;5;0197m\x001B[48;5;0238m",
                     [ConsoleThemeStyle.LevelFatal] = "\x001B[38;5;0197m\x001B[48;5;0238m"
                 }));
-#if DEBUG
-            forceDebug = true;
-#endif
-            if (forceDebug)
+            if (quietMode)
             {
-                configuration.MinimumLevel.Debug();
+                configuration.MinimumLevel.Warning();
             }
+            else
+            {
+#if DEBUG
+                forceDebug = true;
+#endif
+                if (forceDebug)
+                {
+                    configuration.MinimumLevel.Debug();
+                }
+            }
+
 
             Log.Logger = configuration.CreateLogger();
         }
 
         private static int Process(IdMappings idMappings, string mapFilePath, bool skipOutput)
         {
-            Log.Debug("Processing {file}", mapFilePath);
+            Log.Information("Processing {file}", mapFilePath);
             using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
             {
                 var reader = new MapReader(idMappings);
-                H3Map mapHeader;
+                H3Map mapData;
                 try
                 {
-                    mapHeader = reader.Read(new MapDeserializer(new PositionTrackingStream(mapFile)));
+                    mapData = reader.Read(new MapDeserializer(new PositionTrackingStream(mapFile)));
                 }
                 catch (InvalidDataException e)
                 {
                     Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
                     return e.HResult;
                 }
+                catch (ArgumentException e)
+                {
+                    Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
+                    return e.HResult;
+                }
+                catch (InvalidOperationException e)
+                {
+                    Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
+                    return e.HResult;
+                }
 
-                Console.WriteLine("Successfully processed.");
+//                Console.WriteLine("Successfully processed.");
                 if (skipOutput)
                 {
-                    Log.Debug("Skipping writing output file.");
+//                    Log.Debug("Skipping writing output file.");
                     return 0;
                 }
 
-                var output = Path.ChangeExtension(mapFilePath, ".json");
-                var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
-                    new JsonSerializerSettings
-                    {
-                        Converters = {new StringEnumConverter()}
-                    });
-                File.WriteAllText(output, json);
-                Console.WriteLine($"Output saved as {output}");
+//                var output = Path.ChangeExtension(mapFilePath, ".json");
+//                var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
+//                    new JsonSerializerSettings
+//                    {
+//                        Converters = {new StringEnumConverter()}
+//                    });
+//                File.WriteAllText(output, json);
+//                Console.WriteLine($"Output saved as {output}");
                 return 0;
             }
         }

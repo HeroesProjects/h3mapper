@@ -1,0 +1,22 @@
+// id : Name
+59 : Magic Lantern
+60 : Altar of Thought
+61 : Pyre
+62 : Frozen Cliffs
+63 : Crystal Cave
+64 : Magic Forest
+65 : Sulfurous Lair
+66 : Enchanter's Hollow
+67 : Treetop Tower
+68 : Unicorn Glade
+69 : Altar of Air
+70 : Altar of Earth
+71 : Altar of Fire
+72 : Altar of Water
+73 : Thatched Hut
+74 : Hovel
+75 : Boar Glen
+76 : Tomb of Curses
+77 : Nomad Tent
+78 : Rogue Cavern
+79 : Troll Bridge

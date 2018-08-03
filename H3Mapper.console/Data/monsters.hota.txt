@@ -1,3 +1,18 @@
+151 : Sea Dog
+153 : Nymph
+154 : Oceanid
+155 : Crew Mate
+156 : Seaman
+157 : Pirate
+158 : Corsair
+159 : Stormbird
+160 : Ayssid
+161 : Sea Witch
+162 : Sorceress
+163 : Nix
+164 : Nix Warrior
+165 : Sea Serpent
+166 : Haspid
 167 : Satyr
 168 : Fangarm
 169 : Leprechaun

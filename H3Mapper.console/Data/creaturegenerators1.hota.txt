@@ -1,0 +1,15 @@
+// id : Name
+91 : Maelstrom
+92 : Nymph Waterfall
+93 : Shack
+94 : Frigate
+95 : Nest
+96 : Tower of the Seas
+97 : Nix Fort
+// yup, another Maelstrom
+98 : Maelstrom
+// yup, another Nix Fort 
+99 : Nix Fort
+100 : Wineyard
+101 : Ziggurat
+102 : Alehouse

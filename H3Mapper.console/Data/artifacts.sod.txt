@@ -1,0 +1,17 @@
+// id : Name
+129 : Angelic Alliance
+130 : Cloak of the Undead King
+131 : Elixir of Life
+132 : Armor of the Damned
+133 : Statue of Legion
+134 : Power of the Dragon Father
+135 : Titan's Thunder
+136 : Admiral's Hat
+137 : Bow of the Sharpshooter
+138 : Wizard's Well
+139 : Ring of the Magi
+140 : Cornucopia
+// The following artifacts weren't used in the game
+141 : Diplomat's Suit
+142 : Mired in Neutrality
+143 : Ironfist of the Ogre 

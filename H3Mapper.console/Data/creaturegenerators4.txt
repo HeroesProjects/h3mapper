@@ -1,0 +1,3 @@
+// id : Name
+0 : Elemental Conflux
+1 : Golem Factory

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using H3Mapper.Flags;
 using Serilog;
 
@@ -14,14 +15,18 @@ namespace H3Mapper
         private readonly IdMap monsters;
 
         private readonly IdMap spells;
+        private readonly IdMap creatureGenerators1;
+        private readonly IdMap creatureGenerators4;
 
-        public IdMappings(IdMap heroes, IdMap spells,
-            IdMap artifacts, IdMap monsters)
+        public IdMappings(IdMap heroes, IdMap spells, IdMap artifacts, IdMap monsters, IdMap creatureGenerators1,
+            IdMap creatureGenerators4)
         {
             this.heroes = heroes;
             this.spells = spells;
             this.artifacts = artifacts;
             this.monsters = monsters;
+            this.creatureGenerators1 = creatureGenerators1;
+            this.creatureGenerators4 = creatureGenerators4;
         }
 
         public Identifier GetSpell(int spellId)
@@ -30,6 +35,24 @@ namespace H3Mapper
             {
                 Value = spellId,
                 Name = TryGetValueForId(spellId, spells, "spell")
+            };
+        }
+
+        public Identifier GetCreatureGenerator1(int creatureGeneratorId)
+        {
+            return new Identifier
+            {
+                Value = creatureGeneratorId,
+                Name = TryGetValueForId(creatureGeneratorId, creatureGenerators1, "creatureGenerator1")
+            };
+        }
+
+        public Identifier GetCreatureGenerator4(int creatureGeneratorId)
+        {
+            return new Identifier
+            {
+                Value = creatureGeneratorId,
+                Name = TryGetValueForId(creatureGeneratorId, creatureGenerators4, "creatureGenerator4")
             };
         }
 
@@ -69,10 +92,12 @@ namespace H3Mapper
             {
                 Log.Information("No name for {itemType} {value}", name, id);
             }
+
             if (value != emptyValue)
             {
                 return value;
             }
+
             return null;
         }
 
@@ -82,13 +107,18 @@ namespace H3Mapper
             heroes.SetCurrentSpecific(format);
             spells.SetCurrentSpecific(format);
             monsters.SetCurrentSpecific(format);
+            creatureGenerators1.SetCurrentSpecific(format);
+            creatureGenerators4.SetCurrentSpecific(format);
         }
 
         public class IdMap
         {
             private readonly IDictionary<int, string> @default;
-            private IDictionary<MapFormat, IDictionary<int, string>> specific;
-            private IDictionary<int, string> specificCurrent;
+
+            private readonly IDictionary<MapFormat, IDictionary<int, string>> specific =
+                new Dictionary<MapFormat, IDictionary<int, string>>();
+
+            private IDictionary<int, string>[] valueChain;
 
             public IdMap(IDictionary<int, string> @default)
             {
@@ -103,35 +133,63 @@ namespace H3Mapper
                     {
                         return false;
                     }
-                    return specificCurrent != null && specificCurrent.Count > 0;
+
+                    return specific.Any(s => s.Value.Count > 0) == false;
                 }
             }
 
             public void AddFormatMapping(MapFormat format, IDictionary<int, string> mapping)
             {
-                if (specific == null)
-                {
-                    specific = new Dictionary<MapFormat, IDictionary<int, string>>();
-                }
                 specific.Add(format, mapping);
             }
 
             public void SetCurrentSpecific(MapFormat format)
             {
-                if (specific != null && specific.TryGetValue(format, out var current))
+                var chain = new List<IDictionary<int, string>>(specific.Count + 1);
+                var currentFormat = format;
+                do
                 {
-                    specificCurrent = current;
-                }
-                else
+                    if (specific.TryGetValue(currentFormat, out var currentValue))
+                    {
+                        chain.Add(currentValue);
+                    }
+
+                    currentFormat = GetPreviousFormatInChain(currentFormat);
+                } while (currentFormat != 0);
+
+                // always at least have the default
+                chain.Add(@default);
+                valueChain = chain.ToArray();
+            }
+
+            private MapFormat GetPreviousFormatInChain(MapFormat format)
+            {
+                switch (format)
                 {
-                    specificCurrent = null;
+                    case MapFormat.HotA:
+                    case MapFormat.WoG:
+                        return MapFormat.SoD;
+                    case MapFormat.SoD:
+                        return MapFormat.AB;
+                    case MapFormat.AB:
+                        return MapFormat.RoE;
+                    default:
+                        return 0;
                 }
             }
 
             public bool TryGetValue(int id, out string value)
             {
-                return specificCurrent != null && specificCurrent.TryGetValue(id, out value) ||
-                       @default.TryGetValue(id, out value);
+                foreach (var collection in valueChain)
+                {
+                    if (collection.TryGetValue(id, out value))
+                    {
+                        return true;
+                    }
+                }
+
+                value = null;
+                return false;
             }
         }
     }

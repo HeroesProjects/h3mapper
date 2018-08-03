@@ -1,0 +1,60 @@
+// id : Name
+0 : Basilisk Pit
+1 : Behemoth Crag
+2 : Pillar of Eyes
+3 : Hall of Darkness
+4 : Dragon Vault
+5 : Training Grounds
+6 : Centaur Stables
+7 : Altar of Air
+8 : Portal of Glory
+9 : Cyclops Cave
+10 : Forsaken Palace
+11 : Serpent Fly Hive
+12 : Dwarf Cottage
+13 : Altar of Earth
+14 : Fire Lake
+15 : Homestead
+16 : Altar of Fire
+17 : Parapet
+18 : Altar of Wishes
+19 : Wolf Pen
+20 : Gnoll Hut
+21 : Goblin Barracks
+22 : Hall of Sins
+23 : Gorgon Lair
+24 : Dragon Cliffs
+25 : Griffin Tower
+26 : Harpy Loft
+27 : Kennels
+28 : Hydra Pond
+29 : Imp Crucible
+30 : Lizard Den
+31 : Mage Tower
+32 : Manticore Lair
+33 : Chapel of Stilled Voices
+34 : Labyrinth
+35 : Monastery
+36 : Golden Pavilion
+37 : Demon Gate
+38 : Ogre Fort
+39 : Orc Tower
+40 : Hell Hole
+41 : Dragon Cave
+42 : Cliff Nest
+43 : Workshop
+44 : Cloud Temple
+45 : Dendroid Arches
+46 : Warren
+47 : Altar of Water
+48 : Tomb of Souls
+49 : Wyvern Nest
+50 : Enchanted Spring
+51 : Unicorn Glade
+52 : Mausoleum
+53 : Estate
+54 : Cursed Temple
+55 : Graveyard
+56 : Guardhouse
+57 : Archers' Tower
+58 : Barracks

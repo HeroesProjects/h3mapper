@@ -203,18 +203,24 @@ namespace H3Mapper
                     case ObjectId.Town:
                         mo = ReadTown(s, EnumValues.Cast<Faction>(template.SubId), info);
                         break;
-                    case ObjectId.CreatureGenerator1:
                     case ObjectId.CreatureGenerator2:
                     case ObjectId.CreatureGenerator3:
+                        throw new NotSupportedException();
+                    case ObjectId.CreatureGenerator1:
+                        mo = ReadCreatureGenerator(s, ids.GetCreatureGenerator1(template.SubId));
+                        break;
                     case ObjectId.CreatureGenerator4:
-                        mo = ReadCreatureGenerator(s, EnumValues.Cast<CreatureGeneratorType>(template.SubId));
+                        mo = ReadCreatureGenerator(s, ids.GetCreatureGenerator4(template.SubId));
                         break;
                     case ObjectId.Shipyard:
                     case ObjectId.Lighthouse:
                         mo = ReadPlayerObject(s);
                         break;
                     case ObjectId.Mine:
+                        mo = ReadMine(s, EnumValues.Cast<MineType>(template.SubId));
+                        break;
                     case ObjectId.Mine2:
+                        RequireVersionAtLeast(info, MapFormat.AB);
                         mo = ReadMine(s, EnumValues.Cast<MineType>(template.SubId));
                         break;
                     case ObjectId.ShrineOfMagicGesture:
@@ -303,7 +309,29 @@ namespace H3Mapper
                         mo = new MapObject<Building2Type>(template.SubId);
                         break;
                     case ObjectId.FreelancersGuild:
+                    case ObjectId.DirtHills:
+                    case ObjectId.DesertHills:
+                    case ObjectId.GrassHills:
+                    case ObjectId.TradingPost2:
+                    case ObjectId.Trees2:
+                    case ObjectId.SwampFoliage:
+                    case ObjectId.Lake2:
+                    case ObjectId.RoughHills:
+                    case ObjectId.SubterraneanRocks:
                         RequireVersionAtLeast(info, MapFormat.AB);
+                        mo = new MapObject();
+                        break;
+                    case ObjectId.FavorableWinds:
+                    case ObjectId.CursedGround2:
+                    case ObjectId.MagicPlains2:
+                    case ObjectId.CloverField:
+                    case ObjectId.EvilFog:
+                    case ObjectId.FieryFields:
+                    case ObjectId.HolyGround:
+                    case ObjectId.LucidPools:
+                    case ObjectId.MagicClouds:
+                    case ObjectId.Rocklands:
+                        RequireVersionAtLeast(info, MapFormat.SoD);
                         mo = new MapObject();
                         break;
                     default:
@@ -320,11 +348,11 @@ namespace H3Mapper
             return objects;
         }
 
-        private CreatureGeneratorObject ReadCreatureGenerator(MapDeserializer s, CreatureGeneratorType type)
+        private CreatureGeneratorObject ReadCreatureGenerator(MapDeserializer s, Identifier generator)
         {
             var g = new CreatureGeneratorObject
             {
-                Type = type,
+                Type = generator,
                 Owner = s.ReadEnum<Player>()
             };
             s.Skip(3);

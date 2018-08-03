@@ -1,0 +1,22 @@
+// id : Name
+80 : Portal of Splendor
+81 : Dragon Peaks
+82 : Storm Temple
+83 : Unholy Palace
+84 : Spectral Vault
+85 : Cave of Darkness
+86 : Behemoth Tomb
+87 : Chaos Pool
+88 : Spirit Pyre
+89 : Rock Covered Position
+90 : Snow Covered Position
+91 : Vast Cavern
+92 : Dream Horse-shoe
+93 : Natural Calamity
+94 : Lost Friary
+95 : Snowman
+96 : Sylvan Homestead
+97 : Enchanted Tower
+98 : Howling Hollow
+99 : Hellfire Rift
+100 : Dragon Graveyard
