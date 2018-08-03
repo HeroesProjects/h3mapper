@@ -2,6 +2,15 @@
 141 : Magic Wand
 142 : Gold Tower Arrow
 143 : Monster’s power
+
+// the following are not real artifacts, and for internal use only
+// after https://h3maparchives.celestialheavens.com/tools/wog/erm_help/format/format_a1.htm
+// not sure if anything needs to be done to 'support' them
+// 144 	Highlighted Slot
+// 145 	Artifact Lock
+144 : --
+145 : --
+
 146 : Axe of Smashing (commander artifact)
 147 : Mithril Mail (commander artifact)
 148 : Sword of Sharpness (commander artifact)
