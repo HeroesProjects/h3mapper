@@ -1372,7 +1372,7 @@ namespace H3Mapper
             }
 
 //bag artifacts
-            var bagSize = s.Read2ByteNumber();
+            var bagSize = s.Read2ByteNumber(maxValue: 64);
             for (var i = 0; i < bagSize; i++)
             {
                 artifacts.TryAdd(ReadArtifactForSlot(s, format, ArtifactSlot.Backpack));
