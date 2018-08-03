@@ -1,4 +1,7 @@
 // id : Name
+141 : Magic Wand
+142 : Gold Tower Arrow
+143 : Monster’s power
 146 : Axe of Smashing (commander artifact)
 147 : Mithril Mail (commander artifact)
 148 : Sword of Sharpness (commander artifact)
@@ -7,8 +10,13 @@
 151 : Boots of Haste (commander artifact)
 152 : Bow of Seeking (commander artifact)
 153 : Dragon Eye Ring (commander artifact)
+154 : Hardened Shield (commander artifact)
 155 : Slava's Ring of Power (commander artifact)
 156 : Warlord's Banner
+157 : Crimson Shield of Retribution
+158 : Barbarian Lord's Axe of Ferocity
+159 : Dragonheart
+160 : Gate Key
 161 : Helm (empty artifact)
 162 : Sword (empty artifact)
 163 : Shield (empty artifact)
