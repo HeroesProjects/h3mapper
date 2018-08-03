@@ -856,7 +856,7 @@ namespace H3Mapper
                     q.Skills = ReadPrimarySkills(s);
                     break;
                 case QuestType.AchieveExperienceLevel:
-                    q.Experience = s.Read4ByteNumberLong();
+                    q.Experience = s.Read4ByteNumberLong(1, 99);
                     break;
                 case QuestType.DefeatASpecificHero:
                 case QuestType.DefeatASpecificMonster:
@@ -875,8 +875,7 @@ namespace H3Mapper
                     q.Artifacts = artifactIds;
                     break;
                 case QuestType.ReturnWithCreatures:
-                    // NOTE: not sure why HotA allows up to 9 creatures but well... they do
-                    q.Creatues = ReadCreatures(s, format, s.Read1ByteNumber(maxValue: (byte) (IsHota(format) ? 9 : 7)));
+                    q.Creatues = ReadCreatures(s, format, s.Read1ByteNumber(maxValue: 7));
                     break;
                 case QuestType.ReturnWithResources:
                     q.Resources = ReadResources(s);
@@ -894,7 +893,7 @@ namespace H3Mapper
             var deadline = s.Read4ByteNumberLong();
             if (deadline != uint.MaxValue)
             {
-                q.Deadline = (int?) deadline;
+                q.Deadline = (int) deadline;
             }
 
             q.FirstVisitText = s.ReadString(30000);
@@ -947,7 +946,7 @@ namespace H3Mapper
         private MapObject ReadMapHero(MapDeserializer s, HeroType? type, MapFormat format)
         {
             var h = new HeroObject();
-            if (format > MapFormat.RoE)
+            if (format >= MapFormat.AB)
             {
                 h.Indentifier = s.Read4ByteNumberLong();
             }
@@ -962,7 +961,7 @@ namespace H3Mapper
                 h.Name = s.ReadString(12);
             }
 
-            if (format > MapFormat.AB)
+            if (format >= MapFormat.SoD)
             {
                 var hasExperience = s.ReadBool();
                 if (hasExperience)
@@ -1002,7 +1001,7 @@ namespace H3Mapper
             }
 
             h.PatrolRadius = s.ReadEnum<PatrolRadius>();
-            if (format > MapFormat.RoE)
+            if (format >= MapFormat.AB)
             {
                 var hasBio = s.ReadBool();
                 if (hasBio)
@@ -1013,7 +1012,7 @@ namespace H3Mapper
                 h.Sex = s.ReadEnum<HeroSex>();
             }
 
-            if (format > MapFormat.AB)
+            if (format >= MapFormat.SoD)
             {
                 var hasSpells = s.ReadBool();
                 if (hasSpells)
@@ -1023,6 +1022,7 @@ namespace H3Mapper
             }
             else if (format == MapFormat.AB)
             {
+                // TODO: Investigate this is correct and robust
                 var spellId = s.Read1ByteNumber();
                 if (spellId != byte.MaxValue && // no spell
                     spellId != (byte.MaxValue - 1)) // has 'default'? spell
@@ -1034,7 +1034,7 @@ namespace H3Mapper
                 }
             }
 
-            if (format > MapFormat.AB)
+            if (format >= MapFormat.SoD)
             {
                 var hasCustomPrimarySkills = s.ReadBool();
                 if (hasCustomPrimarySkills)

@@ -191,7 +191,7 @@ namespace H3Mapper
             if (stringLength < 0)
             {
                 throw new ArgumentException(
-                    $"String at {location:x8} has negative length of {stringLength} which is negative." +
+                    $"String at {location:x8} has negative length of {stringLength}." +
                     $" It\'s either a bug or the map file is invalid.");
             }
 
