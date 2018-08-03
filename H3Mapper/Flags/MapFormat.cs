@@ -9,6 +9,6 @@ namespace H3Mapper.Flags
         HotA2 = 0x1f,
         HotA3 = 0x20,
         HotA = HotA1 | HotA2 | HotA3,
-        WoG = 0x33 // 
+        WoG = 0x33 // 51
     }
 }
