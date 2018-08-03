@@ -302,6 +302,10 @@ namespace H3Mapper
                     case ObjectId.Building2:
                         mo = new MapObject<Building2Type>(template.SubId);
                         break;
+                    case ObjectId.FreelancersGuild:
+                        RequireVersionAtLeast(info, MapFormat.AB);
+                        mo = new MapObject();
+                        break;
                     default:
                         mo = new MapObject();
                         break;
