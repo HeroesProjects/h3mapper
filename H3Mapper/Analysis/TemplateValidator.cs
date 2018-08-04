@@ -1,9 +1,61 @@
-﻿using H3Mapper.Flags;
+﻿using System;
+using System.Collections.Generic;
+using H3Mapper.Flags;
 using H3Mapper.MapObjects;
 using Serilog;
 
 namespace H3Mapper.Analysis
 {
+    public class TemplateData
+    {
+        private sealed class TemplateDataEqualityComparer : IEqualityComparer<TemplateData>
+        {
+            public bool Equals(TemplateData x, TemplateData y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                return string.Equals(x.AnimationFile, y.AnimationFile, StringComparison.OrdinalIgnoreCase) && x.Type == y.Type && x.SubId == y.SubId && x.Id == y.Id;
+            }
+
+            public int GetHashCode(TemplateData obj)
+            {
+                unchecked
+                {
+                    var hashCode = StringComparer.OrdinalIgnoreCase.GetHashCode(obj.AnimationFile);
+                    hashCode = (hashCode * 397) ^ (int) obj.Type;
+                    hashCode = (hashCode * 397) ^ obj.SubId;
+                    hashCode = (hashCode * 397) ^ (int) obj.Id;
+                    return hashCode;
+                }
+            }
+        }
+
+        public static IEqualityComparer<TemplateData> TemplateDataComparer { get; } = new TemplateDataEqualityComparer();
+
+        public TemplateData(MapObjectTemplate template)
+        {
+            this.Id = template.Id;
+            this.SubId = template.SubId;
+            this.Type = template.Type;
+            this.AnimationFile = template.AnimationFile;
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(AnimationFile)}: {AnimationFile}, {nameof(Type)}: {Type}, {nameof(SubId)}: {SubId}, {nameof(Id)}: {Id}";
+        }
+
+        public string AnimationFile { get; set; }
+
+        public ObjectType Type { get; set; }
+
+        public int SubId { get; set; }
+
+        public ObjectId Id { get; set; }
+    }
+
     public class TemplateValidator
     {
         public void Validate(H3Map map)

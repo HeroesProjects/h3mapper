@@ -17,9 +17,10 @@ namespace H3Mapper
         private readonly IdMap spells;
         private readonly IdMap creatureGenerators1;
         private readonly IdMap creatureGenerators4;
+        private readonly TemplateMap templates;
 
         public IdMappings(IdMap heroes, IdMap spells, IdMap artifacts, IdMap monsters, IdMap creatureGenerators1,
-            IdMap creatureGenerators4)
+            IdMap creatureGenerators4, TemplateMap templates)
         {
             this.heroes = heroes;
             this.spells = spells;
@@ -27,6 +28,7 @@ namespace H3Mapper
             this.monsters = monsters;
             this.creatureGenerators1 = creatureGenerators1;
             this.creatureGenerators4 = creatureGenerators4;
+            this.templates = templates;
         }
 
         public Identifier GetSpell(int spellId)
@@ -109,6 +111,17 @@ namespace H3Mapper
             monsters.SetCurrentSpecific(format);
             creatureGenerators1.SetCurrentSpecific(format);
             creatureGenerators4.SetCurrentSpecific(format);
+        }
+
+        public class TemplateMap
+        {
+            public void AddFormatMapping(MapFormat format, MapObjectTemplate[] values)
+            {
+            }
+
+            public void AddDefault(MapObjectTemplate[] values)
+            {
+            }
         }
 
         public class IdMap

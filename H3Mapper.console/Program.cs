@@ -42,7 +42,7 @@ namespace H3Mapper
                 else
                 {
                     var mappings = ConfigureMappings();
-                    result = Run(path, mappings, args.Contains("-s"));
+                    result = Run(path, mappings);
                 }
             }
             catch (Exception e)
@@ -68,11 +68,11 @@ namespace H3Mapper
             }
         }
 
-        private static int Run(string path, IdMappings mappings, bool skipOutput)
+        private static int Run(string path, IdMappings mappings)
         {
             if (File.Exists(path))
             {
-                return Process(mappings, path, skipOutput);
+                return Process(mappings, path);
             }
 
             if (Directory.Exists(path))
@@ -80,7 +80,7 @@ namespace H3Mapper
                 var result = 0;
                 foreach (var file in Directory.EnumerateFiles(path, "*.h3m", SearchOption.AllDirectories))
                 {
-                    var fileResult = Process(mappings, file, skipOutput);
+                    var fileResult = Process(mappings, file);
                     if (fileResult != 0)
                     {
                         result = fileResult;
@@ -102,7 +102,37 @@ namespace H3Mapper
                 ReadIdMap("artifacts.txt"),
                 ReadIdMap("monsters.txt"),
                 ReadIdMap("creaturegenerators1.txt"),
-                ReadIdMap("creaturegenerators4.txt"));
+                ReadIdMap("creaturegenerators4.txt"),
+                ReadTemplates("objects.txt"));
+        }
+
+        private static IdMappings.TemplateMap ReadTemplates(string path)
+        {
+            var mapFileLocation = Path.Combine(RootFolder, "data", path);
+            var parser = new TemplateFileParser();
+            var map = new IdMappings.TemplateMap();
+            if (!File.Exists(mapFileLocation))
+            {
+                Log.Information("ID mapping file {file} doesn't exist. Skipping.", mapFileLocation);
+                return map;
+            }
+
+            foreach (var format in new[] {MapFormat.RoE, MapFormat.AB, MapFormat.SoD, MapFormat.HotA, MapFormat.WoG})
+            {
+                var file = Path.ChangeExtension(mapFileLocation, $"{format}.txt");
+                if (File.Exists(file))
+                {
+                    var values = parser.Parse(file).ToArray();
+                    map.AddFormatMapping(format, values);
+                }
+                else
+                {
+                    Log.Debug("ID mapping file {file} doesn't exist. Skipping.", file);
+                }
+            }
+
+            map.AddDefault(parser.Parse(mapFileLocation).ToArray());
+            return map;
         }
 
         private static void ConfigureLogging(bool forceDebug, bool quietMode)
@@ -147,16 +177,15 @@ namespace H3Mapper
             Log.Logger = configuration.CreateLogger();
         }
 
-        private static int Process(IdMappings idMappings, string mapFilePath, bool skipOutput)
+        private static int Process(IdMappings idMappings, string mapFilePath)
         {
             Log.Information("Processing {file}", mapFilePath);
             using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
             {
                 var reader = new MapReader(idMappings);
-                H3Map mapData;
                 try
                 {
-                    mapData = reader.Read(new MapDeserializer(new PositionTrackingStream(mapFile)));
+                    var mapData = reader.Read(new MapDeserializer(new PositionTrackingStream(mapFile)));
                     var analyser = new TemplateValidator();
                     analyser.Validate(mapData);
                 }
@@ -176,21 +205,6 @@ namespace H3Mapper
                     return e.HResult;
                 }
 
-//                Console.WriteLine("Successfully processed.");
-                if (skipOutput)
-                {
-//                    Log.Debug("Skipping writing output file.");
-                    return 0;
-                }
-
-//                var output = Path.ChangeExtension(mapFilePath, ".json");
-//                var json = JsonConvert.SerializeObject(mapHeader, Formatting.Indented,
-//                    new JsonSerializerSettings
-//                    {
-//                        Converters = {new StringEnumConverter()}
-//                    });
-//                File.WriteAllText(output, json);
-//                Console.WriteLine($"Output saved as {output}");
                 return 0;
             }
         }
