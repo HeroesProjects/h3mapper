@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Reflection;
+using H3Mapper.Analysis;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
 using Newtonsoft.Json;
@@ -156,6 +157,8 @@ namespace H3Mapper
                 try
                 {
                     mapData = reader.Read(new MapDeserializer(new PositionTrackingStream(mapFile)));
+                    var analyser = new TemplateValidator();
+                    analyser.Validate(mapData);
                 }
                 catch (InvalidDataException e)
                 {

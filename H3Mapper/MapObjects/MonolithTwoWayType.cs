@@ -5,11 +5,13 @@ namespace H3Mapper.MapObjects
         Green = 0,
         Brown = 1,
         Violet = 2,
+        // below were added in SoD
         Orange = 3,
         GreenPortal = 4,
         YellowPortal = 5,
         RedPortal = 6,
         CyanPortal = 7,
+        // below were added in HotA
         WhiteSeaPortal = 8,
         Pink = 9,
         Turquise = 10,

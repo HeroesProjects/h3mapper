@@ -241,6 +241,7 @@ namespace H3Mapper
                         mo = new MapObject<ObjectColor>(template.SubId);
                         break;
                     case ObjectId.BorderGuard:
+                    case ObjectId.KeymastersTent:
                         mo = new MapObject<ObjectColor>(template.SubId);
                         break;
                     case ObjectId.Object:
@@ -326,7 +327,6 @@ namespace H3Mapper
 
                 mo.Position = position;
                 mo.Template = template;
-                LogUnexpectedTemplateSubId(mo);
                 objects[i] = mo;
             }
 
@@ -344,104 +344,6 @@ namespace H3Mapper
             return g;
         }
 
-        private void LogUnexpectedTemplateSubId(MapObject mo)
-        {
-            switch (mo.Template.Id)
-            {
-                case ObjectId.Mine:
-                case ObjectId.Mine2:
-                case ObjectId.Town:
-                case ObjectId.Hero:
-                case ObjectId.Monster:
-                case ObjectId.Resource:
-                case ObjectId.SeersHut:
-                case ObjectId.CreatureBank:
-                case ObjectId.CreatureGenerator1:
-                case ObjectId.CreatureGenerator2:
-                case ObjectId.CreatureGenerator3:
-                case ObjectId.CreatureGenerator4:
-                case ObjectId.RandomMonster1:
-                case ObjectId.RandomMonster2:
-                case ObjectId.RandomMonster3:
-                case ObjectId.RandomMonster4:
-                case ObjectId.RandomMonster5:
-                case ObjectId.RandomMonster6:
-                case ObjectId.RandomMonster7:
-                case ObjectId.BorderGate:
-                case ObjectId.BorderGuard:
-                case ObjectId.Object:
-                case ObjectId.Artifact:
-                case ObjectId.Cartographer:
-                case ObjectId.TreasureChest:
-                case ObjectId.LearningStone:
-                case ObjectId.SubterraneanGate:
-                case ObjectId.LibraryOfEnlightenment:
-                case ObjectId.WitchHut:
-                case ObjectId.Tavern:
-                case ObjectId.RandomDwellingLevel:
-                case ObjectId.RandomDwellingFaction:
-                case ObjectId.Garrison:
-                case ObjectId.Garrison2:
-                case ObjectId.IdolOfFortune:
-                case ObjectId.ResourceWarehouse:
-                case ObjectId.HillFort:
-                case ObjectId.SchoolOfMagic:
-                case ObjectId.ShrineOfMagicIncantation:
-                case ObjectId.RedwoodObservatory:
-                case ObjectId.MonolithTwoWay:
-                case ObjectId.MonolithOneWayEntrance:
-                case ObjectId.MonolithOneWayExit:
-                case ObjectId.WarMachineFactory:
-                case ObjectId.SeaObject:
-                case ObjectId.Building:
-                case ObjectId.Building2:
-                case ObjectId.MagicalTerrain:
-                case ObjectId.ShrineOfMagicGesture:
-                    return;
-                case ObjectId.KeymastersTent:
-                    if (mo.Template.SubId > 8)
-                    {
-                        LogUnexpectedType(mo);
-                    }
-
-                    return;
-                // HotA decorative objects. SubId defines the type but they are purely ornamental
-                // TODO: confirm they are roughly the same as ObjectId.DecorativeObject or if it should be renamed
-                case ObjectId.DecorativeObject:
-                case ObjectId.DecorativeObject2:
-                case ObjectId.DecorativeObject3:
-                    return;
-                case ObjectId.ShrineOfMagicThought:
-                case ObjectId.MagicWell:
-                    if (mo.Template.SubId > 1)
-                    {
-                        LogUnexpectedType(mo);
-                    }
-
-                    return;
-                case ObjectId.Boat:
-                    if (mo.Template.SubId > 5)
-                    {
-                        LogUnexpectedType(mo);
-                    }
-
-                    return;
-                default:
-                    if (mo.Template.SubId == 0) return;
-                    LogUnexpectedType(mo);
-                    return;
-            }
-        }
-
-        private static void LogUnexpectedType(MapObject mo)
-        {
-            Log.Information("Unexpected Object Subtype {subid} for object {id}:{type} {animationFile} {location}",
-                mo.Template.SubId,
-                mo.Template.Id,
-                mo.Template.Type,
-                mo.Template.AnimationFile,
-                mo.Position);
-        }
 
         private MapObject ReadMine(MapDeserializer s, MineType mineType)
         {
@@ -1171,7 +1073,7 @@ namespace H3Mapper
                 o.SupportedTerrainTypes = s.ReadEnum<Terrains>();
                 o.EditorMenuLocation = s.ReadEnum<TerrainMenus>();
                 o.Id = s.ReadEnum<ObjectId>();
-                o.SubId = s.Read4ByteNumber();
+                o.SubId = s.Read4ByteNumber(minValue: 0);
                 o.Type = s.ReadEnum<ObjectType>();
                 o.IsBackground = s.ReadBool();
                 s.Skip(16); //why?
@@ -1751,7 +1653,7 @@ namespace H3Mapper
 
         private static void RequireHotA(MapInfo info)
         {
-            if (info.Format != MapFormat.HotA) return;
+            if (info.Format == MapFormat.HotA) return;
             Log.Warning("This map's format is {format} but it has features requiring {requiredFormat}",
                 info.Format,
                 MapFormat.HotA);
