@@ -6,6 +6,7 @@ using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Reflection;
 using H3Mapper.Analysis;
+using H3Mapper.DataModel;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
 using Newtonsoft.Json;
@@ -106,17 +107,11 @@ namespace H3Mapper
                 ReadTemplates("objects.txt"));
         }
 
-        private static IdMappings.TemplateMap ReadTemplates(string path)
+        private static TemplateMap ReadTemplates(string path)
         {
             var mapFileLocation = Path.Combine(RootFolder, "data", path);
             var parser = new TemplateFileParser();
-            var map = new IdMappings.TemplateMap();
-            if (!File.Exists(mapFileLocation))
-            {
-                Log.Information("ID mapping file {file} doesn't exist. Skipping.", mapFileLocation);
-                return map;
-            }
-
+            var map = new TemplateMap();
             foreach (var format in new[] {MapFormat.RoE, MapFormat.AB, MapFormat.SoD, MapFormat.HotA, MapFormat.WoG})
             {
                 var file = Path.ChangeExtension(mapFileLocation, $"{format}.txt");
@@ -131,7 +126,9 @@ namespace H3Mapper
                 }
             }
 
-            map.AddDefault(parser.Parse(mapFileLocation).ToArray());
+            map.AddDefault(File.Exists(mapFileLocation)
+                ? parser.Parse(mapFileLocation).ToArray()
+                : new MapObjectTemplate[0]);
             return map;
         }
 
@@ -209,11 +206,11 @@ namespace H3Mapper
             }
         }
 
-        private static IdMappings.IdMap ReadIdMap(string mapFileName)
+        private static IdMap ReadIdMap(string mapFileName)
         {
             var mapFileLocation = Path.Combine(RootFolder, "data", mapFileName);
             var @default = new Dictionary<int, string>();
-            var map = new IdMappings.IdMap(@default);
+            var map = new IdMap(@default);
             if (!File.Exists(mapFileLocation))
             {
                 Log.Information("ID mapping file {file} doesn't exist. Skipping.", mapFileLocation);

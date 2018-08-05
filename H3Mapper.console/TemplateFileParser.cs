@@ -28,8 +28,8 @@ namespace H3Mapper
                 yield return new MapObjectTemplate
                 {
                     AnimationFile = ReadAnimationFile(splitLine[0]),
-                    BlockPosition = ReadMask(splitLine[1], false),
-                    VisitPosition = ReadMask(splitLine[2], true),
+                    BlockPosition = ReadMask(splitLine[1]),
+                    VisitPosition = ReadMask(splitLine[2]),
                     SupportedTerrainTypes = ReadFlags<Terrains>(splitLine[3]),
                     EditorMenuLocation = ReadFlags<TerrainMenus>(splitLine[4]),
                     Id = ReadEnum<ObjectId>(splitLine[5]),
@@ -56,7 +56,7 @@ namespace H3Mapper
             return Convert.ToInt32(rawValue, 2);
         }
 
-        private Position ReadMask(string maskRaw, bool activePosition)
+        private Position ReadMask(string maskRaw)
         {
             if (maskRaw.Length != 6 * 8)
             {
@@ -68,7 +68,7 @@ namespace H3Mapper
             {
                 var index0 = 7 - (i % 8);
                 var index1 = 5 - (i / 8);
-                positions[index0, index1] = ReadBool(maskRaw[i]) == activePosition;
+                positions[index0, index1] = ReadBool(maskRaw[i]) == false;
             }
 
             return new Position {Positions = positions};

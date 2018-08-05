@@ -64,7 +64,7 @@
     <Content Include="Data\objects.wog.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\objects.txt">
+    <Content Include="Data\objects.roe.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

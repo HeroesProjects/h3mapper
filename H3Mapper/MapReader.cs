@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using H3Mapper.DataModel;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
 using H3Mapper.MapObjects;
@@ -1065,7 +1066,7 @@ namespace H3Mapper
 // Good description of how bit masks (block mask and visit mask) work:
 // https://github.com/potmdehex/homm3tools/blob/master/h3m/h3mlib/h3m_constants/h3m.txt#L144-L171
                 var o = new MapObjectTemplate();
-                o.AnimationFile = s.ReadString(255 /* not really possible to verify buy they are all really short */);
+                o.AnimationFile = s.ReadString(30 /* not really possible to verify buy they are all really short */);
                 var blockMask = s.ReadBitmask(6);
                 var visitMask = s.ReadBitmask(6);
                 o.BlockPosition = MapPositionBitmask(blockMask);
@@ -1077,6 +1078,12 @@ namespace H3Mapper
                 o.Type = s.ReadEnum<ObjectType>();
                 o.IsBackground = s.ReadBool();
                 s.Skip(16); //why?
+                if (ids.ContainsObjectTemplate(o) == false)
+                {
+                    Log.Warning("Map object template {template} has either been modified or uses custom object.", o);
+
+                }
+
                 co[i] = o;
             }
 
@@ -1247,19 +1254,19 @@ namespace H3Mapper
             var artifacts = new List<HeroArtifact>();
             foreach (var slot in EnumValues.For<ArtifactSlot>().TakeWhile(x => x < ArtifactSlot.Misc5))
             {
-                artifacts.TryAdd(ReadArtifactForSlot(s, format, slot));
+                artifacts.Add(ReadArtifactForSlot(s, format, slot));
             }
 
             if (format > MapFormat.AB)
             {
-                artifacts.TryAdd(ReadArtifactForSlot(s, format, ArtifactSlot.Misc5));
+                artifacts.Add(ReadArtifactForSlot(s, format, ArtifactSlot.Misc5));
             }
 
 //bag artifacts
             var bagSize = s.Read2ByteNumber(maxValue: 64);
             for (var i = 0; i < bagSize; i++)
             {
-                artifacts.TryAdd(ReadArtifactForSlot(s, format, ArtifactSlot.Backpack));
+                artifacts.Add(ReadArtifactForSlot(s, format, ArtifactSlot.Backpack));
             }
 
             return artifacts.ToArray();
