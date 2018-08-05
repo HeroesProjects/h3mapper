@@ -2,6 +2,11 @@ using System;
 
 namespace H3Mapper.Flags
 {
+    /// <summary>
+    /// It appears that when more than three of those flags are set the objects will show up in all-terrain objects
+    /// That's why in objects.txt some objects are split into multiple entries each with up to three bits set
+    /// to keep them in respective menus (like river deltas).
+    /// </summary>
     [Flags]
     public enum TerrainMenus : ushort
     {

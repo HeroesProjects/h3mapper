@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using H3Mapper.Flags;
 using Serilog;
@@ -111,17 +112,120 @@ namespace H3Mapper
             monsters.SetCurrentSpecific(format);
             creatureGenerators1.SetCurrentSpecific(format);
             creatureGenerators4.SetCurrentSpecific(format);
+            templates.SetCurrentSpecific(format);
         }
 
         public class TemplateMap
         {
+            private ISet<MapObjectTemplate> @default;
+            private ISet<MapObjectTemplate>[] valueChain;
+
+            private readonly IDictionary<MapFormat, ISet<MapObjectTemplate>> specific =
+                new Dictionary<MapFormat, ISet<MapObjectTemplate>>();
+
             public void AddFormatMapping(MapFormat format, MapObjectTemplate[] values)
             {
+                specific.Add(format, BuildMapping(values));
+            }
+
+            private ISet<MapObjectTemplate> BuildMapping(MapObjectTemplate[] values)
+            {
+                var result = new HashSet<MapObjectTemplate>(values.Length, MapObjectTemplateComparer);
+                foreach (var template in values)
+                {
+                    if (result.Add(template) == false)
+                    {
+                        throw new ArgumentException($"Duplicate key for element {template}");
+                    }
+                }
+
+                return result;
             }
 
             public void AddDefault(MapObjectTemplate[] values)
             {
+                @default = BuildMapping(values);
             }
+
+            public bool Contains(MapObjectTemplate value)
+            {
+                foreach (var collection in valueChain)
+                {
+                    
+                    if (collection.Contains(value))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public void SetCurrentSpecific(MapFormat format)
+            {
+                var chain = new List<ISet<MapObjectTemplate>>(specific.Count + 1);
+                var currentFormat = format;
+                do
+                {
+                    if (specific.TryGetValue(currentFormat, out var currentValue))
+                    {
+                        chain.Add(currentValue);
+                    }
+
+                    currentFormat = GetPreviousFormatInChain(currentFormat);
+                } while (currentFormat != 0);
+
+                // always at least have the default
+                chain.Add(@default);
+                valueChain = chain.ToArray();
+            }
+
+            private MapFormat GetPreviousFormatInChain(MapFormat format)
+            {
+                switch (format)
+                {
+                    case MapFormat.HotA:
+                    case MapFormat.WoG:
+                        return MapFormat.SoD;
+                    case MapFormat.SoD:
+                        return MapFormat.AB;
+                    case MapFormat.AB:
+                        return MapFormat.RoE;
+                    default:
+                        return 0;
+                }
+            }
+            
+            private sealed class MapObjectTemplateEqualityComparer : IEqualityComparer<MapObjectTemplate>
+            {
+                public bool Equals(MapObjectTemplate x, MapObjectTemplate y)
+                {
+                    if (ReferenceEquals(x, y)) return true;
+                    if (ReferenceEquals(x, null)) return false;
+                    if (ReferenceEquals(y, null)) return false;
+                    if (x.GetType() != y.GetType()) return false;
+                    return string.Equals(x.AnimationFile, y.AnimationFile, StringComparison.InvariantCultureIgnoreCase) && x.SupportedTerrainTypes == y.SupportedTerrainTypes && x.Id == y.Id && x.SubId == y.SubId && x.Type == y.Type && x.EditorMenuLocation == y.EditorMenuLocation && x.BlockPosition.Equals(y.BlockPosition) && x.VisitPosition.Equals(y.VisitPosition) && x.IsBackground == y.IsBackground;
+                }
+
+                public int GetHashCode(MapObjectTemplate obj)
+                {
+                    unchecked
+                    {
+                        var hashCode = StringComparer.InvariantCultureIgnoreCase.GetHashCode(obj.AnimationFile);
+                        hashCode = (hashCode * 397) ^ (int) obj.SupportedTerrainTypes;
+                        hashCode = (hashCode * 397) ^ (int) obj.Id;
+                        hashCode = (hashCode * 397) ^ obj.SubId;
+                        hashCode = (hashCode * 397) ^ (int) obj.Type;
+                        hashCode = (hashCode * 397) ^ (int) obj.EditorMenuLocation;
+                        hashCode = (hashCode * 397) ^ obj.BlockPosition.GetHashCode();
+                        hashCode = (hashCode * 397) ^ obj.VisitPosition.GetHashCode();
+                        hashCode = (hashCode * 397) ^ obj.IsBackground.GetHashCode();
+                        return hashCode;
+                    }
+                }
+            }
+
+            public static IEqualityComparer<MapObjectTemplate> MapObjectTemplateComparer { get; } = new MapObjectTemplateEqualityComparer();
+
         }
 
         public class IdMap

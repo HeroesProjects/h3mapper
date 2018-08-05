@@ -15,5 +15,10 @@ namespace H3Mapper
         public Position BlockPosition { get; set; }
         public Position VisitPosition { get; set; }
         public bool IsBackground { get; set; }
+
+        public override string ToString()
+        {
+            return $"{nameof(AnimationFile)}: {AnimationFile}, {nameof(Id)}: {Id}, {nameof(SubId)}: {SubId}, {nameof(Type)}: {Type}";
+        }
     }
 }

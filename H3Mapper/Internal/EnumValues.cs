@@ -18,7 +18,7 @@ namespace H3Mapper.Internal
         public static TEnum Cast<TEnum>(int rawValue) where TEnum : struct
         {
             var enumValue = (TEnum) Enum.ToObject(typeof(TEnum), rawValue);
-            if (!Enum.IsDefined(typeof(TEnum), enumValue))
+            if (!IsDefined(enumValue))
             {
                 Log.Warning(
                     "Unexpected enum value {value} for enum type {enumType}", enumValue, typeof(TEnum));
