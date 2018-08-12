@@ -63,15 +63,16 @@ namespace H3Mapper
                 throw new ArgumentOutOfRangeException(nameof(maskRaw), $"Unexpected mask length: {maskRaw.Length}");
             }
 
-            var positions = new bool[8, 6];
-            for (int i = 0; i < maskRaw.Length; i++)
+            var positions = new bool[6, 8];
+            for (var i = 0; i < maskRaw.Length; i++)
             {
-                var index0 = 7 - (i % 8);
-                var index1 = 5 - (i / 8);
+                var index0 = 5-(i / 8);
+                var index1 = 7-(i % 8);
                 positions[index0, index1] = ReadBool(maskRaw[i]) == false;
             }
 
-            return new Position {Positions = positions};
+            var p = new Position(positions);
+            return p;
         }
 
         private bool ReadBool(char value)

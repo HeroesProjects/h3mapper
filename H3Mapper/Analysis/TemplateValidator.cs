@@ -16,7 +16,8 @@ namespace H3Mapper.Analysis
                 if (ReferenceEquals(x, null)) return false;
                 if (ReferenceEquals(y, null)) return false;
                 if (x.GetType() != y.GetType()) return false;
-                return string.Equals(x.AnimationFile, y.AnimationFile, StringComparison.OrdinalIgnoreCase) && x.Type == y.Type && x.SubId == y.SubId && x.Id == y.Id;
+                return string.Equals(x.AnimationFile, y.AnimationFile, StringComparison.OrdinalIgnoreCase) &&
+                       x.Type == y.Type && x.SubId == y.SubId && x.Id == y.Id;
             }
 
             public int GetHashCode(TemplateData obj)
@@ -32,7 +33,8 @@ namespace H3Mapper.Analysis
             }
         }
 
-        public static IEqualityComparer<TemplateData> TemplateDataComparer { get; } = new TemplateDataEqualityComparer();
+        public static IEqualityComparer<TemplateData> TemplateDataComparer { get; } =
+            new TemplateDataEqualityComparer();
 
         public TemplateData(MapObjectTemplate template)
         {
@@ -44,7 +46,8 @@ namespace H3Mapper.Analysis
 
         public override string ToString()
         {
-            return $"{nameof(AnimationFile)}: {AnimationFile}, {nameof(Type)}: {Type}, {nameof(SubId)}: {SubId}, {nameof(Id)}: {Id}";
+            return
+                $"{nameof(AnimationFile)}: {AnimationFile}, {nameof(Type)}: {Type}, {nameof(SubId)}: {SubId}, {nameof(Id)}: {Id}";
         }
 
         public string AnimationFile { get; set; }
@@ -102,7 +105,7 @@ namespace H3Mapper.Analysis
 
                     if (mo.Template.SubId == 1)
                     {
-                        RequireVersion(mo, info, MapFormat.HotA);
+                        RequireVersion(mo, info, MapFormat.HotA3);
                     }
 
                     return;
@@ -112,7 +115,7 @@ namespace H3Mapper.Analysis
                     var m = (MapObject<MonolithOneWayType>) mo;
                     if (m.Type >= MonolithOneWayType.Turquoise)
                     {
-                        RequireVersion(mo, info, MapFormat.HotA);
+                        RequireVersion(mo, info, MapFormat.HotA3);
                     }
                     else if (m.Type >= MonolithOneWayType.Yellow)
                     {
@@ -124,7 +127,7 @@ namespace H3Mapper.Analysis
                     var m2 = (MapObject<MonolithTwoWayType>) mo;
                     if (m2.Type >= MonolithTwoWayType.WhiteSeaPortal)
                     {
-                        RequireVersion(mo, info, MapFormat.HotA);
+                        RequireVersion(mo, info, MapFormat.HotA3);
                     }
                     else if (m2.Type >= MonolithTwoWayType.Orange)
                     {
@@ -136,7 +139,7 @@ namespace H3Mapper.Analysis
                     var m3 = (SeerHutObject) mo;
                     if (m3.Type >= SeerHutType.Water)
                     {
-                        RequireVersion(mo, info, MapFormat.HotA);
+                        RequireVersion(mo, info, MapFormat.HotA3);
                     }
 
                     return;
@@ -145,14 +148,33 @@ namespace H3Mapper.Analysis
                     var m4 = (MapObject<CreatureBankType>) mo;
                     if (m4.Type >= CreatureBankType.BeholdersSanctuary)
                     {
-                        RequireVersion(mo, info, MapFormat.HotA);
+                        RequireVersion(mo, info, MapFormat.HotA3);
                     }
                     else if (m4.Type >= CreatureBankType.HuntingLodge)
                     {
                         RequireVersion(mo, info, MapFormat.WoG);
                     }
-                    return;
 
+                    return;
+                case ObjectId.HillFort:
+                case ObjectId.WarMachineFactory:
+                    if (mo.Template.SubId >= 1)
+                    {
+                        RequireVersion(mo, info, MapFormat.HotA3);
+                        if (mo.Template.SubId > 1) // only extra variant exists 
+                        {
+                            LogUnexpectedObject(mo);
+                        }
+                    }
+
+                    return;
+                case ObjectId.RedwoodObservatory:
+                    var m5 = (MapObject<ObservatoryType>) mo;
+                    if (m5.Type >= ObservatoryType.ObservationTower)
+                    {
+                        RequireVersion(mo, info, MapFormat.HotA3);
+                    }
+                    return;
                 // not real objects. Those should never appear
                 case ObjectId.AnchorPoint: // WTF even is Anchor Point?
                 case ObjectId.CreatureGenerator2:
@@ -201,13 +223,18 @@ namespace H3Mapper.Analysis
                 case ObjectId.HeroPlaceholder:
                 case ObjectId.Garrison2:
                 case ObjectId.Mine2:
+                case ObjectId.Building:
+                case ObjectId.SeaObject:
+                case ObjectId.Building2:
+                case ObjectId.MagicalTerrain:
+                case ObjectId.ResourceWarehouse:
                     return;
 
                 case ObjectId.Boat:
                     // TODO: only 2 noticed so far
                     if (mo.Template.SubId >= 3)
                     {
-                        RequireVersion(mo, info, MapFormat.HotA);
+                        RequireVersion(mo, info, MapFormat.HotA3);
                     }
 
                     if (mo.Template.SubId >= 6)

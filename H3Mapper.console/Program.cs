@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Reflection;
 using H3Mapper.Analysis;
 using H3Mapper.DataModel;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -111,7 +108,11 @@ namespace H3Mapper
         {
             var mapFileLocation = Path.Combine(RootFolder, "data", path);
             var parser = new TemplateFileParser();
-            var map = new TemplateMap();
+
+
+            var map = new TemplateMap(File.Exists(mapFileLocation)
+                ? parser.Parse(mapFileLocation).ToArray()
+                : new MapObjectTemplate[0]);
             foreach (var format in new[] {MapFormat.RoE, MapFormat.AB, MapFormat.SoD, MapFormat.HotA, MapFormat.WoG})
             {
                 var file = Path.ChangeExtension(mapFileLocation, $"{format}.txt");
@@ -126,9 +127,6 @@ namespace H3Mapper
                 }
             }
 
-            map.AddDefault(File.Exists(mapFileLocation)
-                ? parser.Parse(mapFileLocation).ToArray()
-                : new MapObjectTemplate[0]);
             return map;
         }
 

@@ -13,10 +13,12 @@ namespace H3Mapper
     public class MapReader
     {
         private readonly IdMappings ids;
+        private readonly MapObjectTemplateValidator validator;
 
         public MapReader(IdMappings ids)
         {
             this.ids = ids;
+            validator = new MapObjectTemplateValidator(ids);
         }
 
         public H3Map Read(MapDeserializer s)
@@ -255,10 +257,8 @@ namespace H3Mapper
                         mo = new MapObject<TreasureChestType>(template.SubId);
                         break;
                     case ObjectId.ResourceWarehouse:
+                        RequireHotA(info);
                         mo = new MapObject<Resource>(template.SubId);
-                        break;
-                    case ObjectId.HillFort:
-                        mo = new MapObject<HillFortType>(template.SubId);
                         break;
                     case ObjectId.SchoolOfMagic:
                         mo = new MapObject<SchoolOfMagicType>(template.SubId);
@@ -276,23 +276,24 @@ namespace H3Mapper
                     case ObjectId.MonolithTwoWay:
                         mo = new MapObject<MonolithTwoWayType>(template.SubId);
                         break;
-                    case ObjectId.WarMachineFactory:
-                        mo = new MapObject<WarMachineFactoryType>(template.SubId);
-                        break;
                     case ObjectId.MonolithOneWayEntrance:
                     case ObjectId.MonolithOneWayExit:
                         mo = new MapObject<MonolithOneWayType>(template.SubId);
                         break;
                     case ObjectId.MagicalTerrain:
+                        RequireHotA(info);
                         mo = new MapObject<MagicalTerrainType>(template.SubId);
                         break;
                     case ObjectId.Building:
+                        RequireHotA(info);
                         mo = new MapObject<BuildingType>(template.SubId);
                         break;
                     case ObjectId.SeaObject:
+                        RequireHotA(info);
                         mo = new MapObject<SeaObjectType>(template.SubId);
                         break;
                     case ObjectId.Building2:
+                        RequireHotA(info);
                         mo = new MapObject<Building2Type>(template.SubId);
                         break;
                     case ObjectId.FreelancersGuild:
@@ -1078,11 +1079,7 @@ namespace H3Mapper
                 o.Type = s.ReadEnum<ObjectType>();
                 o.IsBackground = s.ReadBool();
                 s.Skip(16); //why?
-                if (ids.ContainsObjectTemplate(o) == false)
-                {
-                    Log.Warning("Map object template {template} has either been modified or uses custom object.", o);
-
-                }
+                validator.Validate(o);
 
                 co[i] = o;
             }
@@ -1090,15 +1087,17 @@ namespace H3Mapper
             return co;
         }
 
-        private Position MapPositionBitmask(bool[] mask)
+        public Position MapPositionBitmask(bool[] mask)
         {
-            var positions = new bool[8, 6];
+            var positions = new bool[6, 8];
             for (var i = 0; i < mask.Length; i++)
             {
-                positions[i / 6, i % 6] = !mask[i];
+                var index1 = (i % 8);
+                var index0 = (i / 8);
+                positions[index0, index1] = mask[i] == false;
             }
 
-            return new Position {Positions = positions};
+            return new Position(positions);
         }
 
         private MapTerrain ReadTerrain(MapDeserializer s, MapInfo info)
@@ -1660,7 +1659,7 @@ namespace H3Mapper
 
         private static void RequireHotA(MapInfo info)
         {
-            if (info.Format == MapFormat.HotA) return;
+            if (info.Format == MapFormat.HotA3) return;
             Log.Warning("This map's format is {format} but it has features requiring {requiredFormat}",
                 info.Format,
                 MapFormat.HotA);
