@@ -40,7 +40,7 @@ namespace H3Mapper
                 else
                 {
                     var mappings = ConfigureMappings();
-                    result = Run(path, mappings);
+                    result = Run(path, mappings, args.Contains("-v"));
                 }
             }
             catch (Exception e)
@@ -66,11 +66,11 @@ namespace H3Mapper
             }
         }
 
-        private static int Run(string path, IdMappings mappings)
+        private static int Run(string path, IdMappings mappings, bool validate)
         {
             if (File.Exists(path))
             {
-                return Process(mappings, path);
+                return Process(mappings, path, validate);
             }
 
             if (Directory.Exists(path))
@@ -78,7 +78,7 @@ namespace H3Mapper
                 var result = 0;
                 foreach (var file in Directory.EnumerateFiles(path, "*.h3m", SearchOption.AllDirectories))
                 {
-                    var fileResult = Process(mappings, file);
+                    var fileResult = Process(mappings, file, validate);
                     if (fileResult != 0)
                     {
                         result = fileResult;
@@ -133,7 +133,6 @@ namespace H3Mapper
         private static void ConfigureLogging(bool forceDebug, bool quietMode)
         {
             var configuration = new LoggerConfiguration()
-                .WriteTo.File("logs.log")
                 .WriteTo.Console(theme: new AnsiConsoleTheme(new Dictionary<ConsoleThemeStyle, string>
                 {
                     [ConsoleThemeStyle.Text] = "\x001B[38;5;0253m",
@@ -172,7 +171,7 @@ namespace H3Mapper
             Log.Logger = configuration.CreateLogger();
         }
 
-        private static int Process(IdMappings idMappings, string mapFilePath)
+        private static int Process(IdMappings idMappings, string mapFilePath, bool validate)
         {
             Log.Information("Processing {file}", mapFilePath);
             using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
@@ -181,8 +180,11 @@ namespace H3Mapper
                 try
                 {
                     var mapData = reader.Read(new MapDeserializer(new PositionTrackingStream(mapFile)));
-                    var analyser = new TemplateValidator();
-                    analyser.Validate(mapData);
+                    if (validate)
+                    {
+                        var validator = new MapValidator(idMappings);
+                        validator.Validate(mapData);
+                    }
                 }
                 catch (InvalidDataException e)
                 {
@@ -199,7 +201,7 @@ namespace H3Mapper
                     Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
                     return e.HResult;
                 }
-
+  
                 return 0;
             }
         }

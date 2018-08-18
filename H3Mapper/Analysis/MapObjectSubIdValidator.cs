@@ -4,17 +4,17 @@ using Serilog;
 
 namespace H3Mapper.Analysis
 {
-    public class TemplateValidator
+    public class MapObjectSubIdValidator : IMapValidator
     {
         public void Validate(H3Map map)
         {
             foreach (var mapObject in map.Objects)
             {
-                CheckForUnexpectedTemplateSubId(mapObject, map.Info);
+                CheckForUnexpectedTemplateSubId(mapObject);
             }
         }
 
-        private void CheckForUnexpectedTemplateSubId(MapObject mo, MapInfo info)
+        private void CheckForUnexpectedTemplateSubId(MapObject mo)
         {
             switch (mo.Template.Id)
             {
@@ -77,7 +77,7 @@ namespace H3Mapper.Analysis
                 default:
                     if (mo.Template.SubId > 0)
                     {
-                        LogUnexpectedType(mo, info);
+                        LogUnexpectedType(mo);
                     }
 
                     return;
@@ -94,17 +94,15 @@ namespace H3Mapper.Analysis
                 mo.Position);
         }
 
-        private static void LogUnexpectedType(MapObject mo, MapInfo info)
+        private static void LogUnexpectedType(MapObject mo)
         {
             Log.Information(
-                "Unexpected Object Subtype {subid} for object {id}:{type} {animationFile} {location} ({version}:{subVersion})",
+                "Unexpected Object Subtype {subid} for object {id}:{type} {animationFile} {location}",
                 mo.Template.SubId,
                 mo.Template.Id,
                 mo.Template.Type,
                 mo.Template.AnimationFile,
-                mo.Position,
-                info.Format,
-                info.FormatSubversion);
+                mo.Position);
         }
     }
 }

@@ -13,12 +13,10 @@ namespace H3Mapper
     public class MapReader
     {
         private readonly IdMappings ids;
-        private readonly MapObjectTemplateValidator validator;
 
         public MapReader(IdMappings ids)
         {
             this.ids = ids;
-            validator = new MapObjectTemplateValidator(ids);
         }
 
         public H3Map Read(MapDeserializer s)
@@ -1034,8 +1032,6 @@ namespace H3Mapper
                 o.Type = s.ReadEnum<ObjectType>();
                 o.IsBackground = s.ReadBool();
                 s.Skip(16); //why?
-                validator.Validate(o);
-
                 co[i] = o;
             }
 

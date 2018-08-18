@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
+using H3Mapper.DataModel;
 using Serilog;
 
-namespace H3Mapper.DataModel
+namespace H3Mapper.Analysis
 {
-    public class MapObjectTemplateValidator
+    public class MapObjectTemplateValidator : IMapValidator
     {
         private readonly IdMappings maps;
 
@@ -13,7 +15,15 @@ namespace H3Mapper.DataModel
             this.maps = maps;
         }
 
-        public void Validate(MapObjectTemplate template)
+        public void Validate(H3Map map)
+        {
+            foreach (var template in map.Objects.Select(x => x.Template).Distinct())
+            {
+                ValidateTemplate(template);
+            }
+        }
+
+        private void ValidateTemplate(MapObjectTemplate template)
         {
             var templates = maps.GetTemplatesMatching(template);
             if (templates.Length == 0)
@@ -23,7 +33,7 @@ namespace H3Mapper.DataModel
             }
         }
 
-        public static string FormatObject(MapObjectTemplate template)
+        private static string FormatObject(MapObjectTemplate template)
         {
 // AVCtowx0.def 000001110000011110001111111111111111111111111111 001000000000000000000000000000000000000000000000 011111111 011111111 98 2 1 0
 
