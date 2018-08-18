@@ -153,10 +153,10 @@ namespace H3Mapper
                         mo = ReadMessageObject(s);
                         break;
                     case ObjectId.SeersHut:
-                        mo = ReadSeersHut(s, EnumValues.Cast<SeerHutType>(template.SubId), info.Format);
+                        mo = ReadSeersHut(s, info.Format);
                         break;
                     case ObjectId.WitchHut:
-                        mo = ReadWitchHut(s, info.Format, template.SubId);
+                        mo = ReadWitchHut(s, info.Format);
                         break;
                     case ObjectId.Scholar:
                         mo = ReadScholar(s);
@@ -243,42 +243,13 @@ namespace H3Mapper
                         RequireVersionAtLeast(info, MapFormat.AB);
                         mo = new MapObject<ObjectColor>(template.SubId);
                         break;
-                    case ObjectId.BorderGuard:
-                    case ObjectId.KeymastersTent:
-                        mo = new MapObject<ObjectColor>(template.SubId);
-                        break;
                     case ObjectId.Object:
+                        if (template.SubId == 0) goto default;
                         mo = new WoGObject(template.SubId);
-                        break;
-                    case ObjectId.Cartographer:
-                        mo = new MapObject<CartographerType>(template.SubId);
-                        break;
-                    case ObjectId.TreasureChest:
-                        mo = new MapObject<TreasureChestType>(template.SubId);
                         break;
                     case ObjectId.ResourceWarehouse:
                         RequireHotA(info);
                         mo = new MapObject<Resource>(template.SubId);
-                        break;
-                    case ObjectId.SchoolOfMagic:
-                        mo = new MapObject<SchoolOfMagicType>(template.SubId);
-                        break;
-                    case ObjectId.Tavern:
-                    case ObjectId.LearningStone:
-                    case ObjectId.SubterraneanGate:
-                    case ObjectId.LibraryOfEnlightenment:
-                    case ObjectId.IdolOfFortune:
-                        mo = new MapObject<ObjectVariantType>(template.SubId);
-                        break;
-                    case ObjectId.RedwoodObservatory:
-                        mo = new MapObject<ObservatoryType>(template.SubId);
-                        break;
-                    case ObjectId.MonolithTwoWay:
-                        mo = new MapObject<MonolithTwoWayType>(template.SubId);
-                        break;
-                    case ObjectId.MonolithOneWayEntrance:
-                    case ObjectId.MonolithOneWayExit:
-                        mo = new MapObject<MonolithOneWayType>(template.SubId);
                         break;
                     case ObjectId.MagicalTerrain:
                         RequireHotA(info);
@@ -369,8 +340,7 @@ namespace H3Mapper
 
         private ResourceObject ReadMapResource(MapDeserializer s, Resource resource, MapFormat format)
         {
-            var r = new ResourceObject();
-            r.Resource = resource;
+            var r = new ResourceObject {Resource = resource};
             ReadMessageAndGuards(r, s, format);
             r.Amount = s.Read4ByteNumberLong();
             s.Skip(4);
@@ -397,8 +367,7 @@ namespace H3Mapper
 
         private DwellingObject ReadDwelling(MapDeserializer s, ObjectId id, int subId)
         {
-            var d = new DwellingObject();
-            d.Player = s.ReadEnum<Player>();
+            var d = new DwellingObject {Player = s.ReadEnum<Player>()};
             s.Skip(3);
             if (id == ObjectId.RandomDwellingFaction)
             {
@@ -432,8 +401,7 @@ namespace H3Mapper
 
         private GrailObject ReadGrail(MapDeserializer s)
         {
-            var g = new GrailObject();
-            g.Radius = s.Read4ByteNumber(0, 127);
+            var g = new GrailObject {Radius = s.Read4ByteNumber(0, 127)};
             return g;
         }
 
@@ -457,17 +425,11 @@ namespace H3Mapper
 
         private MagicShrineObject ReadMagicShrine(MapDeserializer s, ObjectId templateId, int templateSubId)
         {
-            var m = new MagicShrineObject();
-            m.SpellLevel = MapSpellLevel(templateId, templateSubId);
+            var m = new MagicShrineObject {SpellLevel = MapSpellLevel(templateId, templateSubId)};
             var spellId = s.Read1ByteNumber();
             if (spellId != byte.MaxValue)
             {
                 m.Spell = ids.GetSpell(spellId);
-            }
-
-            if (templateId == ObjectId.ShrineOfMagicGesture)
-            {
-                m.Type = EnumValues.Cast<ShrineType>(templateSubId);
             }
 
             s.Skip(3);
@@ -645,9 +607,9 @@ namespace H3Mapper
             return sc;
         }
 
-        private WitchHutObject ReadWitchHut(MapDeserializer s, MapFormat format, int rawVariant)
+        private WitchHutObject ReadWitchHut(MapDeserializer s, MapFormat format)
         {
-            var h = new WitchHutObject(rawVariant);
+            var h = new WitchHutObject();
             if (format > MapFormat.RoE)
             {
                 var skills = new List<SecondarySkillType>();
@@ -666,11 +628,9 @@ namespace H3Mapper
             return h;
         }
 
-        private SeerHutObject ReadSeersHut(MapDeserializer s, SeerHutType type, MapFormat format)
+        private SeerHutObject ReadSeersHut(MapDeserializer s, MapFormat format)
         {
-            var h = new SeerHutObject();
-            h.Type = type;
-            h.Quest = ReadQuest(s, format);
+            var h = new SeerHutObject {Quest = ReadQuest(s, format)};
             if (h.Quest.Type != QuestType.None)
             {
                 h.Reward = ReadReward(s, format);
@@ -808,19 +768,14 @@ namespace H3Mapper
 
         private MapObject ReadMessageObject(MapDeserializer s)
         {
-            var m = new MapObject
-            {
-                Message = s.ReadString(150)
-            };
-
+            var m = new MessageObject(s.ReadString(150));
             s.Skip(4);
             return m;
         }
 
         private MonsterObject ReadMapMonster(MapDeserializer s, int monsterId, MapFormat format)
         {
-            var m = new MonsterObject();
-            m.Type = ids.GetMonster(monsterId);
+            var m = new MonsterObject {Type = ids.GetMonster(monsterId)};
             if (format > MapFormat.RoE)
             {
                 m.Identifier = s.Read4ByteNumberLong();
@@ -997,7 +952,7 @@ namespace H3Mapper
             return spells;
         }
 
-        private void ReadMessageAndGuards(MapObject o, MapDeserializer s, MapFormat format)
+        private void ReadMessageAndGuards(GuardedObject o, MapDeserializer s, MapFormat format)
         {
             var hasMessage = s.ReadBool();
             if (hasMessage)

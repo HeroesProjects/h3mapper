@@ -3,7 +3,7 @@ using H3Mapper.Flags;
 
 namespace H3Mapper.MapObjects
 {
-    public class MonsterObject : MapObject
+    public class MonsterObject : GuardedObject
     {
         public long Identifier { get; set; }
         public int Count { get; set; }

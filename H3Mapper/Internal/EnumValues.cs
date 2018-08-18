@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Transactions;
-using H3Mapper.Flags;
 using Serilog;
 
 namespace H3Mapper.Internal

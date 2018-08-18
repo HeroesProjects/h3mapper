@@ -2,7 +2,6 @@ namespace H3Mapper.Flags
 {
     public enum WoGObjectType
     {
-        Pyramid = 0, // not a WoG object
         VenussBlessing = 2,
         MysteriousCreatureDwelling = 3,
         JunkMerchant = 8,

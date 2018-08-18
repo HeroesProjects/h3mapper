@@ -7,11 +7,11 @@ namespace H3Mapper.DataModel
 {
     public class TemplateMap
     {
-        private readonly ILookup<String, MapObjectTemplate> @default;
-        private ILookup<String, MapObjectTemplate>[] valueChain;
+        private readonly ILookup<string, MapObjectTemplate> @default;
+        private ILookup<string, MapObjectTemplate>[] valueChain;
 
         private readonly IDictionary<MapFormat, ILookup<String, MapObjectTemplate>> specific =
-            new Dictionary<MapFormat, ILookup<String, MapObjectTemplate>>();
+            new Dictionary<MapFormat, ILookup<string, MapObjectTemplate>>();
 
         public TemplateMap(MapObjectTemplate[] defaults)
         {
@@ -37,9 +37,9 @@ namespace H3Mapper.DataModel
             specific.Add(format, BuildMapping(values));
         }
 
-        private ILookup<String, MapObjectTemplate> BuildMapping(MapObjectTemplate[] values)
+        private ILookup<string, MapObjectTemplate> BuildMapping(MapObjectTemplate[] values)
         {
-            var result = new Internal.Lookup<String, MapObjectTemplate>(StringComparer.OrdinalIgnoreCase);
+            var result = new Internal.Lookup<string, MapObjectTemplate>(StringComparer.OrdinalIgnoreCase);
             foreach (var template in values)
             {
                 result.Add(template.AnimationFile, template);
@@ -50,7 +50,7 @@ namespace H3Mapper.DataModel
 
         public void SetCurrentSpecific(MapFormat format)
         {
-            var chain = new List<ILookup<String, MapObjectTemplate>>(specific.Count + 1);
+            var chain = new List<ILookup<string, MapObjectTemplate>>(specific.Count + 1);
             var currentFormat = format;
             do
             {

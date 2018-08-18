@@ -3,7 +3,7 @@ using H3Mapper.Flags;
 
 namespace H3Mapper.MapObjects
 {
-    public class PandorasBoxObject : MapObject
+    public class PandorasBoxObject : GuardedObject
     {
         public long GainedExperience { get; set; }
         public long ManaDifference { get; set; }

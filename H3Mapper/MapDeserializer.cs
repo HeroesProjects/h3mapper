@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using H3Mapper.Internal;
 using Serilog;
 
 namespace H3Mapper
