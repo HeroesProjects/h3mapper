@@ -48,7 +48,7 @@ namespace H3Mapper
             info.Name = s.ReadString(30);
             info.Description = s.ReadString(300);
             info.Difficulty = s.ReadEnum<Difficulty>();
-            if (info.Format > MapFormat.RoE)
+            if (info.Format >= MapFormat.AB)
             {
                 info.ExperienceLevelLimit = s.Read1ByteNumber(maxValue: 99);
             }
@@ -69,7 +69,11 @@ namespace H3Mapper
             var heroes = new MapHeroes();
             map.Heroes = heroes;
             ReadAllowedHeroes(s, heroes, info.Format);
-            ReadHeroCustomisations(s, heroes, info.Format);
+            if (info.Format >= MapFormat.SoD)
+            {
+                ReadHeroCustomisations(s, heroes, info.Format);
+            }
+
             s.Skip(31);
             if (IsHota(info.Format))
             {
@@ -94,6 +98,8 @@ namespace H3Mapper
             map.Terrain = ReadTerrain(s, info);
             map.Objects = ReadMapObjects(s, info);
             map.Events = ReadEvents(s, info.Format, false);
+            s.Skip(124);
+            s.EnsureEof(1000);
             return map;
         }
 
@@ -460,9 +466,8 @@ namespace H3Mapper
 
         private TownObject ReadTown(MapDeserializer s, Faction faction, MapInfo info)
         {
-            var m = new TownObject();
-            m.Faction = faction;
-            if (info.Format > MapFormat.RoE)
+            var m = new TownObject {Faction = faction};
+            if (info.Format >= MapFormat.AB)
             {
                 m.Identifier = s.Read4ByteNumberLong();
             }
@@ -492,7 +497,7 @@ namespace H3Mapper
                 m.HasFort = s.ReadBool();
             }
 
-            if (info.Format > MapFormat.RoE)
+            if (info.Format >= MapFormat.AB)
             {
                 m.SpellsThatMustAppear = ReadSpellsFromBitmask(s, activeBitValue: true);
             }
@@ -504,7 +509,7 @@ namespace H3Mapper
             }
 
             m.Events = ReadEvents(s, info.Format, true);
-            if (info.Format > MapFormat.AB)
+            if (info.Format >= MapFormat.SoD)
             {
                 // this only applies to random castles
                 m.Alignment = s.ReadEnum<RandomTownAlignment>();
@@ -525,7 +530,7 @@ namespace H3Mapper
                 e.Message = s.ReadString(30000);
                 e.Resources = ReadResources(s, allowNegative: true);
                 e.Players = s.ReadEnum<Players>();
-                if (format > MapFormat.AB)
+                if (format >= MapFormat.SoD)
                 {
                     e.HumanAffected = s.ReadBool();
                 }
@@ -608,7 +613,7 @@ namespace H3Mapper
         private WitchHutObject ReadWitchHut(MapDeserializer s, MapFormat format)
         {
             var h = new WitchHutObject();
-            if (format > MapFormat.RoE)
+            if (format >= MapFormat.AB)
             {
                 var skills = new List<SecondarySkillType>();
                 var flags = s.ReadBitmask(4);
@@ -774,7 +779,7 @@ namespace H3Mapper
         private MonsterObject ReadMapMonster(MapDeserializer s, int monsterId, MapFormat format)
         {
             var m = new MonsterObject {Type = ids.GetMonster(monsterId)};
-            if (format > MapFormat.RoE)
+            if (format >= MapFormat.AB)
             {
                 m.Identifier = s.Read4ByteNumberLong();
             }
@@ -1207,7 +1212,7 @@ namespace H3Mapper
                 artifacts.Add(ReadArtifactForSlot(s, format, slot));
             }
 
-            if (format > MapFormat.AB)
+            if (format >= MapFormat.SoD)
             {
                 artifacts.Add(ReadArtifactForSlot(s, format, ArtifactSlot.Misc5));
             }
@@ -1330,11 +1335,6 @@ namespace H3Mapper
 
         private void ReadHeroCustomisations(MapDeserializer s, MapHeroes heroes, MapFormat format)
         {
-            if (format < MapFormat.SoD)
-            {
-                return;
-            }
-
             var count = s.Read1ByteNumber();
             for (var i = 0; i < count; i++)
             {
@@ -1360,7 +1360,7 @@ namespace H3Mapper
                 }
             }
 
-            if (format > MapFormat.RoE)
+            if (format >= MapFormat.AB)
             {
                 var placeholderCount = s.Read4ByteNumber();
                 if (placeholderCount > 0)
@@ -1423,7 +1423,7 @@ namespace H3Mapper
             {
                 case VictoryConditionType.Artifact:
                     vc.Identifier = ids.GetArtifact(s.Read1ByteNumber());
-                    if (info.Format > MapFormat.RoE)
+                    if (info.Format >= MapFormat.AB)
                     {
                         s.Skip(1);
                     }
@@ -1431,7 +1431,7 @@ namespace H3Mapper
                     break;
                 case VictoryConditionType.GatherTroop:
                     vc.Identifier = ids.GetMonster(s.Read1ByteNumber());
-                    if (info.Format > MapFormat.RoE)
+                    if (info.Format >= MapFormat.AB)
                     {
                         s.Skip(1);
                     }
@@ -1501,41 +1501,48 @@ namespace H3Mapper
 
         private MapPlayer ReadPlayer(MapDeserializer s, MapFormat format, int mapSize)
         {
-            var player = new MapPlayer();
-            player.CanHumanPlay = s.ReadBool();
-            player.CanAIPlay = s.ReadBool();
-// if both false, player disabled, rest of the data may be garbage
-            player.AITactic = s.ReadEnum<AITactic>();
-            if (format > MapFormat.AB)
+            var player = new MapPlayer
             {
-                // 1 Configured whether what cities owns a player
-                // that makes no sense
-                // VCMI call it P7 (Unknown and unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L206
-// if the player is disabled this can contain garbage
-                player.Unknown1 = s.Read1ByteNumber();
+                CanHumanPlay = s.ReadBool(),
+                CanAIPlay = s.ReadBool(),
+                AITactic = s.ReadEnum<AITactic>()
+            };
+            if (format >= MapFormat.SoD)
+            {
+                if (player.CanPlay)
+                {
+                    player.AllowedAlignmentsCustomised = s.ReadBool();
+                }
+                else
+                {
+                    s.Ignore(1);
+                }
             }
 
-            player.AllowedFactions = Fractions(s, format);
-            if (player.Disabled)
+            player.AllowedFactions = s.ReadEnum<Factions>(format == MapFormat.RoE ? 1 : 2);
+            if (player.CanPlay)
             {
-// if the player is disabled this can contain garbage
-                // TODO: is there any meaning to that?
-                s.Read1ByteNumber();
+                player.IsFactionRandom = s.ReadBool();
             }
             else
             {
-                player.IsFactionRandom = s.ReadBool();
+                s.Ignore(1);
             }
 
             player.HasHomeTown = s.ReadBool();
             if (player.HasHomeTown)
             {
-                if (format != MapFormat.RoE)
+                if (format >= MapFormat.AB)
                 {
                     player.GenerateHeroAtMainTown = s.ReadBool();
-                    // 1 Chief Town player: 1-DA 0-NET
-                    // VCMI call it generateHero (unused): https://github.com/vcmi/vcmi/blob/develop/lib/mapping/MapFormatH3M.cpp#L238
-                    player.Unknown2 = s.Read1ByteNumber();
+                    if (player.CanPlay)
+                    {
+                        player.MainTownType = s.ReadEnum<Faction>();
+                    }
+                    else
+                    {
+                        s.Ignore(1);
+                    }
                 }
 
                 player.HomeTownPosition = ReadPosition(s, mapSize);
@@ -1555,9 +1562,9 @@ namespace H3Mapper
                 player.MainCustomHeroName = s.ReadString(12);
             }
 
-            if (format > MapFormat.RoE)
+            if (format >= MapFormat.AB)
             {
-                player.PowerPlaceholders = s.Read1ByteNumber();
+                player.HeroPlaceholderCount = s.Read1ByteNumber(maxValue: 8);
                 var heroCount = s.Read4ByteNumber(0, 8);
                 for (var i = 0; i < heroCount; i++)
                 {
@@ -1588,16 +1595,6 @@ namespace H3Mapper
                 Y = s.Read1ByteNumber(maxValue: maxValue, allowEmpty: allowEmpty),
                 Z = s.Read1ByteNumber(maxValue: 1, allowEmpty: allowEmpty)
             };
-        }
-
-        private static Factions Fractions(MapDeserializer s, MapFormat format)
-        {
-            if (format == MapFormat.RoE)
-            {
-                return s.ReadEnum<Factions>(1);
-            }
-
-            return s.ReadEnum<Factions>(2);
         }
 
         private static void RequireVersionAtLeast(MapInfo info, MapFormat version)

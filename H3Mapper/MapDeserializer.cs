@@ -31,6 +31,7 @@ namespace H3Mapper
                 throw new InvalidOperationException(
                     $"Unexpected amount of data. Expected {byteCount} bytes but {readCount} read.");
             }
+
             return buffer;
         }
 
@@ -266,6 +267,26 @@ namespace H3Mapper
                     location,
                     BitConverter.ToString(garbage));
             }
+        }
+
+        public void EnsureEof(int checkByteCount)
+        {
+            var location = Location;
+            var buffer = new byte[checkByteCount];
+            var readCount = map.Read(buffer, 0, buffer.Length);
+            if (readCount != 0)
+            {
+                Log.Warning(
+                    "aw {location}. Read {readCount} bytes: {bytes}",
+                    location.ToString("x8"),
+                    readCount,
+                    BitConverter.ToString(buffer));
+            }
+        }
+
+        public void Ignore(int byteCount)
+        {
+            ReadBytes(byteCount);
         }
     }
 }
