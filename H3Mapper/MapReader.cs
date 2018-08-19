@@ -12,6 +12,10 @@ namespace H3Mapper
 {
     public class MapReader
     {
+        private const int SpellIdNoSpell = byte.MaxValue;
+        private const int SpellIdDefaultSpell = byte.MaxValue - 1;
+
+
         private readonly IdMappings ids;
 
         public MapReader(IdMappings ids)
@@ -33,8 +37,8 @@ namespace H3Mapper
                     info.Format);
             }
 
-            ids.SetCurrentVersion(IsHota(info.Format) ? MapFormat.HotA : info.Format);
-            if (IsHota(info.Format))
+            ids.SetCurrentVersion(info.Format);
+            if (info.Format == MapFormat.HotA)
             {
                 // there's either 4 empty bytes or 1 followed by 5 empty ones.
                 // not sure about the meaning of that yet...
@@ -71,17 +75,20 @@ namespace H3Mapper
             ReadAllowedHeroes(s, heroes, info.Format);
             if (info.Format >= MapFormat.SoD)
             {
-                ReadHeroCustomisations(s, heroes, info.Format);
+                ReadHeroCustomisations(s, heroes);
             }
 
             s.Skip(31);
-            if (IsHota(info.Format))
+            if (info.Format == MapFormat.HotA)
             {
                 info.AllowSpecialWeeks = s.ReadBool();
                 s.Skip(3);
             }
 
-            map.AllowedArtifacts = ReadAllowedArtifacts(s, info.Format);
+            if (info.Format >= MapFormat.AB)
+            {
+                map.AllowedArtifacts = ReadAllowedArtifacts(s, info.Format);   
+            }
 
             if (info.Format >= MapFormat.SoD)
             {
@@ -105,11 +112,7 @@ namespace H3Mapper
 
         private bool IsFullySupported(MapFormat format)
         {
-            return format == MapFormat.RoE ||
-                   format == MapFormat.AB ||
-                   format == MapFormat.SoD ||
-                   format == MapFormat.WoG ||
-                   format == MapFormat.HotA3;
+            return EnumValues.IsDefined(format);
         }
 
         private MapObject[] ReadMapObjects(MapDeserializer s, MapInfo info)
@@ -124,190 +127,156 @@ namespace H3Mapper
             var objects = new MapObject[count];
             for (var i = 0; i < count; i++)
             {
-                var mo = default(MapObject);
                 var position = ReadPosition(s, info.Size);
                 var templateIndex = s.Read4ByteNumber(0, templates.Length - 1);
-                var template = templates[templateIndex];
                 s.Skip(5); //why?
-                switch (template.Id)
-                {
-                    case ObjectId.Event:
-                        mo = ReadMapEvent(s, info.Format);
-                        break;
-                    case ObjectId.Hero:
-                        mo = ReadMapHero(s, EnumValues.Cast<HeroType>(template.SubId), info.Format);
-                        break;
-                    case ObjectId.RandomHero:
-                    case ObjectId.Prison:
-                        mo = ReadMapHero(s, null, info.Format);
-                        break;
-                    case ObjectId.Monster:
-                    case ObjectId.RandomMonster:
-                    case ObjectId.RandomMonster1:
-                    case ObjectId.RandomMonster2:
-                    case ObjectId.RandomMonster3:
-                    case ObjectId.RandomMonster4:
-                    case ObjectId.RandomMonster5:
-                    case ObjectId.RandomMonster6:
-                    case ObjectId.RandomMonster7:
-                        mo = ReadMapMonster(s, template.SubId, info.Format);
-                        break;
-                    case ObjectId.OceanBottle:
-                    case ObjectId.Sign:
-                        mo = ReadMessageObject(s);
-                        break;
-                    case ObjectId.SeersHut:
-                        mo = ReadSeersHut(s, info.Format);
-                        break;
-                    case ObjectId.WitchHut:
-                        mo = ReadWitchHut(s, info.Format);
-                        break;
-                    case ObjectId.Scholar:
-                        mo = ReadScholar(s);
-                        break;
-                    case ObjectId.Garrison:
-                        mo = ReadGarrison(s, info.Format, template.SubId, GarrisonOrientation.EastWest);
-                        break;
-                    case ObjectId.Garrison2:
-                        RequireVersionAtLeast(info, MapFormat.AB);
-                        mo = ReadGarrison(s, info.Format, template.SubId, GarrisonOrientation.NorthSouth);
-                        break;
-                    case ObjectId.Artifact:
-                        mo = ReadArtifact(s, info.Format, template.SubId);
-                        break;
-                    case ObjectId.RandomArtifact:
-                        mo = ReadArtifact(s, info.Format, template.SubId);
-                        break;
-                    case ObjectId.RandomTreasureArtifact:
-                    case ObjectId.RandomMinorArtifact:
-                    case ObjectId.RandomMajorArtifact:
-                    case ObjectId.RandomRelicArtifact:
-                        mo = ReadArtifact(s, info.Format, null);
-                        break;
-                    case ObjectId.SpellScroll:
-                        mo = ReadSpellScroll(s, info.Format);
-                        break;
-                    case ObjectId.RandomResource:
-                    case ObjectId.Resource:
-                        mo = ReadMapResource(s, EnumValues.Cast<Resource>(template.SubId), info.Format);
-                        break;
-                    case ObjectId.RandomTown:
-                    case ObjectId.Town:
-                        mo = ReadTown(s, EnumValues.Cast<Faction>(template.SubId), info);
-                        break;
-                    case ObjectId.CreatureGenerator2:
-                    case ObjectId.CreatureGenerator3:
-                        throw new NotSupportedException();
-                    case ObjectId.CreatureGenerator1:
-                        mo = ReadCreatureGenerator(s, ids.GetCreatureGenerator1(template.SubId));
-                        break;
-                    case ObjectId.CreatureGenerator4:
-                        mo = ReadCreatureGenerator(s, ids.GetCreatureGenerator4(template.SubId));
-                        break;
-                    case ObjectId.Shipyard:
-                    case ObjectId.Lighthouse:
-                        mo = ReadPlayerObject(s);
-                        break;
-                    case ObjectId.Mine:
-                        mo = ReadMine(s, EnumValues.Cast<MineType>(template.SubId));
-                        break;
-                    case ObjectId.Mine2:
-                        RequireVersionAtLeast(info, MapFormat.AB);
-                        mo = ReadMine(s, EnumValues.Cast<MineType>(template.SubId));
-                        break;
-                    case ObjectId.ShrineOfMagicGesture:
-                    case ObjectId.ShrineOfMagicIncantation:
-                    case ObjectId.ShrineOfMagicThought:
-                        mo = ReadMagicShrine(s, template.Id, template.SubId);
-                        break;
-                    case ObjectId.PandorasBox:
-                        mo = ReadPandorasBox(s, info.Format);
-                        break;
-                    case ObjectId.Grail:
-                        mo = ReadGrail(s);
-                        break;
-                    case ObjectId.RandomDwelling:
-                    case ObjectId.RandomDwellingLevel:
-                    case ObjectId.RandomDwellingFaction:
-                        RequireVersionAtLeast(info, MapFormat.AB);
-                        mo = ReadDwelling(s, template.Id, template.SubId);
-                        break;
-                    case ObjectId.QuestGuard:
-                        RequireVersionAtLeast(info, MapFormat.AB);
-                        mo = ReadQuest(s, info.Format);
-                        break;
-                    case ObjectId.HeroPlaceholder:
-                        RequireVersionAtLeast(info, MapFormat.AB);
-                        mo = ReadHeroPlaceholder(s);
-                        break;
-                    case ObjectId.CreatureBank:
-                        mo = new MapObject<CreatureBankType>(template.SubId);
-                        break;
-                    case ObjectId.BorderGate:
-                        RequireVersionAtLeast(info, MapFormat.AB);
-                        mo = new MapObject<ObjectColor>(template.SubId);
-                        break;
-                    case ObjectId.Object:
-                        if (template.SubId == 0) goto default;
-                        mo = new WoGObject(template.SubId);
-                        break;
-                    case ObjectId.ResourceWarehouse:
-                        RequireHotA(info);
-                        mo = new MapObject<Resource>(template.SubId);
-                        break;
-                    case ObjectId.MagicalTerrain:
-                        RequireHotA(info);
-                        mo = new MapObject<MagicalTerrainType>(template.SubId);
-                        break;
-                    case ObjectId.Building:
-                        RequireHotA(info);
-                        mo = new MapObject<BuildingType>(template.SubId);
-                        break;
-                    case ObjectId.SeaObject:
-                        RequireHotA(info);
-                        mo = new MapObject<SeaObjectType>(template.SubId);
-                        break;
-                    case ObjectId.Building2:
-                        RequireHotA(info);
-                        mo = new MapObject<Building2Type>(template.SubId);
-                        break;
-                    case ObjectId.FreelancersGuild:
-                    case ObjectId.DirtHills:
-                    case ObjectId.DesertHills:
-                    case ObjectId.GrassHills:
-                    case ObjectId.TradingPost2:
-                    case ObjectId.Trees2:
-                    case ObjectId.SwampFoliage:
-                    case ObjectId.Lake2:
-                    case ObjectId.RoughHills:
-                    case ObjectId.SubterraneanRocks:
-                        RequireVersionAtLeast(info, MapFormat.AB);
-                        mo = new MapObject();
-                        break;
-                    case ObjectId.FavorableWinds:
-                    case ObjectId.CursedGround2:
-                    case ObjectId.MagicPlains2:
-                    case ObjectId.CloverField:
-                    case ObjectId.EvilFog:
-                    case ObjectId.FieryFields:
-                    case ObjectId.HolyGround:
-                    case ObjectId.LucidPools:
-                    case ObjectId.MagicClouds:
-                    case ObjectId.Rocklands:
-                        RequireVersionAtLeast(info, MapFormat.SoD);
-                        mo = new MapObject();
-                        break;
-                    default:
-                        mo = new MapObject();
-                        break;
-                }
+                var template = templates[templateIndex];
 
+                var mo = ReadMapObject(s, info, template);
                 mo.Position = position;
                 mo.Template = template;
                 objects[i] = mo;
             }
 
             return objects;
+        }
+
+        private MapObject ReadMapObject(MapDeserializer s, MapInfo info, MapObjectTemplate template)
+        {
+            switch (template.Id)
+            {
+                case ObjectId.Event:
+                    return ReadMapEvent(s, info.Format);
+                case ObjectId.Hero:
+                    return ReadMapHero(s, EnumValues.Cast<HeroType>(template.SubId), info.Format);
+                case ObjectId.RandomHero:
+                case ObjectId.Prison:
+                    return ReadMapHero(s, null, info.Format);
+                case ObjectId.Monster:
+                case ObjectId.RandomMonster:
+                case ObjectId.RandomMonster1:
+                case ObjectId.RandomMonster2:
+                case ObjectId.RandomMonster3:
+                case ObjectId.RandomMonster4:
+                case ObjectId.RandomMonster5:
+                case ObjectId.RandomMonster6:
+                case ObjectId.RandomMonster7:
+                    return ReadMapMonster(s, template.SubId, info.Format);
+                case ObjectId.OceanBottle:
+                case ObjectId.Sign:
+                    return ReadMessageObject(s);
+                case ObjectId.SeersHut:
+                    return ReadSeersHut(s, info.Format);
+                case ObjectId.WitchHut:
+                    return ReadWitchHut(s, info.Format);
+                case ObjectId.Scholar:
+                    return ReadScholar(s);
+                case ObjectId.Garrison:
+                    return ReadGarrison(s, info.Format, template.SubId, GarrisonOrientation.EastWest);
+                case ObjectId.Garrison2:
+                    RequireVersionAtLeast(info, MapFormat.AB);
+                    return ReadGarrison(s, info.Format, template.SubId, GarrisonOrientation.NorthSouth);
+                case ObjectId.Artifact:
+                    return ReadArtifact(s, info.Format, template.SubId);
+                case ObjectId.RandomArtifact:
+                    return ReadArtifact(s, info.Format, template.SubId);
+                case ObjectId.RandomTreasureArtifact:
+                case ObjectId.RandomMinorArtifact:
+                case ObjectId.RandomMajorArtifact:
+                case ObjectId.RandomRelicArtifact:
+                    return ReadArtifact(s, info.Format, null);
+                case ObjectId.SpellScroll:
+                    return ReadSpellScroll(s, info.Format);
+                case ObjectId.RandomResource:
+                case ObjectId.Resource:
+                    return ReadMapResource(s, EnumValues.Cast<Resource>(template.SubId), info.Format);
+                case ObjectId.RandomTown:
+                case ObjectId.Town:
+                    return ReadTown(s, EnumValues.Cast<Faction>(template.SubId), info);
+                case ObjectId.CreatureGenerator2:
+                case ObjectId.CreatureGenerator3:
+                    throw new NotSupportedException();
+                case ObjectId.CreatureGenerator1:
+                    return ReadCreatureGenerator(s, ids.GetCreatureGenerator1(template.SubId));
+                case ObjectId.CreatureGenerator4:
+                    return ReadCreatureGenerator(s, ids.GetCreatureGenerator4(template.SubId));
+                case ObjectId.Shipyard:
+                case ObjectId.Lighthouse:
+                    return ReadPlayerObject(s);
+                case ObjectId.Mine:
+                    return ReadMine(s, EnumValues.Cast<MineType>(template.SubId));
+                case ObjectId.Mine2:
+                    RequireVersionAtLeast(info, MapFormat.AB);
+                    return ReadMine(s, EnumValues.Cast<MineType>(template.SubId));
+                case ObjectId.ShrineOfMagicGesture:
+                case ObjectId.ShrineOfMagicIncantation:
+                case ObjectId.ShrineOfMagicThought:
+                    return ReadMagicShrine(s, template.Id, template.SubId);
+                case ObjectId.PandorasBox:
+                    return ReadPandorasBox(s, info.Format);
+                case ObjectId.Grail:
+                    return ReadGrail(s);
+                case ObjectId.RandomDwelling:
+                case ObjectId.RandomDwellingLevel:
+                case ObjectId.RandomDwellingFaction:
+                    RequireVersionAtLeast(info, MapFormat.AB);
+                    return ReadDwelling(s, template.Id, template.SubId);
+                case ObjectId.QuestGuard:
+                    RequireVersionAtLeast(info, MapFormat.AB);
+                    return ReadQuest(s, info.Format);
+                case ObjectId.HeroPlaceholder:
+                    RequireVersionAtLeast(info, MapFormat.AB);
+                    return ReadHeroPlaceholder(s);
+                case ObjectId.CreatureBank:
+                    return new MapObject<CreatureBankType>(template.SubId);
+                case ObjectId.BorderGate:
+                    RequireVersionAtLeast(info, MapFormat.AB);
+                    return new MapObject<ObjectColor>(template.SubId);
+                case ObjectId.Object:
+                    if (template.SubId == 0) goto default;
+                    return new WoGObject(template.SubId);
+                case ObjectId.ResourceWarehouse:
+                    RequireHotA(info);
+                    return new MapObject<Resource>(template.SubId);
+                case ObjectId.MagicalTerrain:
+                    RequireHotA(info);
+                    return new MapObject<MagicalTerrainType>(template.SubId);
+                case ObjectId.Building:
+                    RequireHotA(info);
+                    return new MapObject<BuildingType>(template.SubId);
+                case ObjectId.SeaObject:
+                    RequireHotA(info);
+                    return new MapObject<SeaObjectType>(template.SubId);
+                case ObjectId.Building2:
+                    RequireHotA(info);
+                    return new MapObject<Building2Type>(template.SubId);
+                case ObjectId.FreelancersGuild:
+                case ObjectId.DirtHills:
+                case ObjectId.DesertHills:
+                case ObjectId.GrassHills:
+                case ObjectId.TradingPost2:
+                case ObjectId.Trees2:
+                case ObjectId.SwampFoliage:
+                case ObjectId.Lake2:
+                case ObjectId.RoughHills:
+                case ObjectId.SubterraneanRocks:
+                    RequireVersionAtLeast(info, MapFormat.AB);
+                    return new MapObject();
+                case ObjectId.FavorableWinds:
+                case ObjectId.CursedGround2:
+                case ObjectId.MagicPlains2:
+                case ObjectId.CloverField:
+                case ObjectId.EvilFog:
+                case ObjectId.FieryFields:
+                case ObjectId.HolyGround:
+                case ObjectId.LucidPools:
+                case ObjectId.MagicClouds:
+                case ObjectId.Rocklands:
+                    RequireVersionAtLeast(info, MapFormat.SoD);
+                    return new MapObject();
+                default:
+                    return new MapObject();
+            }
         }
 
         private CreatureGeneratorObject ReadCreatureGenerator(MapDeserializer s, Identifier generator)
@@ -886,8 +855,9 @@ namespace H3Mapper
             {
                 // TODO: Investigate this is correct and robust
                 var spellId = s.Read1ByteNumber();
-                if (spellId != byte.MaxValue && // no spell
-                    spellId != (byte.MaxValue - 1)) // has 'default'? spell
+                if (spellId != SpellIdNoSpell && // no spell
+                    // TODO: Double check that default spell thing
+                    spellId != SpellIdDefaultSpell) // has 'default'? spell
                 {
                     h.Identifiers = new[]
                     {
@@ -1101,7 +1071,7 @@ namespace H3Mapper
         {
 // is there a way to be smart and detect it instead?
             var heroCount = 156;
-            if (IsHota(format))
+            if (format == MapFormat.HotA)
             {
                 heroCount = s.Read4ByteNumber();
             }
@@ -1301,7 +1271,6 @@ namespace H3Mapper
 
         private Identifier[] ReadAllowedArtifacts(MapDeserializer s, MapFormat format)
         {
-            if (format == MapFormat.RoE) return null;
             var bits = GetAllowedArtifactsBits(s, format);
             var artifacts = new List<Identifier>(bits.Length);
             for (var i = 0; i < bits.Length; i++)
@@ -1317,7 +1286,7 @@ namespace H3Mapper
 
         private bool[] GetAllowedArtifactsBits(MapDeserializer s, MapFormat format)
         {
-            if (IsHota(format))
+            if (format == MapFormat.HotA)
             {
                 var number = s.Read1ByteNumber();
                 if (number == 16)
@@ -1332,10 +1301,11 @@ namespace H3Mapper
                 return s.ReadBitmaskBits(number);
             }
 
+            // TODO: what about WoG?
             return s.ReadBitmaskBits(format == MapFormat.AB ? 129 : 144);
         }
 
-        private void ReadHeroCustomisations(MapDeserializer s, MapHeroes heroes, MapFormat format)
+        private void ReadHeroCustomisations(MapDeserializer s, MapHeroes heroes)
         {
             var count = s.Read1ByteNumber();
             for (var i = 0; i < count; i++)
@@ -1378,7 +1348,7 @@ namespace H3Mapper
 
         private static int GetAllowedHeroesCount(MapDeserializer mapDeserializer, MapFormat format)
         {
-            if (IsHota(format))
+            if (format == MapFormat.HotA)
             {
                 return mapDeserializer.Read4ByteNumber(minValue: 0);
             }
@@ -1451,7 +1421,7 @@ namespace H3Mapper
                     break;
                 case VictoryConditionType.BuildGrail:
                     var position = ReadPosition(s, info.Size, true);
-                    if (position != MapPosition.Empty)
+                    if (!position.IsEmpty)
                     {
                         vc.Position = position;
                     }
@@ -1481,13 +1451,6 @@ namespace H3Mapper
             }
 
             return vc;
-        }
-
-        private static bool IsHota(MapFormat mapFormat)
-        {
-            return mapFormat == MapFormat.HotA1 ||
-                   mapFormat == MapFormat.HotA2 ||
-                   mapFormat == MapFormat.HotA3;
         }
 
         private MapPlayer[] ReadPlayers(MapDeserializer s, int playerCount, MapInfo info)
@@ -1609,7 +1572,7 @@ namespace H3Mapper
 
         private static void RequireHotA(MapInfo info)
         {
-            if (info.Format == MapFormat.HotA3) return;
+            if (info.Format == MapFormat.HotA) return;
             Log.Warning("This map's format is {format} but it has features requiring {requiredFormat}",
                 info.Format,
                 MapFormat.HotA);
