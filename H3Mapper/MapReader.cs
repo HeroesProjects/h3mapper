@@ -1083,9 +1083,9 @@ namespace H3Mapper
                         TerrainVariant = s.Read1ByteNumber(),
                         RiverType = s.ReadEnum<RiverType>(),
                         // TODO: Do proper RiverDirection, RoadDirection and TileMirroring
-                        RiverDirection = (RiverDirection) s.Read1ByteNumber(),
+                        RiverDirection =s.ReadEnum<RiverDirection>(),
                         RoadType = s.ReadEnum<RoadType>(),
-                        RoadDirection = (RoadDirection) s.Read1ByteNumber(),
+                        RoadDirection = s.ReadEnum<RoadDirection>(),
                         Flags = (TileMirroring) s.Read1ByteNumber() //two eldest bytes - not used
                     };
                     row[x] = tile;

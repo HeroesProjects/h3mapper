@@ -277,7 +277,7 @@ namespace H3Mapper
             if (readCount != 0)
             {
                 Log.Warning(
-                    "aw {location}. Read {readCount} bytes: {bytes}",
+                    "Unexpected data at the end of the file at {location}. Read {readCount} bytes: {bytes}",
                     location.ToString("x8"),
                     readCount,
                     BitConverter.ToString(buffer));
