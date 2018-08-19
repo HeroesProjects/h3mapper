@@ -1080,13 +1080,15 @@ namespace H3Mapper
                     var tile = new MapTile(x, y, level)
                     {
                         TerrainType = s.ReadEnum<Terrain>(),
-                        TerrainVariant = s.Read1ByteNumber(),
+                        // for some terrains max is less than 78, but 78 is the most and 7 out of 11 terrains have that
+                        TerrainVariant = s.Read1ByteNumber(maxValue: 78),
                         RiverType = s.ReadEnum<RiverType>(),
-                        // TODO: Do proper RiverDirection, RoadDirection and TileMirroring
-                        RiverDirection =s.ReadEnum<RiverDirection>(),
+                        // the direction only makes sense when RiverType is not NoRiver
+                        RiverDirection = s.ReadEnum<RiverDirection>(),
                         RoadType = s.ReadEnum<RoadType>(),
+                        // the direction only makes sense when RoadType is not NoRoad
                         RoadDirection = s.ReadEnum<RoadDirection>(),
-                        Flags = (TileMirroring) s.Read1ByteNumber() //two eldest bytes - not used
+                        DisplayOptions = s.ReadEnum<TileMirroring>()
                     };
                     row[x] = tile;
                 }

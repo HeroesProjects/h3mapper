@@ -16,6 +16,6 @@ namespace H3Mapper
         public RiverDirection RiverDirection { get; set; }
         public RoadType RoadType { get; set; }
         public RoadDirection RoadDirection { get; set; }
-        public TileMirroring Flags { get; set; }
+        public TileMirroring DisplayOptions { get; set; }
     }
 }
