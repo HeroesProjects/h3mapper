@@ -8,8 +8,9 @@ namespace H3Mapper
     {
         private readonly IList<HeroInfo> heroInfos = new List<HeroInfo>();
 
-        public MapPlayer()
+        public MapPlayer(Player player)
         {
+            Player = player;
             GenerateHeroAtMainTown = true;
         }
 
@@ -34,6 +35,7 @@ namespace H3Mapper
         public string MainCustomHeroName { get; set; }
         public int HeroPlaceholderCount { get; set; }
         public int? TeamId { get; set; }
+        public Player Player { get; set; }
 
         public void AddHero(HeroInfo heroInfo)
         {

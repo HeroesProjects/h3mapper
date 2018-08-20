@@ -57,8 +57,7 @@ namespace H3Mapper
                 info.ExperienceLevelLimit = s.Read1ByteNumber(maxValue: 99);
             }
 
-            const int playerCount = 8;
-            info.Players = ReadPlayers(s, playerCount, info);
+            info.Players = ReadPlayers(s, info);
             info.VictoryCondition = ReadVictoryCondition(s, info);
             info.LossCondition = ReadLossCondition(s, info.Size);
             var teamCount = s.Read1ByteNumber(maxValue: 7);
@@ -1464,20 +1463,19 @@ namespace H3Mapper
             return vc;
         }
 
-        private MapPlayer[] ReadPlayers(MapDeserializer s, int playerCount, MapInfo info)
+        private MapPlayer[] ReadPlayers(MapDeserializer s, MapInfo info)
         {
-            var players = new MapPlayer[playerCount];
-            for (var i = 0; i < playerCount; i++)
-            {
-                players[i] = ReadPlayer(s, info.Format, info.Size);
-            }
+            var players = EnumValues.For<Player>()
+                .TakeWhile(x => x <= Player.Pink)
+                .Select(x => ReadPlayer(s, x, info.Format, info.Size))
+                .ToArray();
 
             return players;
         }
 
-        private MapPlayer ReadPlayer(MapDeserializer s, MapFormat format, int mapSize)
+        private MapPlayer ReadPlayer(MapDeserializer s, Player p, MapFormat format, int mapSize)
         {
-            var player = new MapPlayer
+            var player = new MapPlayer(p)
             {
                 CanHumanPlay = s.ReadBool(),
                 CanAIPlay = s.ReadBool(),
