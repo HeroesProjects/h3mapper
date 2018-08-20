@@ -87,7 +87,7 @@ namespace H3Mapper
 
             if (info.Format >= MapFormat.AB)
             {
-                map.AllowedArtifacts = ReadAllowedArtifacts(s, info.Format);   
+                map.AllowedArtifacts = ReadAllowedArtifacts(s, info.Format);
             }
 
             if (info.Format >= MapFormat.SoD)
@@ -843,26 +843,37 @@ namespace H3Mapper
                 h.Sex = s.ReadEnum<HeroSex>();
             }
 
-            if (format >= MapFormat.SoD)
+            if (format == MapFormat.AB)
+            {
+                var spellId = s.Read1ByteNumber();
+                if (spellId == SpellIdDefaultSpell)
+                {
+                    // RoE would always start with the default spell...
+                    // That's the default anyway, just being explicit
+                    // TODO: ideally, that would pull the spell to Spells array
+                    // also, perhaps do the same in RoE (unconditionally since there is no way to change it)
+                    h.StartsWithCustomSpell = false;
+                }
+                else if (spellId == SpellIdNoSpell)
+                {
+                    h.StartsWithCustomSpell = true;
+                    h.Spells = null;
+                }
+                else
+                {
+                    h.StartsWithCustomSpell = true;
+                    h.Spells = new[]
+                    {
+                        ids.GetSpell(spellId)
+                    };
+                }
+            }
+            else
             {
                 var hasSpells = s.ReadBool();
                 if (hasSpells)
                 {
-                    h.Identifiers = ReadSpellsFromBitmask(s);
-                }
-            }
-            else if (format == MapFormat.AB)
-            {
-                // TODO: Investigate this is correct and robust
-                var spellId = s.Read1ByteNumber();
-                if (spellId != SpellIdNoSpell && // no spell
-                    // TODO: Double check that default spell thing
-                    spellId != SpellIdDefaultSpell) // has 'default'? spell
-                {
-                    h.Identifiers = new[]
-                    {
-                        ids.GetSpell(spellId)
-                    };
+                    h.Spells = ReadSpellsFromBitmask(s);
                 }
             }
 

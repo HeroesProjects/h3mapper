@@ -5,6 +5,7 @@ namespace H3Mapper.MapObjects
 {
     public class HeroObject : MapObject
     {
+        public bool StartsWithCustomSpell { get; set; }
         public long Indentifier { get; set; }
         public Player Owner { get; set; }
         public int SubId { get; set; }
@@ -18,7 +19,7 @@ namespace H3Mapper.MapObjects
         public PatrolRadius PatrolRadius { get; set; }
         public string Bio { get; set; }
         public HeroSex Sex { get; set; }
-        public Identifier[] Identifiers { get; set; }
+        public Identifier[] Spells { get; set; }
         public IDictionary<PrimarySkillType, int> PrimarySkills { get; set; }
         public HeroType? Type { get; set; }
     }
