@@ -7,6 +7,7 @@ namespace H3Mapper.Serialize
     {
         private static readonly byte[] Letters =
         {
+            133, // …
             159, // Ÿ
             192, // À
             194, // Â
@@ -34,7 +35,7 @@ namespace H3Mapper.Serialize
             249, // ù
             251, // û
             252, // ü
-            255, // ÿ
+            255 // ÿ
         };
 
         public Encoding TryMatchEncoding(byte[] text)

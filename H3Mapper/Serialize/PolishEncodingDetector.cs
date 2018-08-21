@@ -5,7 +5,9 @@ namespace H3Mapper.Serialize
 {
     public class PolishEncodingDetector : IEncodingDetector
     {
-        private static readonly byte[] Letters = {
+        private static readonly byte[] Letters =
+        {
+            133, // …
             185, // ą
             165, // Ą
             230, // ć
@@ -23,7 +25,7 @@ namespace H3Mapper.Serialize
             159, // ź
             143, // Ź
             191, // ż
-            175, // Ż
+            175 // Ż
         };
 
         public Encoding TryMatchEncoding(byte[] text)

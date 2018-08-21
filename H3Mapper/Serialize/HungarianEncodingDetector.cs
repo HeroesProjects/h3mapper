@@ -5,7 +5,9 @@ namespace H3Mapper.Serialize
 {
     public class HungarianEncodingDetector : IEncodingDetector
     {
-        private static readonly byte[] Letters = {
+        private static readonly byte[] Letters =
+        {
+            133, // …
             193, // Á
             201, // É
             205, // Í
@@ -23,7 +25,7 @@ namespace H3Mapper.Serialize
             246, // ö
             250, // ú
             251, // ű
-            252, // ü
+            252 // ü
         };
 
         public Encoding TryMatchEncoding(byte[] text)
