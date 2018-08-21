@@ -8,7 +8,9 @@ namespace H3Mapper.Serialize
         {
             new PolishEncodingDetector(),
             new HungarianEncodingDetector(),
-            new CyrilicEncodingDetector()
+            new FrenchEncodingDetector(),
+            new UkrainianEncodingDetector(),
+            new RussianEncodingDetector()
         };
 
         public Encoding GuessEncoding(byte[] text)

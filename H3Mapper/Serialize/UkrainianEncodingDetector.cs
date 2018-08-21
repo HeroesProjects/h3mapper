@@ -3,12 +3,18 @@ using System.Text;
 
 namespace H3Mapper.Serialize
 {
-    public class CyrilicEncodingDetector : IEncodingDetector
+    public class UkrainianEncodingDetector : IEncodingDetector
     {
         private static readonly byte[] Letters =
         {
-            168, // Ё
-            184, // ё
+            165, // Ґ
+            170, // Є
+            175, // Ї
+            178, // І
+            179, // і
+            180, // ґ
+            186, // є
+            191, // ї
             192, // А
             193, // Б
             194, // В
@@ -35,10 +41,7 @@ namespace H3Mapper.Serialize
             215, // Ч
             216, // Ш
             217, // Щ
-            218, // Ъ
-            219, // Ы
             220, // Ь
-            221, // Э
             222, // Ю
             223, // Я
             224, // а
@@ -67,10 +70,7 @@ namespace H3Mapper.Serialize
             247, // ч
             248, // ш
             249, // щ
-            250, // ъ
-            251, // ы
             252, // ь
-            253, // э
             254, // ю
             255, // я
         };
