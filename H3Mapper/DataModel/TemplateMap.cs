@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using H3Mapper.Flags;
+using H3Mapper.MapModel;
 
 namespace H3Mapper.DataModel
 {

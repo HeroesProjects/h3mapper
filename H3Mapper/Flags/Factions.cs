@@ -15,11 +15,7 @@ namespace H3Mapper.Flags
         Stronghold = 1 << 6,
         Fortress = 1 << 7,
         Conflux = 1 << 8,
-        Custom1 = 1 << 9,
-        Custom2 = 1 << 10,
-        Custom3 = 1 << 11,
-        Custom4 = 1 << 12,
-        Cove = Custom1,
+        Cove = 1 << 9,
         Any = ushort.MaxValue
     }
 }

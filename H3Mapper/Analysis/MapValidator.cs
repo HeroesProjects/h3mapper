@@ -1,4 +1,5 @@
 ﻿using H3Mapper.DataModel;
+using H3Mapper.MapModel;
 
 namespace H3Mapper.Analysis
 {
@@ -11,7 +12,7 @@ namespace H3Mapper.Analysis
             validators = new IMapValidator[]
             {
                 new MapObjectTemplateValidator(maps),
-                new MapObjectSubIdValidator(),
+                new MapObjectSubIdValidator()
             };
         }
 

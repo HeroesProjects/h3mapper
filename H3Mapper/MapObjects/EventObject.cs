@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using H3Mapper.Flags;
+using H3Mapper.MapModel;
 
 namespace H3Mapper.MapObjects
 {

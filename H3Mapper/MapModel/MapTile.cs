@@ -1,6 +1,6 @@
 using H3Mapper.Flags;
 
-namespace H3Mapper
+namespace H3Mapper.MapModel
 {
     public class MapTile
     {
@@ -9,7 +9,7 @@ namespace H3Mapper
             Location = new MapPosition {X = x, Y = y, Z = z};
         }
 
-        public MapPosition Location { get; set; }
+        public MapPosition Location { get; }
         public Terrain TerrainType { get; set; }
         public int TerrainVariant { get; set; }
         public RiverType RiverType { get; set; }

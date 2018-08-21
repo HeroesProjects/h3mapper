@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
+using H3Mapper.MapModel;
 using Serilog;
 
 namespace H3Mapper

@@ -1,4 +1,5 @@
 ﻿using H3Mapper.Flags;
+using H3Mapper.MapModel;
 using H3Mapper.MapObjects;
 using Serilog;
 

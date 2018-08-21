@@ -1,4 +1,6 @@
-﻿namespace H3Mapper.Analysis
+﻿using H3Mapper.MapModel;
+
+namespace H3Mapper.Analysis
 {
     public interface IMapValidator
     {

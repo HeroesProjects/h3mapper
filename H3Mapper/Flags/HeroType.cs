@@ -20,6 +20,7 @@ namespace H3Mapper.Flags
         Witch = 15,
         PlanesWalker = 16,
         Elementalist = 17,
+        // HotA only
         Captain = 18,
         Navigator = 19
     }

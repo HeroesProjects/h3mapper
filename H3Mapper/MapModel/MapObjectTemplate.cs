@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using H3Mapper.Flags;
 
-namespace H3Mapper
+namespace H3Mapper.MapModel
 {
     [DebuggerDisplay("{Id}/{SubId}: {Type} ({AnimationFile})")]
     public class MapObjectTemplate

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using H3Mapper.Flags;
 
-namespace H3Mapper
+namespace H3Mapper.MapModel
 {
     [DebuggerDisplay("{Slot} - {Artifact}")]
     public class HeroArtifact

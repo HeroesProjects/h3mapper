@@ -7,11 +7,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Serilog;
 
-namespace H3Mapper
+namespace H3Mapper.Serialize
 {
     public class MapDeserializer
     {
         private readonly Stream map;
+        private readonly EncodingDetector encodingDetector = new EncodingDetector();
 
         public MapDeserializer(Stream mapFile)
         {
@@ -47,6 +48,11 @@ namespace H3Mapper
                 return ConvertByte(raw);
             }
 
+            if (type == typeof(sbyte))
+            {
+                return (sbyte) ConvertByte(raw);
+            }
+
             if (type == typeof(ushort))
             {
                 return ConvertUInt16(raw);
@@ -70,9 +76,9 @@ namespace H3Mapper
             return BitConverter.ToUInt16(raw, 0);
         }
 
-        private string ConvertUtf8String(byte[] raw)
+        private string ConvertString(byte[] raw)
         {
-            return Encoding.UTF8.GetString(raw);
+            return encodingDetector.GuessEncoding(raw).GetString(raw);
         }
 
         private int ConvertInt32(byte[] raw)
@@ -196,7 +202,7 @@ namespace H3Mapper
             }
 
             var bytes = ReadBytes(stringLength);
-            return ConvertUtf8String(bytes);
+            return ConvertString(bytes);
         }
 
         private bool[] ReadBitmask(int byteCount, int bitCount)

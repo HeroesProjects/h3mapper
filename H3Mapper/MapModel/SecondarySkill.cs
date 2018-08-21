@@ -1,6 +1,6 @@
 using H3Mapper.Flags;
 
-namespace H3Mapper
+namespace H3Mapper.MapModel
 {
     public class SecondarySkill
     {

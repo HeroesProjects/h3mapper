@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using H3Mapper.DataModel;
+using H3Mapper.MapModel;
 using Serilog;
 
 namespace H3Mapper.Analysis

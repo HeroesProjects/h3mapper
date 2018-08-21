@@ -1,7 +1,7 @@
 using H3Mapper.Flags;
 using H3Mapper.MapObjects;
 
-namespace H3Mapper
+namespace H3Mapper.MapModel
 {
     public class H3Map
     {

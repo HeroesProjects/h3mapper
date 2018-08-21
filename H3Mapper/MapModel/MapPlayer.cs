@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using H3Mapper.Flags;
 
-namespace H3Mapper
+namespace H3Mapper.MapModel
 {
     public class MapPlayer
     {
@@ -35,7 +35,7 @@ namespace H3Mapper
         public string MainCustomHeroName { get; set; }
         public int HeroPlaceholderCount { get; set; }
         public int? TeamId { get; set; }
-        public Player Player { get; set; }
+        public Player Player { get; }
 
         public void AddHero(HeroInfo heroInfo)
         {

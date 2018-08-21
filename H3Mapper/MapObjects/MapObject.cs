@@ -1,4 +1,5 @@
 using H3Mapper.Internal;
+using H3Mapper.MapModel;
 
 namespace H3Mapper.MapObjects
 {

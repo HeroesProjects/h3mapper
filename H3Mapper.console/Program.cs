@@ -4,10 +4,13 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using H3Mapper.Analysis;
 using H3Mapper.DataModel;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
+using H3Mapper.MapModel;
+using H3Mapper.Serialize;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -19,6 +22,7 @@ namespace H3Mapper
 
         private static int Main(string[] args)
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             if (args.Length == 0)
             {
                 ShowHelp();

@@ -5,10 +5,11 @@ using System.Linq;
 using H3Mapper.DataModel;
 using H3Mapper.Flags;
 using H3Mapper.Internal;
+using H3Mapper.MapModel;
 using H3Mapper.MapObjects;
 using Serilog;
 
-namespace H3Mapper
+namespace H3Mapper.Serialize
 {
     public class MapReader
     {
@@ -867,17 +868,13 @@ namespace H3Mapper
                     };
                 }
             }
-            else
+            else if (format >= MapFormat.SoD)
             {
                 var hasSpells = s.ReadBool();
                 if (hasSpells)
                 {
                     h.Spells = ReadSpellsFromBitmask(s);
                 }
-            }
-
-            if (format >= MapFormat.SoD)
-            {
                 var hasCustomPrimarySkills = s.ReadBool();
                 if (hasCustomPrimarySkills)
                 {
