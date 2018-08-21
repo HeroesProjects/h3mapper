@@ -1057,8 +1057,7 @@ namespace H3Mapper.Serialize
                     var tile = new MapTile(x, y, level)
                     {
                         TerrainType = s.ReadEnum<Terrain>(),
-                        // for some terrains max is less than 78, but 78 is the most and 7 out of 11 terrains have that
-                        TerrainVariant = s.Read1ByteNumber(maxValue: 78),
+                        TerrainVariant = s.Read1ByteNumber(maxValue: 125),
                         RiverType = s.ReadEnum<RiverType>(),
                         // the direction only makes sense when RiverType is not NoRiver
                         RiverDirection = s.ReadEnum<RiverDirection>(),
