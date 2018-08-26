@@ -9,7 +9,7 @@ namespace H3Mapper.MapObjects
         public bool StartsWithCustomSpell { get; set; }
         public long Identifier { get; set; }
         public Player Owner { get; set; }
-        public int SubId { get; set; }
+        public Identifier Identity { get; set; }
         public long? Experience { get; set; }
         public string Name { get; set; }
         public int? PortraitId { get; set; }

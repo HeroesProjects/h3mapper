@@ -243,10 +243,9 @@ namespace H3Mapper
                 w.Write((byte) o.RandomDwellingFaction.Value);
             }
 
-            if (o.FactionSameAsCastleId.HasValue)
+            if (o.FactionSameAsTownId.HasValue)
             {
-                // TODO: What is this Id?
-                w.Write(o.FactionSameAsCastleId.Value);
+                w.Write(o.FactionSameAsTownId.Value);
             }
 
             if (o.AllowedFactions.HasValue)
@@ -383,7 +382,20 @@ namespace H3Mapper
         private void WriteScholar(BinaryWriter w, ScholarObject o)
         {
             w.Write((byte) o.BonusType);
-            w.Write(o.BonusId);
+            if (o.PrimarySkill != null)
+            {
+                w.Write((byte) o.PrimarySkill.Value);
+            }
+
+            if (o.SecondarySkill != null)
+            {
+                w.Write((byte) o.SecondarySkill.Value);
+            }
+
+            if (o.Spell != null)
+            {
+                w.Write(o.Spell.Value);
+            }
         }
 
         private void WriteWitchHut(BinaryWriter w, WitchHutObject o)
@@ -519,7 +531,11 @@ namespace H3Mapper
         {
             w.Write(o.Identifier);
             w.Write((byte) o.Owner);
-            w.Write(o.SubId);
+            if (o.Identity != null)
+            {
+                w.Write(o.Identity.Value);
+            }
+
             if (o.Name != null)
             {
                 w.Write(o.Name);
@@ -777,9 +793,6 @@ namespace H3Mapper
                     // main town type will be determined when we write out the town
                     WritePosition(writer, player.MainTownPosition);
                 }
-
-                // TODO: Random hero and hero placeholder ? Or we don't care here?
-                // we can either do it here or with map objects I guess...
             }
         }
 
@@ -793,7 +806,7 @@ namespace H3Mapper
 
             switch (lc.Type)
             {
-                case LossConditionType.LossCastle:
+                case LossConditionType.LossTown:
                 case LossConditionType.LossHero:
                     WritePosition(writer, lc.Position);
                     break;

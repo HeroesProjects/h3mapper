@@ -56,7 +56,8 @@
 55 : Slayer
 56 : Frenzy
 // http://heroes.thelazy.net/wiki/Fear
-// 57 : Fear
+// a value must be present because it does appear as active in town bitmasks (even though it can't be used)
+57 : -- unavailable
 58 : Counterstrike
 59 : Berserk
 60 : Hypnotize

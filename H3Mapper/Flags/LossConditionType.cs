@@ -2,7 +2,7 @@ namespace H3Mapper.Flags
 {
     public enum LossConditionType : byte
     {
-        LossCastle,
+        LossTown,
         LossHero,
         TimeExpires,
         LossStandard = byte.MaxValue

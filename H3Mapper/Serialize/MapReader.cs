@@ -348,10 +348,10 @@ namespace H3Mapper.Serialize
             }
             else
             {
-                var sameAsCastleId = s.Read4ByteNumberLong();
-                if (sameAsCastleId != 0)
+                var townId = s.Read4ByteNumberLong();
+                if (townId != 0)
                 {
-                    d.FactionSameAsCastleId = sameAsCastleId;
+                    d.FactionSameAsTownId = townId;
                 }
                 else
                 {
@@ -480,7 +480,7 @@ namespace H3Mapper.Serialize
             m.Events = ReadEvents(s, info.Format, true);
             if (info.Format >= MapFormat.SoD)
             {
-                // this only applies to random castles
+                // this only applies to random towns
                 m.Alignment = s.ReadEnum<RandomTownAlignment>();
             }
 
@@ -488,7 +488,7 @@ namespace H3Mapper.Serialize
             return m;
         }
 
-        private TimedEvents[] ReadEvents(MapDeserializer s, MapFormat format, bool forCastle)
+        private TimedEvents[] ReadEvents(MapDeserializer s, MapFormat format, bool forTown)
         {
             var count = s.Read4ByteNumberLong();
             var events = new TimedEvents[count];
@@ -512,7 +512,7 @@ namespace H3Mapper.Serialize
                 e.FirstOccurence = s.Read2ByteNumber(maxValue: 672);
                 e.RepeatEvery = s.Read1ByteNumber(maxValue: 28);
                 s.Skip(17);
-                if (forCastle)
+                if (forTown)
                 {
                     e.NewBuildings = s.ReadBitmask(6);
                     e.Creatures = ReadCastleCreatures(s);
@@ -527,13 +527,13 @@ namespace H3Mapper.Serialize
 
         private int[] ReadCastleCreatures(MapDeserializer s)
         {
+            // one per level
             var creatures = new int[7];
             for (var i = 0; i < creatures.Length; i++)
             {
                 creatures[i] = s.Read2ByteNumber();
             }
 
-            // TODO: Those should be creature ids? Or what?
             return creatures;
         }
 
@@ -575,10 +575,23 @@ namespace H3Mapper.Serialize
 
         private ScholarObject ReadScholar(MapDeserializer s)
         {
-            var sc = new ScholarObject();
-            sc.BonusType = s.ReadEnum<ScholarBonusType>();
-            // TODO: this should pull the appropriate ObjectId
-            sc.BonusId = s.Read1ByteNumber();
+            var sc = new ScholarObject {BonusType = s.ReadEnum<ScholarBonusType>()};
+            switch (sc.BonusType)
+            {
+                case ScholarBonusType.Random:
+                    s.Skip(1);
+                    break;
+                case ScholarBonusType.PrimarySkill:
+                    sc.PrimarySkill = EnumValues.Cast<PrimarySkillType>(s.Read1ByteNumber());
+                    break;
+                case ScholarBonusType.SecondarySkill:
+                    sc.SecondarySkill = EnumValues.Cast<SecondarySkillType>(s.Read1ByteNumber());
+                    break;
+                case ScholarBonusType.Spell:
+                    sc.Spell = ids.GetSpell(s.Read1ByteNumber());
+                    break;
+            }
+
             s.Skip(6);
             return sc;
         }
@@ -786,7 +799,11 @@ namespace H3Mapper.Serialize
             }
 
             h.Owner = s.ReadEnum<Player>();
-            h.SubId = s.Read1ByteNumber();
+            var heroId = s.Read1ByteNumber();
+            if (heroId != byte.MaxValue) //random
+            {
+                h.Identity = ids.GetHero(heroId);
+            }
 
             var hasName = s.ReadBool();
             if (hasName)
@@ -1378,7 +1395,7 @@ namespace H3Mapper.Serialize
 
             switch (type)
             {
-                case LossConditionType.LossCastle:
+                case LossConditionType.LossTown:
                 case LossConditionType.LossHero:
                     lc.Position = ReadPosition(s, mapSize);
                     break;
