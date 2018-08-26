@@ -1,6 +1,6 @@
 0 : Summon Boat
 1 : Scuttle Boat
-2 : Vision
+2 : Visions
 3 : View Earth
 4 : Disguise
 5 : View Air
@@ -31,9 +31,9 @@
 30 : Protection from Air
 31 : Protection from Fire
 32 : Protection from Water
-33 : Protection From Earth
-34 : Antimagic
-35 : Dispel Magic
+33 : Protection from Earth
+34 : Anti-Magic
+35 : Dispel
 36 : Magic Mirror
 37 : Cure
 38 : Resurrection
@@ -45,21 +45,22 @@
 44 : Precision
 45 : Weakness
 46 : Stone Skin
-47 : Disruption Ray
+47 : Disrupting Ray
 48 : Prayer
-49 : Sorrow
-50 : Fortune
-51 : Mirth
+49 : Mirth
+50 : Sorrow
+51 : Fortune
 52 : Misfortune
 53 : Haste
 54 : Slow
 55 : Slayer
 56 : Frenzy
-57 : Fear
+// http://heroes.thelazy.net/wiki/Fear
+// 57 : Fear
 58 : Counterstrike
 59 : Berserk
-60 : Hypnose
-61 : Forgetfullnes
+60 : Hypnotize
+61 : Forgetfulness
 62 : Blind
 63 : Teleport
 64 : Remove Obstacle
