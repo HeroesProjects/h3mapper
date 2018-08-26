@@ -14,4 +14,4 @@
 // The following artifacts weren't used in the game
 141 : Diplomat's Suit
 142 : Mired in Neutrality
-143 : Ironfist of the Ogre 
+143 : Ironfist of the Ogre

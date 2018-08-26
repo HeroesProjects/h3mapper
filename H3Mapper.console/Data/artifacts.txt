@@ -1,12 +1,12 @@
 // id : Name
 0 : Spell Book
 1 : Spell Scroll
-2 : Grail
+2 : The Grail
 3 : Catapult
 4 : Ballista
 5 : Ammo Cart
 6 : First Aid Tent
-7 : Centaur's Axe
+7 : Centaurs Axe
 8 : Blackshard of the Dead Knight
 9 : Greater Gnoll's Flail
 10 : Ogre's Club of Havoc
@@ -32,7 +32,7 @@
 30 : Titan's Cuirass
 31 : Armor of Wonder
 32 : Sandals of the Saint
-33 : Celestial Necklase of Bliss
+33 : Celestial Necklace of Bliss
 34 : Lion's Shield of Courage
 35 : Sword of Judgement
 36 : Helm of Heavenly Enlightenment
@@ -59,7 +59,7 @@
 57 : Garniture of Interference
 58 : Surcoat of Counterpoise
 59 : Boots of Polarity
-60 : Bow of Elfen Cherrywood
+60 : Bow of Elven Cherrywood
 61 : Bowstring of the Unicorn's Mane
 62 : Angel Feather Arrows
 63 : Bird of Perception
@@ -78,7 +78,7 @@
 76 : Collar of Conjuring
 77 : Ring of Conjuring
 78 : Cape of Conjuring
-79 : Orb of Firmament 
+79 : Orb of the Firmament
 80 : Orb of Silt
 81 : Orb of Tempestuous Fire
 82 : Orb of Driving Rain
@@ -91,8 +91,8 @@
 89 : Tome of Earth Magic
 90 : Boots of Levitation
 91 : Golden Bow
-92 : Sphere of Permamence
-93 : Orb of Vulnerability 
+92 : Sphere of Permanence
+93 : Orb of Vulnerability
 94 : Ring of Vitality
 95 : Ring of Life
 96 : Vial of Lifeblood
@@ -112,7 +112,7 @@
 110 : Ring of Infinite Gems
 111 : Everpouring Vial of Mercury
 112 : Inexhaustible Cart of Ore
-113 : Eversmoking Ring of Sulphur
+113 : Eversmoking Ring of Sulfur
 114 : Inexhaustible Cart of Lumber
 115 : Endless Sack of Gold
 116 : Endless Bag of Gold
