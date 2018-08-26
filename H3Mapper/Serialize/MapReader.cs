@@ -327,7 +327,7 @@ namespace H3Mapper.Serialize
             var id = s.Read1ByteNumber();
             if (id != byte.MaxValue)
             {
-                h.Id = id;
+                h.Id = ids.GetHero(id);
             }
             else
             {
@@ -518,6 +518,8 @@ namespace H3Mapper.Serialize
                     e.Creatures = ReadCastleCreatures(s);
                     s.Skip(4);
                 }
+
+                events[i] = e;
             }
 
             return events;
@@ -531,6 +533,7 @@ namespace H3Mapper.Serialize
                 creatures[i] = s.Read2ByteNumber();
             }
 
+            // TODO: Those should be creature ids? Or what?
             return creatures;
         }
 
@@ -574,6 +577,7 @@ namespace H3Mapper.Serialize
         {
             var sc = new ScholarObject();
             sc.BonusType = s.ReadEnum<ScholarBonusType>();
+            // TODO: this should pull the appropriate ObjectId
             sc.BonusId = s.Read1ByteNumber();
             s.Skip(6);
             return sc;
@@ -618,8 +622,7 @@ namespace H3Mapper.Serialize
 
         private QuestReward ReadReward(MapDeserializer s, MapFormat format)
         {
-            var r = new QuestReward();
-            r.Type = s.ReadEnum<RewardType>();
+            var r = new QuestReward {Type = s.ReadEnum<RewardType>()};
             switch (r.Type)
             {
                 case RewardType.None:
@@ -776,13 +779,12 @@ namespace H3Mapper.Serialize
 
         private MapObject ReadMapHero(MapDeserializer s, HeroType? type, MapFormat format)
         {
-            var h = new HeroObject();
+            var h = new HeroObject {Type = type};
             if (format >= MapFormat.AB)
             {
-                h.Indentifier = s.Read4ByteNumberLong();
+                h.Identifier = s.Read4ByteNumberLong();
             }
 
-            h.Type = type;
             h.Owner = s.ReadEnum<Player>();
             h.SubId = s.Read1ByteNumber();
 
@@ -875,6 +877,7 @@ namespace H3Mapper.Serialize
                 {
                     h.Spells = ReadSpellsFromBitmask(s);
                 }
+
                 var hasCustomPrimarySkills = s.ReadBool();
                 if (hasCustomPrimarySkills)
                 {
@@ -939,6 +942,7 @@ namespace H3Mapper.Serialize
             {
                 o.Message = s.ReadString(30000);
 // NOTE: does it belong inside of this if?
+                // TODO: What is the message if not set explicitly but has guards?
                 var hasGuards = s.ReadBool();
                 if (hasGuards)
                 {
@@ -1499,8 +1503,8 @@ namespace H3Mapper.Serialize
                 s.Ignore(1);
             }
 
-            player.HasHomeTown = s.ReadBool();
-            if (player.HasHomeTown)
+            player.HasMainTown = s.ReadBool();
+            if (player.HasMainTown)
             {
                 if (format >= MapFormat.AB)
                 {
@@ -1515,10 +1519,10 @@ namespace H3Mapper.Serialize
                     }
                 }
 
-                player.HomeTownPosition = ReadPosition(s, mapSize);
+                player.MainTownPosition = ReadPosition(s, mapSize);
             }
 
-            player.HasRandomHero = s.ReadBool();
+            player.HasRandomHeroes = s.ReadBool();
             var heroId = s.Read1ByteNumber();
             if (heroId != byte.MaxValue)
             {

@@ -8,7 +8,7 @@ namespace H3Mapper.MapModel
         public int PortraitId { get; set; }
         public string Name { get; set; }
         public Players AllowedForPlayers { get; set; }
-        public int Experience { get; set; }
+        public int? Experience { get; set; }
         public SecondarySkill[] SecondarySkills { get; set; }
         public HeroArtifact[] Inventory { get; set; }
         public string Bio { get; set; }

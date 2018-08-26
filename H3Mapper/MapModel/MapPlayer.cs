@@ -25,11 +25,11 @@ namespace H3Mapper.MapModel
         public bool AllowedAlignmentsCustomised { get; set; }
         public Factions AllowedFactions { get; set; }
         public bool IsFactionRandom { get; set; }
-        public bool HasHomeTown { get; set; }
+        public bool HasMainTown { get; set; }
         public bool GenerateHeroAtMainTown { get; set; }
         public Faction? MainTownType { get; set; }
-        public MapPosition HomeTownPosition { get; set; }
-        public bool HasRandomHero { get; set; }
+        public MapPosition MainTownPosition { get; set; }
+        public bool HasRandomHeroes { get; set; }
         public Identifier MainCustomHero { get; set; }
         public int? MainCustomHeroPortraitId { get; set; }
         public string MainCustomHeroName { get; set; }

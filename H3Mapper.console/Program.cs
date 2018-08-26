@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using H3Mapper.Analysis;
 using H3Mapper.DataModel;
 using H3Mapper.Flags;
-using H3Mapper.Internal;
 using H3Mapper.MapModel;
-using H3Mapper.Serialize;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -18,8 +14,6 @@ namespace H3Mapper
 {
     internal class Program
     {
-        private static string RootFolder = null;
-
         private static int Main(string[] args)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -29,23 +23,23 @@ namespace H3Mapper
                 return -1;
             }
 
-            RootFolder = Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
             var result = 0;
             try
             {
-                ConfigureLogging(args.Contains("-d"), args.Contains("-q"));
-
-                var path = args[0];
-
-                if (args.Contains("-u"))
-                {
-                    Unpack(path);
-                }
-                else
-                {
-                    var mappings = ConfigureMappings();
-                    result = Run(path, mappings, args.Contains("-v"));
-                }
+                ConfigureLogging(
+#if DEBUG
+                    true,
+#else
+                    args.Contains("-d"),
+#endif
+                    args.Contains("-q")
+                );
+                var executor = new Executor(
+                    ConfigureMappings(Path.GetDirectoryName(Environment.GetCommandLineArgs()[0])),
+                    args[0],
+                    args.Contains("-v"));
+                result = executor.Run();
+                executor.Dispose();
             }
             catch (Exception e)
             {
@@ -58,59 +52,20 @@ namespace H3Mapper
             return result;
         }
 
-        private static void Unpack(string mapFilePath)
-        {
-            using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    mapFile.CopyTo(memoryStream);
-                    File.WriteAllBytes(Path.ChangeExtension(mapFilePath, ".decompressed"), memoryStream.ToArray());
-                }
-            }
-        }
-
-        private static int Run(string path, IdMappings mappings, bool validate)
-        {
-            if (File.Exists(path))
-            {
-                return Process(mappings, path, validate);
-            }
-
-            if (Directory.Exists(path))
-            {
-                var result = 0;
-                foreach (var file in Directory.EnumerateFiles(path, "*.h3m", SearchOption.AllDirectories))
-                {
-                    var fileResult = Process(mappings, file, validate);
-                    if (fileResult != 0)
-                    {
-                        result = fileResult;
-                    }
-                }
-
-                return result;
-            }
-
-            Log.Information("Given path: '{path}' does not point to an existing file or directory", path);
-            return 1;
-        }
-
-        private static IdMappings ConfigureMappings()
+        private static IdMappings ConfigureMappings(string rootFolder)
         {
             return new IdMappings(
-                ReadIdMap("heroes.txt"),
-                ReadIdMap("spells.txt"),
-                ReadIdMap("artifacts.txt"),
-                ReadIdMap("monsters.txt"),
-                ReadIdMap("creaturegenerators1.txt"),
-                ReadIdMap("creaturegenerators4.txt"),
-                ReadTemplates("objects.txt"));
+                ReadIdMap(Path.Combine(rootFolder, "data", "heroes.txt")),
+                ReadIdMap(Path.Combine(rootFolder, "data", "spells.txt")),
+                ReadIdMap(Path.Combine(rootFolder, "data", "artifacts.txt")),
+                ReadIdMap(Path.Combine(rootFolder, "data", "monsters.txt")),
+                ReadIdMap(Path.Combine(rootFolder, "data", "creaturegenerators1.txt")),
+                ReadIdMap(Path.Combine(rootFolder, "data", "creaturegenerators4.txt")),
+                ReadTemplates(Path.Combine(rootFolder, "data", "objects.txt")));
         }
 
-        private static TemplateMap ReadTemplates(string path)
+        private static TemplateMap ReadTemplates(string mapFileLocation)
         {
-            var mapFileLocation = Path.Combine(RootFolder, "data", path);
             var parser = new TemplateFileParser();
 
 
@@ -162,9 +117,6 @@ namespace H3Mapper
             }
             else
             {
-#if DEBUG
-                forceDebug = true;
-#endif
                 if (forceDebug)
                 {
                     configuration.MinimumLevel.Debug();
@@ -175,44 +127,8 @@ namespace H3Mapper
             Log.Logger = configuration.CreateLogger();
         }
 
-        private static int Process(IdMappings idMappings, string mapFilePath, bool validate)
+        private static IdMap ReadIdMap(string mapFileLocation)
         {
-            Log.Information("Processing {file}", mapFilePath);
-            using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
-            {
-                var reader = new MapReader(idMappings);
-                try
-                {
-                    var mapData = reader.Read(new MapDeserializer(new PositionTrackingStream(mapFile)));
-                    if (validate)
-                    {
-                        var validator = new MapValidator(idMappings);
-                        validator.Validate(mapData);
-                    }
-                }
-                catch (InvalidDataException e)
-                {
-                    Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
-                    return e.HResult;
-                }
-                catch (ArgumentException e)
-                {
-                    Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
-                    return e.HResult;
-                }
-                catch (InvalidOperationException e)
-                {
-                    Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
-                    return e.HResult;
-                }
-  
-                return 0;
-            }
-        }
-
-        private static IdMap ReadIdMap(string mapFileName)
-        {
-            var mapFileLocation = Path.Combine(RootFolder, "data", mapFileName);
             var @default = new Dictionary<int, string>();
             var map = new IdMap(@default);
             if (!File.Exists(mapFileLocation))

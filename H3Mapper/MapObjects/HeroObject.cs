@@ -7,7 +7,7 @@ namespace H3Mapper.MapObjects
     public class HeroObject : MapObject
     {
         public bool StartsWithCustomSpell { get; set; }
-        public long Indentifier { get; set; }
+        public long Identifier { get; set; }
         public Player Owner { get; set; }
         public int SubId { get; set; }
         public long? Experience { get; set; }
