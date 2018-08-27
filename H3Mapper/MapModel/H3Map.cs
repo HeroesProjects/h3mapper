@@ -14,5 +14,8 @@ namespace H3Mapper.MapModel
         public SecondarySkillType[] AllowedSecondarySkills { get; set; }
         public MapInfo Info { get; set; }
         public MapHeroes Heroes { get; set; }
+        public MapPlayer[] Players { get; set; }
+        public VictoryCondition VictoryCondition { get; set; }
+        public LossCondition LossCondition { get; set; }
     }
 }

@@ -32,6 +32,9 @@ namespace H3Mapper
                 {
                     WriteHeader(writer, map.Info);
                     WriteHeroes(writer, map.Heroes);
+                    WriteVictorConditions(writer, map.VictoryCondition);
+                    WriteLossCondition(writer, map.LossCondition);
+                    WritePlayers(writer, map.Players);
                     if (map.AllowedArtifacts != null)
                     {
                         WriteArtifacts(writer, map.AllowedArtifacts);
@@ -766,13 +769,13 @@ namespace H3Mapper
         private void WriteHeader(BinaryWriter writer, MapInfo mapInfo)
         {
             writer.Write((int) mapInfo.Format);
-            writer.Write((byte) mapInfo.FormatSubversion);
+            writer.Write((byte) mapInfo.Subformat);
             writer.Write((byte) mapInfo.Difficulty);
-            writer.Write(mapInfo.ExperienceLevelLimit);
+            writer.Write(mapInfo.ExperienceLevelLimit.GetValueOrDefault());
             writer.Write(mapInfo.AllowSpecialWeeks);
-            WriteVictorConditions(writer, mapInfo.VictoryCondition);
-            WriteLossCondition(writer, mapInfo.LossCondition);
-            WritePlayers(writer, mapInfo.Players);
+            writer.Write(mapInfo.Arena);
+            writer.Write(mapInfo.Name);
+            writer.Write(mapInfo.Description);
         }
 
         private void WritePlayers(BinaryWriter writer, MapPlayer[] players)

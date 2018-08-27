@@ -41,10 +41,18 @@ namespace H3Mapper.Serialize
             ids.SetCurrentVersion(info.Format);
             if (info.Format == MapFormat.HotA)
             {
-                // there's either 4 empty bytes or 1 followed by 5 empty ones.
-                // not sure about the meaning of that yet...
-                info.FormatSubversion = s.ReadEnum<MapFormatSubversion>();
-                s.Skip(info.FormatSubversion == MapFormatSubversion.Version1 ? 5 : 3);
+                var subVersion = s.ReadEnum<MapSubformat>();
+                info.Subformat = subVersion;
+                switch (subVersion)
+                {
+                    case MapSubformat.Version1:
+                        s.Skip(4);
+                        info.Arena = s.ReadBool();
+                        break;
+                    default:
+                        s.Skip(3);
+                        break;
+                }
             }
 
             info.HasPlayers = s.ReadBool();
@@ -55,16 +63,20 @@ namespace H3Mapper.Serialize
             info.Difficulty = s.ReadEnum<Difficulty>();
             if (info.Format >= MapFormat.AB)
             {
-                info.ExperienceLevelLimit = s.Read1ByteNumber(maxValue: 99);
+                var xpLimit = s.Read1ByteNumber(maxValue: 99);
+                if (xpLimit > 0) // 0 means no limit
+                {
+                    info.ExperienceLevelLimit = xpLimit;
+                }
             }
 
-            info.Players = ReadPlayers(s, info);
-            info.VictoryCondition = ReadVictoryCondition(s, info);
-            info.LossCondition = ReadLossCondition(s, info.Size);
+            map.Players = ReadPlayers(s, info);
+            map.VictoryCondition = ReadVictoryCondition(s, info);
+            map.LossCondition = ReadLossCondition(s, info.Size);
             var teamCount = s.Read1ByteNumber(maxValue: 7);
             if (teamCount > 0)
             {
-                foreach (var player in info.Players)
+                foreach (var player in map.Players)
                 {
                     player.TeamId = s.Read1ByteNumber(maxValue: (byte) (teamCount - 1));
                 }
@@ -472,7 +484,7 @@ namespace H3Mapper.Serialize
             }
 
             m.SpellsThatMayAppear = ReadSpellsFromBitmask(s);
-            if (info.FormatSubversion == MapFormatSubversion.Version1)
+            if (info.Subformat == MapSubformat.Version1)
             {
                 m.AllowSpellResearch = s.ReadBool();
             }
