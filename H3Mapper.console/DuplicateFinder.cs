@@ -14,7 +14,7 @@ namespace H3Mapper
     {
         private readonly SHA1Managed sha1Managed = new SHA1Managed();
         private readonly Internal.Lookup<string, string> hashes = new Internal.Lookup<string, string>();
-        private int totalCount = 0;
+        private int totalCount;
 
 
         public void Process(H3Map map, string mapFilePath)
@@ -26,38 +26,36 @@ namespace H3Mapper
 
         private byte[] BuildHash(H3Map map)
         {
-            using (var m = new MemoryStream())
+            using var m = new MemoryStream();
+            using (var writer = new BinaryWriter(m))
             {
-                using (var writer = new BinaryWriter(m))
+                WriteHeader(writer, map.Info);
+                WriteHeroes(writer, map.Heroes);
+                WriteVictorConditions(writer, map.VictoryCondition);
+                WriteLossCondition(writer, map.LossCondition);
+                WritePlayers(writer, map.Players);
+                if (map.AllowedArtifacts != null)
                 {
-                    WriteHeader(writer, map.Info);
-                    WriteHeroes(writer, map.Heroes);
-                    WriteVictorConditions(writer, map.VictoryCondition);
-                    WriteLossCondition(writer, map.LossCondition);
-                    WritePlayers(writer, map.Players);
-                    if (map.AllowedArtifacts != null)
-                    {
-                        WriteArtifacts(writer, map.AllowedArtifacts);
-                    }
-
-                    if (map.AllowedSpells != null)
-                    {
-                        WriteSpells(writer, map.AllowedSpells);
-                    }
-
-                    if (map.AllowedSecondarySkills != null)
-                    {
-                        WriteSkills(writer, map.AllowedSecondarySkills);
-                    }
-
-                    WriteRumors(writer, map.Rumors);
-                    WriteTerrain(writer, map.Terrain);
-                    WriteObjects(writer, map.Objects);
-                    WriteEvents(writer, map.Events);
+                    WriteArtifacts(writer, map.AllowedArtifacts);
                 }
 
-                return m.ToArray();
+                if (map.AllowedSpells != null)
+                {
+                    WriteSpells(writer, map.AllowedSpells);
+                }
+
+                if (map.AllowedSecondarySkills != null)
+                {
+                    WriteSkills(writer, map.AllowedSecondarySkills);
+                }
+
+                WriteRumors(writer, map.Rumors);
+                WriteTerrain(writer, map.Terrain);
+                WriteObjects(writer, map.Objects);
+                WriteEvents(writer, map.Events);
             }
+
+            return m.ToArray();
         }
 
         private void WriteEvents(BinaryWriter w, TimedEvents[] events)
@@ -690,48 +688,42 @@ namespace H3Mapper
             foreach (var hero in heroes.OrderBy(h => h.Id.Value))
             {
                 writer.Write(hero.Id.Value);
-                var cust = hero.Customisations;
-                if (cust == null)
+                if (hero.Name != null)
                 {
-                    continue;
+                    writer.Write(hero.Name);
                 }
 
-                if (cust.Name != null)
+                writer.Write((byte) hero.AllowedForPlayers);
+                writer.Write(hero.PortraitId);
+                if (hero.Experience.HasValue)
                 {
-                    writer.Write(cust.Name);
+                    writer.Write(hero.Experience.Value);
                 }
 
-                writer.Write((byte) cust.AllowedForPlayers);
-                writer.Write(cust.PortraitId);
-                if (cust.Experience.HasValue)
+                if (hero.SecondarySkills != null)
                 {
-                    writer.Write(cust.Experience.Value);
+                    WriteSkills(writer, hero.SecondarySkills);
                 }
 
-                if (cust.SecondarySkills != null)
+                if (hero.Inventory != null)
                 {
-                    WriteSkills(writer, cust.SecondarySkills);
+                    WriteInventory(writer, hero.Inventory);
                 }
 
-                if (cust.Inventory != null)
+                if (hero.Bio != null)
                 {
-                    WriteInventory(writer, cust.Inventory);
+                    writer.Write(hero.Bio);
                 }
 
-                if (cust.Bio != null)
+                writer.Write((byte) hero.Sex);
+                if (hero.Spells != null)
                 {
-                    writer.Write(cust.Bio);
+                    WriteSpells(writer, hero.Spells);
                 }
 
-                writer.Write((byte) cust.Sex);
-                if (cust.Spells != null)
+                if (hero.PrimarySkills != null)
                 {
-                    WriteSpells(writer, cust.Spells);
-                }
-
-                if (cust.PrimarySkills != null)
-                {
-                    WriteSkills(writer, cust.PrimarySkills);
+                    WriteSkills(writer, hero.PrimarySkills);
                 }
             }
         }
@@ -786,15 +778,14 @@ namespace H3Mapper
                 writer.Write(player.CanHumanPlay);
                 writer.Write(player.TeamId.GetValueOrDefault(-1));
                 writer.Write((byte) player.AITactic);
-                writer.Write(player.AllowedAlignmentsCustomised);
+                writer.Write(player.AllowedFactionsCustomised);
                 writer.Write((int) player.AllowedFactions);
                 writer.Write(player.IsFactionRandom);
-                writer.Write(player.HasMainTown);
-                if (player.HasMainTown)
+                if (player.MainTown != null)
                 {
-                    writer.Write(player.GenerateHeroAtMainTown);
+                    writer.Write(player.MainTown.GenerateHero);
                     // main town type will be determined when we write out the town
-                    WritePosition(writer, player.MainTownPosition);
+                    WritePosition(writer, player.MainTown.Position);
                 }
             }
         }

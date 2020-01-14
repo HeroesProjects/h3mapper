@@ -11,31 +11,39 @@ namespace H3Mapper.MapModel
         public MapPlayer(Player player)
         {
             Player = player;
-            GenerateHeroAtMainTown = true;
         }
 
-        public IEnumerable<HeroInfo> Heroes => heroInfos.AsEnumerable();
-
+        // Playability: Human
         public bool CanHumanPlay { get; set; }
+        // Playability: Computer
         public bool CanAIPlay { get; set; }
-
-        public bool CanPlay => CanAIPlay || CanHumanPlay;
-
+        // Playability: Behavior
         public AITactic AITactic { get; set; }
-        public bool AllowedAlignmentsCustomised { get; set; }
+        
+        // Allowed alignments: Customize
+        public bool AllowedFactionsCustomised { get; set; }
+        // Allowed alignments
         public Factions AllowedFactions { get; set; }
+        
+        // Generate hero at:/Has main town + Generate hero at main town
+        public HeroMainTown MainTown { get; set; }
+        
+        // Implicit properties:
+        // Can be true is player has at least one random town
         public bool IsFactionRandom { get; set; }
-        public bool HasMainTown { get; set; }
-        public bool GenerateHeroAtMainTown { get; set; }
-        public Faction? MainTownType { get; set; }
-        public MapPosition MainTownPosition { get; set; }
+        // true is player has at least one random hero
         public bool HasRandomHeroes { get; set; }
-        public Identifier MainCustomHero { get; set; }
-        public int? MainCustomHeroPortraitId { get; set; }
-        public string MainCustomHeroName { get; set; }
+        // how many HeroPlaceholders this player has
         public int HeroPlaceholderCount { get; set; }
+        
+        public HeroInfo MainHero { get; set; }
         public int? TeamId { get; set; }
+        
+        // Derived properties
         public Player Player { get; }
+        public bool CanPlay => CanAIPlay || CanHumanPlay;
+        public IEnumerable<HeroInfo> Heroes => heroInfos.AsEnumerable();
+        
 
         public void AddHero(HeroInfo heroInfo)
         {

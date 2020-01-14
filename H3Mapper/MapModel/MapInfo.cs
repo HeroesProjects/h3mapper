@@ -29,7 +29,7 @@ namespace H3Mapper.MapModel
         // Map size
         public int Size { get; set; }
         
-        // Implied properties:
+        // Implicit properties:
         // Only in HotA. Not sure if this is depepdent on HotA version or something else
         public MapSubformat Subformat { get; set; }
         

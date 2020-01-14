@@ -220,7 +220,7 @@ namespace H3Mapper.Serialize
             }
         }
 
-        public T ReadEnum<T>(int? bytesCount = null) where T : struct
+        public T ReadEnum<T>(int? bytesCount = null) where T : Enum
         {
             var type = typeof(T);
             Debug.Assert(type.IsEnum);

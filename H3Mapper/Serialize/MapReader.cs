@@ -26,11 +26,88 @@ namespace H3Mapper.Serialize
 
         public H3Map Read(MapDeserializer s)
         {
-            // https://github.com/potmdehex/homm3tools/blob/master/h3m/h3mlib/h3m_structures/h3m_description.english.txt
             var map = new H3Map();
-            var info = new MapInfo();
-            map.Info = info;
-            info.Format = s.ReadEnum<MapFormat>();
+            map.Info = ReadMapInfo(s);
+            map.Players = ReadPlayers(s, map.Info, map.Heroes);
+            map.VictoryCondition = ReadVictoryCondition(s, map.Info);
+            map.LossCondition = ReadLossCondition(s, map.Info);
+            var teamCount = s.Read1ByteNumber(maxValue: 7);
+            if (teamCount > 0)
+            {
+                foreach (var player in map.Players)
+                {
+                    player.TeamId = s.Read1ByteNumber(maxValue: (byte) (teamCount - 1));
+                }
+            }
+
+            ReadHeroes(s, map.Info, map.Heroes);
+
+            s.Skip(31);
+            if (map.Info.Format == MapFormat.HotA)
+            {
+                map.Info.AllowSpecialWeeks = s.ReadBool();
+                s.Skip(3);
+            }
+
+            if (map.Info.Format >= MapFormat.AB)
+            {
+                map.AllowedArtifacts = ReadAllowedArtifacts(s, map.Info);
+            }
+
+            if (map.Info.Format >= MapFormat.SoD)
+            {
+                map.AllowedSpells = ReadSpellsFromBitmask(s);
+                map.AllowedSecondarySkills = ReadSecondarySkillsFromBitmask(s);
+            }
+
+            map.Rumors = ReadRumors(s);
+            if (map.Info.Format >= MapFormat.SoD)
+            {
+                ReadHeroConfigurationCustomisations(s, map.Heroes, map.Info);
+            }
+
+            map.Terrain = ReadTerrain(s, map.Info);
+            map.Objects = ReadMapObjects(s, map.Info);
+            map.Events = ReadEvents(s, map.Info, false);
+            s.Skip(124);
+            s.EnsureEof(1000);
+            return map;
+        }
+
+        private void ReadHeroes(MapDeserializer s, MapInfo info, MapHeroes heroes)
+        {
+            var bitCount = GetAllowedHeroesCount(s, info.Format);
+            var bitmask = s.ReadBitmaskBits(bitCount);
+            for (var i = 0; i < bitmask.Length; i++)
+            {
+                if (bitmask[i])
+                {
+                    heroes.AddHero(ids.GetHero(i));
+                }
+            }
+
+            if (info.Format >= MapFormat.AB)
+            {
+                var placeholderCount = s.Read4ByteNumber();
+                if (placeholderCount > 0)
+                {
+                    for (var i = 0; i < placeholderCount; i++)
+                    {
+                        var hero = ids.GetHero(s.Read1ByteNumber());
+                        heroes.AddHero(hero);
+                    }
+                }
+            }
+
+            if (info.Format >= MapFormat.SoD)
+            {
+                ReadHeroCustomisations(s, heroes);
+            }
+        }
+
+        private MapInfo ReadMapInfo(MapDeserializer s)
+        {
+            var info = new MapInfo {Format = s.ReadEnum<MapFormat>()};
             if (IsFullySupported(info.Format) == false)
             {
                 Log.Warning(
@@ -70,56 +147,7 @@ namespace H3Mapper.Serialize
                 }
             }
 
-            map.Players = ReadPlayers(s, info);
-            map.VictoryCondition = ReadVictoryCondition(s, info);
-            map.LossCondition = ReadLossCondition(s, info.Size);
-            var teamCount = s.Read1ByteNumber(maxValue: 7);
-            if (teamCount > 0)
-            {
-                foreach (var player in map.Players)
-                {
-                    player.TeamId = s.Read1ByteNumber(maxValue: (byte) (teamCount - 1));
-                }
-            }
-
-            var heroes = new MapHeroes();
-            map.Heroes = heroes;
-            ReadAllowedHeroes(s, heroes, info.Format);
-            if (info.Format >= MapFormat.SoD)
-            {
-                ReadHeroCustomisations(s, heroes);
-            }
-
-            s.Skip(31);
-            if (info.Format == MapFormat.HotA)
-            {
-                info.AllowSpecialWeeks = s.ReadBool();
-                s.Skip(3);
-            }
-
-            if (info.Format >= MapFormat.AB)
-            {
-                map.AllowedArtifacts = ReadAllowedArtifacts(s, info.Format);
-            }
-
-            if (info.Format >= MapFormat.SoD)
-            {
-                map.AllowedSpells = ReadSpellsFromBitmask(s);
-                map.AllowedSecondarySkills = ReadSecondarySkillsFromBitmask(s);
-            }
-
-            map.Rumors = ReadRumors(s);
-            if (info.Format >= MapFormat.SoD)
-            {
-                ReadHeroConfigurationCustomisations(s, heroes, info.Format);
-            }
-
-            map.Terrain = ReadTerrain(s, info);
-            map.Objects = ReadMapObjects(s, info);
-            map.Events = ReadEvents(s, info.Format, false);
-            s.Skip(124);
-            s.EnsureEof(1000);
-            return map;
+            return info;
         }
 
         private bool IsFullySupported(MapFormat format)
@@ -489,7 +517,7 @@ namespace H3Mapper.Serialize
                 m.AllowSpellResearch = s.ReadBool();
             }
 
-            m.Events = ReadEvents(s, info.Format, true);
+            m.Events = ReadEvents(s, info, true);
             if (info.Format >= MapFormat.SoD)
             {
                 // this only applies to random towns
@@ -500,7 +528,7 @@ namespace H3Mapper.Serialize
             return m;
         }
 
-        private TimedEvents[] ReadEvents(MapDeserializer s, MapFormat format, bool forTown)
+        private TimedEvents[] ReadEvents(MapDeserializer s, MapInfo info, bool forTown)
         {
             var count = s.Read4ByteNumberLong();
             var events = new TimedEvents[count];
@@ -511,7 +539,7 @@ namespace H3Mapper.Serialize
                 e.Message = s.ReadString(30000);
                 e.Resources = ReadResources(s, allowNegative: true);
                 e.Players = s.ReadEnum<Players>();
-                if (format >= MapFormat.SoD)
+                if (info.Format >= MapFormat.SoD)
                 {
                     e.HumanAffected = s.ReadBool();
                 }
@@ -1106,11 +1134,11 @@ namespace H3Mapper.Serialize
             return tiles;
         }
 
-        private void ReadHeroConfigurationCustomisations(MapDeserializer s, MapHeroes heroes, MapFormat format)
+        private void ReadHeroConfigurationCustomisations(MapDeserializer s, MapHeroes heroes, MapInfo info)
         {
 // is there a way to be smart and detect it instead?
             var heroCount = 156;
-            if (format == MapFormat.HotA)
+            if (info.Format == MapFormat.HotA)
             {
                 heroCount = s.Read4ByteNumber();
             }
@@ -1124,49 +1152,43 @@ namespace H3Mapper.Serialize
                 }
 
                 var hero = heroes.GetHero(ids.GetHero(id));
-                if (hero.Customisations == null)
-                {
-                    hero.Customisations = new HeroCustomisations();
-                }
-
-                var h = hero.Customisations;
                 var hasExperience = s.ReadBool();
                 if (hasExperience)
                 {
-                    h.Experience = s.Read4ByteNumber();
+                    hero.Experience = s.Read4ByteNumber();
                 }
 
                 var hasSecondarySkills = s.ReadBool();
                 if (hasSecondarySkills)
                 {
                     var skills = ReadSecondarySkills(s, s.Read4ByteNumber());
-                    h.SecondarySkills = skills;
+                    hero.SecondarySkills = skills;
                 }
 
                 var hasAtrifacts = s.ReadBool();
                 if (hasAtrifacts)
                 {
-                    h.Inventory = ReadHeroInventory(s, format);
+                    hero.Inventory = ReadHeroInventory(s, info.Format);
                 }
 
                 var hasBio = s.ReadBool();
                 if (hasBio)
                 {
-                    h.Bio = s.ReadString(30000);
+                    hero.Bio = s.ReadString(30000);
                 }
 
-                h.Sex = s.ReadEnum<HeroSex>();
+                hero.Sex = s.ReadEnum<HeroSex>();
                 var hasCustomSpells = s.ReadBool();
                 if (hasCustomSpells)
                 {
-                    h.Spells = ReadSpellsFromBitmask(s);
+                    hero.Spells = ReadSpellsFromBitmask(s);
                 }
 
                 var hasPrimarySkills = s.ReadBool();
                 if (hasPrimarySkills)
                 {
                     var primarySkills = ReadPrimarySkills(s);
-                    h.PrimarySkills = primarySkills;
+                    hero.PrimarySkills = primarySkills;
                 }
             }
         }
@@ -1308,9 +1330,9 @@ namespace H3Mapper.Serialize
             return skills.ToArray();
         }
 
-        private Identifier[] ReadAllowedArtifacts(MapDeserializer s, MapFormat format)
+        private Identifier[] ReadAllowedArtifacts(MapDeserializer s, MapInfo info)
         {
-            var bits = GetAllowedArtifactsBits(s, format);
+            var bits = GetAllowedArtifactsBits(s, info.Format);
             var artifacts = new List<Identifier>(bits.Length);
             for (var i = 0; i < bits.Length; i++)
             {
@@ -1350,38 +1372,9 @@ namespace H3Mapper.Serialize
             for (var i = 0; i < count; i++)
             {
                 var hero = heroes.GetHero(ids.GetHero(s.Read1ByteNumber()));
-                hero.Customisations = new HeroCustomisations
-                {
-                    PortraitId = s.Read1ByteNumber(),
-                    Name = s.ReadString(12),
-                    AllowedForPlayers = s.ReadEnum<Players>()
-                };
-            }
-        }
-
-        private void ReadAllowedHeroes(MapDeserializer s, MapHeroes heroes, MapFormat format)
-        {
-            var bitCount = GetAllowedHeroesCount(s, format);
-            var bitmask = s.ReadBitmaskBits(bitCount);
-            for (var i = 0; i < bitmask.Length; i++)
-            {
-                if (bitmask[i])
-                {
-                    heroes.AddHero(ids.GetHero(i));
-                }
-            }
-
-            if (format >= MapFormat.AB)
-            {
-                var placeholderCount = s.Read4ByteNumber();
-                if (placeholderCount > 0)
-                {
-                    for (var i = 0; i < placeholderCount; i++)
-                    {
-                        var hero = ids.GetHero(s.Read1ByteNumber());
-                        heroes.AddHero(hero);
-                    }
-                }
+                hero.PortraitId = s.Read1ByteNumber();
+                hero.Name = s.ReadString(12);
+                hero.AllowedForPlayers = s.ReadEnum<Players>();
             }
         }
 
@@ -1396,7 +1389,7 @@ namespace H3Mapper.Serialize
             return byteCount * 8;
         }
 
-        private LossCondition ReadLossCondition(MapDeserializer s, int mapSize)
+        private LossCondition ReadLossCondition(MapDeserializer s, MapInfo info)
         {
             var type = s.ReadEnum<LossConditionType>();
             var lc = new LossCondition {Type = type};
@@ -1409,7 +1402,7 @@ namespace H3Mapper.Serialize
             {
                 case LossConditionType.LossTown:
                 case LossConditionType.LossHero:
-                    lc.Position = ReadPosition(s, mapSize);
+                    lc.Position = ReadPosition(s, info.Size);
                     break;
                 case LossConditionType.TimeExpires:
                     lc.Value = s.Read2ByteNumber(2, 7 * 4 * 12);
@@ -1485,6 +1478,8 @@ namespace H3Mapper.Serialize
                     RequireHotA(info);
                     vc.Value = s.Read4ByteNumber(1, 9999);
                     break;
+                case VictoryConditionType.WinStandard:
+                    break;
                 default:
                     throw new NotSupportedException();
             }
@@ -1492,17 +1487,17 @@ namespace H3Mapper.Serialize
             return vc;
         }
 
-        private MapPlayer[] ReadPlayers(MapDeserializer s, MapInfo info)
+        private MapPlayer[] ReadPlayers(MapDeserializer s, MapInfo info, MapHeroes heroes)
         {
             var players = EnumValues.For<Player>()
                 .TakeWhile(x => x <= Player.Pink)
-                .Select(x => ReadPlayer(s, x, info.Format, info.Size))
+                .Select(x => ReadPlayer(s, x, info, heroes))
                 .ToArray();
 
             return players;
         }
 
-        private MapPlayer ReadPlayer(MapDeserializer s, Player p, MapFormat format, int mapSize)
+        private MapPlayer ReadPlayer(MapDeserializer s, Player p, MapInfo info, MapHeroes heroes)
         {
             var player = new MapPlayer(p)
             {
@@ -1510,11 +1505,11 @@ namespace H3Mapper.Serialize
                 CanAIPlay = s.ReadBool(),
                 AITactic = s.ReadEnum<AITactic>()
             };
-            if (format >= MapFormat.SoD)
+            if (info.Format >= MapFormat.SoD)
             {
                 if (player.CanPlay)
                 {
-                    player.AllowedAlignmentsCustomised = s.ReadBool();
+                    player.AllowedFactionsCustomised = s.ReadBool();
                 }
                 else
                 {
@@ -1522,7 +1517,7 @@ namespace H3Mapper.Serialize
                 }
             }
 
-            player.AllowedFactions = s.ReadEnum<Factions>(format == MapFormat.RoE ? 1 : 2);
+            player.AllowedFactions = s.ReadEnum<Factions>(info.Format == MapFormat.RoE ? 1 : 2);
             if (player.CanPlay)
             {
                 player.IsFactionRandom = s.ReadBool();
@@ -1532,15 +1527,16 @@ namespace H3Mapper.Serialize
                 s.Ignore(1);
             }
 
-            player.HasMainTown = s.ReadBool();
-            if (player.HasMainTown)
+            var hasMainTown = s.ReadBool();
+            if (hasMainTown)
             {
-                if (format >= MapFormat.AB)
+                var mainTown = new HeroMainTown();
+                if (info.Format >= MapFormat.AB)
                 {
-                    player.GenerateHeroAtMainTown = s.ReadBool();
+                    mainTown.GenerateHero = s.ReadBool();
                     if (player.CanPlay)
                     {
-                        player.MainTownType = s.ReadEnum<Faction>();
+                        mainTown.Faction = s.ReadEnum<Faction>();
                     }
                     else
                     {
@@ -1548,24 +1544,29 @@ namespace H3Mapper.Serialize
                     }
                 }
 
-                player.MainTownPosition = ReadPosition(s, mapSize);
+                mainTown.Position = ReadPosition(s, info.Size);
+                player.MainTown = mainTown;
             }
 
             player.HasRandomHeroes = s.ReadBool();
             var heroId = s.Read1ByteNumber();
             if (heroId != byte.MaxValue)
             {
-                player.MainCustomHero = ids.GetHero(heroId);
+                var hero = new HeroInfo
+                {
+                    Id = ids.GetHero(heroId)
+                };
+                player.MainHero = hero;
                 var portraitId = s.Read1ByteNumber();
                 if (portraitId != byte.MaxValue)
                 {
-                    player.MainCustomHeroPortraitId = portraitId;
+                    hero.PortraitId = portraitId;   
                 }
 
-                player.MainCustomHeroName = s.ReadString(12);
+                hero.Name = s.ReadString(12);
             }
 
-            if (format >= MapFormat.AB)
+            if (info.Format >= MapFormat.AB)
             {
                 player.HeroPlaceholderCount = s.Read1ByteNumber(maxValue: 8);
                 var heroCount = s.Read4ByteNumber(0, 8);

@@ -7,5 +7,6 @@ namespace H3Mapper.MapModel
     {
         public Identifier Id { get; set; }
         public string Name { get; set; }
+        public int? PortraitId { get; set; }
     }
 }
