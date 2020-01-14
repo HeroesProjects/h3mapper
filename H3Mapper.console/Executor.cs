@@ -58,33 +58,31 @@ namespace H3Mapper
         private int Process(IdMappings idMappings, string mapFilePath)
         {
             Log.Information("Processing {file}", mapFilePath);
-            using (var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress))
+            using var mapFile = new GZipStream(File.OpenRead(mapFilePath), CompressionMode.Decompress);
+            var reader = new MapReader(idMappings);
+            try
             {
-                var reader = new MapReader(idMappings);
-                try
-                {
-                    var mapData = reader.Read(new MapDeserializer(new PositionTrackingStream(mapFile)));
-                    validator?.Validate(mapData);
-                    duplicateFinder.Process(mapData, mapFilePath);
-                }
-                catch (InvalidDataException e)
-                {
-                    Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
-                    return e.HResult;
-                }
-                catch (ArgumentException e)
-                {
-                    Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
-                    return e.HResult;
-                }
-                catch (InvalidOperationException e)
-                {
-                    Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
-                    return e.HResult;
-                }
-
-                return 0;
+                var mapData = reader.Read(new MapDeserializer(new PositionTrackingStream(mapFile)));
+                validator?.Validate(mapData);
+                duplicateFinder.Process(mapData, mapFilePath);
             }
+            catch (InvalidDataException e)
+            {
+                Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
+                return e.HResult;
+            }
+            catch (ArgumentException e)
+            {
+                Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
+                return e.HResult;
+            }
+            catch (InvalidOperationException e)
+            {
+                Log.Error(e, "Failed to process map {file}. File is most likely corrupted.", mapFilePath);
+                return e.HResult;
+            }
+
+            return 0;
         }
 
         public void Dispose()

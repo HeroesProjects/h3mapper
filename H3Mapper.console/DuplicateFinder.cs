@@ -27,33 +27,31 @@ namespace H3Mapper
         private byte[] BuildHash(H3Map map)
         {
             using var m = new MemoryStream();
-            using (var writer = new BinaryWriter(m))
+            using var writer = new BinaryWriter(m);
+            WriteHeader(writer, map.Info);
+            WriteHeroes(writer, map.Heroes);
+            WriteVictorConditions(writer, map.VictoryCondition);
+            WriteLossCondition(writer, map.LossCondition);
+            WritePlayers(writer, map.Players);
+            if (map.AllowedArtifacts != null)
             {
-                WriteHeader(writer, map.Info);
-                WriteHeroes(writer, map.Heroes);
-                WriteVictorConditions(writer, map.VictoryCondition);
-                WriteLossCondition(writer, map.LossCondition);
-                WritePlayers(writer, map.Players);
-                if (map.AllowedArtifacts != null)
-                {
-                    WriteArtifacts(writer, map.AllowedArtifacts);
-                }
-
-                if (map.AllowedSpells != null)
-                {
-                    WriteSpells(writer, map.AllowedSpells);
-                }
-
-                if (map.AllowedSecondarySkills != null)
-                {
-                    WriteSkills(writer, map.AllowedSecondarySkills);
-                }
-
-                WriteRumors(writer, map.Rumors);
-                WriteTerrain(writer, map.Terrain);
-                WriteObjects(writer, map.Objects);
-                WriteEvents(writer, map.Events);
+                WriteArtifacts(writer, map.AllowedArtifacts);
             }
+
+            if (map.AllowedSpells != null)
+            {
+                WriteSpells(writer, map.AllowedSpells);
+            }
+
+            if (map.AllowedSecondarySkills != null)
+            {
+                WriteSkills(writer, map.AllowedSecondarySkills);
+            }
+
+            WriteRumors(writer, map.Rumors);
+            WriteTerrain(writer, map.Terrain);
+            WriteObjects(writer, map.Objects);
+            WriteEvents(writer, map.Events);
 
             return m.ToArray();
         }
